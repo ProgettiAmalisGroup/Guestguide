@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GuestGuide — La guida digitale per i tuoi ospiti</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,700;1,400;1,500&family=Plus+Jakarta+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:#F0F4F8; --surface:#FFFFFF; --surf2:#E8EEF4;
+    --blue-deep:#1A3A5C; --blue-mid:#2D6A8F; --blue-light:#5BA4CB;
+    --teal:#2BBFA4; --teal-light:#7DDECE; --sky:#C8E8F5;
+    --text:#111C28; --text-soft:#5B7087; --border:rgba(26,58,92,0.12); --white:#FFFFFF;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--text);overflow-x:hidden;}
+
+  /* NAV */
+  nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:18px 56px;display:flex;align-items:center;justify-content:space-between;background:rgba(240,244,248,0.92);backdrop-filter:blur(16px);border-bottom:1px solid var(--border);}
+  .nav-logo{font-family:'Playfair Display',serif;font-size:20px;font-weight:500;color:var(--blue-deep);}
+  .nav-logo span{color:var(--teal);}
+  .nav-cta{background:var(--teal);color:var(--white);padding:10px 26px;font-size:13px;font-weight:600;border-radius:6px;border:none;cursor:pointer;text-decoration:none;display:inline-block;transition:background .2s,transform .2s;}
+  .nav-cta:hover{background:var(--blue-mid);transform:translateY(-1px);}
+
+  /* HERO */
+  .hero{min-height:100vh;display:grid;grid-template-columns:1fr 1fr;padding-top:80px;overflow:hidden;}
+  .hero-left{display:flex;flex-direction:column;justify-content:center;padding:80px 60px 80px 80px;}
+  .hero-tag{display:inline-flex;align-items:center;gap:8px;font-size:11px;font-weight:600;letter-spacing:2.5px;text-transform:uppercase;color:var(--teal);margin-bottom:28px;}
+  .hero-tag span{width:28px;height:2px;background:var(--teal);border-radius:2px;}
+  h1{font-family:'Playfair Display',serif;font-size:clamp(44px,4.5vw,72px);font-weight:500;line-height:1.1;color:var(--blue-deep);margin-bottom:24px;}
+  h1 em{font-style:italic;color:var(--blue-mid);}
+  .hero-sub{font-size:16px;font-weight:300;line-height:1.75;color:var(--text-soft);max-width:420px;margin-bottom:48px;}
+  .hero-actions{display:flex;align-items:center;gap:28px;flex-wrap:wrap;}
+  .btn-primary{background:var(--blue-deep);color:var(--white);padding:16px 40px;font-size:15px;font-weight:600;border-radius:8px;border:none;cursor:pointer;text-decoration:none;display:inline-block;transition:background .25s,transform .2s,box-shadow .25s;box-shadow:0 8px 24px rgba(26,58,92,0.22);}
+  .btn-primary:hover{background:var(--blue-mid);transform:translateY(-2px);box-shadow:0 12px 32px rgba(26,58,92,0.3);}
+  .price-inline .amount{font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:var(--blue-deep);}
+  .price-inline .note{font-size:12px;color:var(--text-soft);}
+  .hero-right{position:relative;overflow:hidden;background:var(--blue-deep);}
+  .hero-img{width:100%;height:100%;object-fit:cover;opacity:0.38;position:absolute;inset:0;}
+  .hero-img-overlay{position:absolute;inset:0;background:linear-gradient(135deg,rgba(26,58,92,0.7) 0%,rgba(45,106,143,0.4) 100%);}
+  .hero-phone-area{position:relative;z-index:2;display:flex;align-items:center;justify-content:center;height:100%;padding:60px 40px;}
+
+  /* PHONE */
+  .phone-float{animation:float 3.8s ease-in-out infinite;}
+  @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+  .phone{width:230px;height:460px;background:var(--white);border-radius:32px;box-shadow:0 48px 80px rgba(0,0,0,0.5),0 0 0 1px rgba(255,255,255,0.08);overflow:hidden;position:relative;}
+  .phone-bar{position:absolute;top:0;left:50%;transform:translateX(-50%);width:72px;height:22px;background:var(--blue-deep);border-radius:0 0 14px 14px;z-index:3;}
+  .phone-screen{width:100%;height:100%;padding:30px 14px 14px;background:#F7FAFC;display:flex;flex-direction:column;gap:10px;overflow:hidden;}
+  .ph-header{text-align:center;padding:6px 0 10px;border-bottom:1px solid rgba(45,106,143,0.15);}
+  .ph-name{font-family:'Playfair Display',serif;font-size:13px;font-weight:500;color:var(--blue-deep);}
+  .ph-loc{font-size:8px;letter-spacing:1.2px;text-transform:uppercase;color:var(--text-soft);margin-top:2px;}
+  .ph-langs{position:absolute;top:34px;right:14px;display:flex;gap:3px;}
+  .ph-lang{font-size:7px;padding:2px 6px;border-radius:3px;background:#E8EEF4;color:var(--text-soft);}
+  .ph-lang.on{background:var(--teal);color:white;}
+  .ph-tabs{display:flex;gap:3px;}
+  .ph-tab{flex:1;text-align:center;font-size:7px;padding:4px 2px;border-radius:4px;color:var(--text-soft);background:#E8EEF4;}
+  .ph-tab.on{background:var(--blue-deep);color:white;}
+  .ph-card{background:white;border-radius:8px;padding:9px 11px;box-shadow:0 2px 8px rgba(26,58,92,0.07);}
+  .ph-label{font-size:7px;font-weight:600;letter-spacing:1.2px;text-transform:uppercase;color:var(--teal);margin-bottom:5px;}
+  .ph-row{display:flex;justify-content:space-between;align-items:center;}
+  .ph-txt{font-size:8px;color:var(--text);line-height:1.5;}
+  .ph-pass{background:var(--sky);color:var(--blue-deep);font-size:7px;font-weight:600;padding:2px 7px;border-radius:3px;}
+  .ph-place{display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #F0F4F8;}
+  .ph-place:last-child{border-bottom:none;}
+  .ph-pname{font-size:8px;font-weight:500;color:var(--text);}
+  .ph-pdist{font-size:7px;color:var(--teal);}
+
+  /* TRUST */
+  .trust-bar{background:var(--blue-deep);padding:18px 80px;display:flex;align-items:center;justify-content:center;gap:48px;flex-wrap:wrap;}
+  .trust-item{display:flex;align-items:center;gap:10px;color:var(--white);}
+  .trust-ic{width:18px;height:18px;flex-shrink:0;}
+  .trust-txt{font-size:13px;font-weight:400;opacity:.88;}
+  .trust-sep{width:1px;height:22px;background:rgba(255,255,255,0.12);}
+
+  /* SECTIONS */
+  section.pad{padding:100px 80px;}
+  .sec-tag{display:inline-flex;align-items:center;gap:8px;font-size:11px;font-weight:600;letter-spacing:2.5px;text-transform:uppercase;color:var(--teal);margin-bottom:16px;}
+  .sec-tag::before{content:'';width:22px;height:2px;background:var(--teal);border-radius:2px;}
+  h2{font-family:'Playfair Display',serif;font-size:clamp(34px,3.5vw,52px);font-weight:500;line-height:1.15;color:var(--blue-deep);margin-bottom:56px;max-width:520px;}
+  h2 em{font-style:italic;color:var(--blue-mid);}
+
+  /* STEPS */
+  .steps{display:grid;grid-template-columns:repeat(4,1fr);border:1px solid var(--border);border-radius:12px;overflow:hidden;}
+  .step{padding:40px 32px;border-right:1px solid var(--border);transition:background .25s;}
+  .step:last-child{border-right:none;}
+  .step:hover{background:var(--surface);}
+  .step-num{font-family:'Playfair Display',serif;font-size:52px;font-weight:400;line-height:1;color:rgba(91,164,203,0.2);margin-bottom:20px;}
+  .step-title{font-size:16px;font-weight:600;color:var(--blue-deep);margin-bottom:10px;}
+  .step-text{font-size:13px;font-weight:300;line-height:1.7;color:var(--text-soft);}
+
+  /* FEATURES DARK */
+  section.dark{background:var(--blue-deep);padding:100px 80px;position:relative;overflow:hidden;}
+  section.dark::before{content:'';position:absolute;width:600px;height:600px;border-radius:50%;background:radial-gradient(circle,rgba(43,191,164,0.07) 0%,transparent 70%);top:-200px;right:-200px;}
+  section.dark .sec-tag{color:var(--teal-light);}
+  section.dark .sec-tag::before{background:var(--teal-light);}
+  section.dark h2{color:var(--white);}
+  section.dark h2 em{color:var(--teal-light);}
+  .feat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.07);border-radius:12px;overflow:hidden;}
+  .feat{padding:40px 32px;transition:background .25s;}
+  .feat:hover{background:rgba(43,191,164,0.06);}
+  .feat-icon{font-size:26px;margin-bottom:16px;display:block;}
+  .feat-title{font-size:17px;font-weight:600;color:var(--white);margin-bottom:10px;}
+  .feat-text{font-size:13px;font-weight:300;line-height:1.7;color:rgba(255,255,255,0.58);}
+
+  /* PHOTO */
+  .photo-section{display:grid;grid-template-columns:1fr 1fr;min-height:480px;overflow:hidden;}
+  .photo-col{position:relative;overflow:hidden;}
+  .photo-col img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .5s ease;}
+  .photo-col:hover img{transform:scale(1.03);}
+  .photo-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(26,58,92,0.75) 0%,transparent 55%);display:flex;align-items:flex-end;padding:40px 44px;}
+  .photo-caption{font-family:'Playfair Display',serif;font-size:22px;font-weight:500;font-style:italic;color:white;line-height:1.3;max-width:280px;}
+  .photo-caption span{font-style:normal;font-size:12px;display:block;margin-top:6px;opacity:.7;font-family:'Plus Jakarta Sans',sans-serif;}
+
+  /* ── PRICING ── */
+  section.pricing{padding:100px 80px;text-align:center;}
+  section.pricing h2{margin:0 auto 16px;}
+  .pricing-sub{font-size:16px;font-weight:300;color:var(--text-soft);margin-bottom:56px;}
+
+  .plans{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;max-width:960px;margin:0 auto;}
+
+  .plan{
+    background:var(--white);border-radius:16px;border:1px solid var(--border);
+    padding:40px 36px 36px;position:relative;
+    box-shadow:0 8px 32px rgba(26,58,92,0.07);
+    display:flex;flex-direction:column;
+    transition:transform .25s,box-shadow .25s;
+  }
+  .plan:hover{transform:translateY(-4px);box-shadow:0 20px 48px rgba(26,58,92,0.13);}
+
+  .plan.featured{
+    background:var(--blue-deep);border-color:var(--blue-deep);
+    box-shadow:0 16px 48px rgba(26,58,92,0.3);
+    transform:scale(1.03);
+  }
+  .plan.featured:hover{transform:scale(1.03) translateY(-4px);}
+
+  .plan-badge{
+    position:absolute;top:-13px;left:50%;transform:translateX(-50%);
+    background:var(--teal);color:white;
+    font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;
+    padding:4px 16px;border-radius:20px;white-space:nowrap;
+  }
+
+  .plan-name{font-size:11px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--teal);margin-bottom:12px;}
+  .plan.featured .plan-name{color:var(--teal-light);}
+
+  .plan-price{font-family:'Playfair Display',serif;font-size:64px;font-weight:700;color:var(--blue-deep);line-height:1;margin-bottom:4px;}
+  .plan.featured .plan-price{color:var(--white);}
+  .plan-price sup{font-size:24px;vertical-align:super;}
+
+  .plan-iva{font-size:12px;color:var(--text-soft);margin-bottom:6px;}
+  .plan.featured .plan-iva{color:rgba(255,255,255,0.55);}
+
+  .plan-strutture{
+    font-size:14px;font-weight:600;color:var(--blue-deep);
+    background:var(--surf2);border-radius:6px;padding:8px 12px;
+    margin-bottom:28px;text-align:center;
+  }
+  .plan.featured .plan-strutture{background:rgba(255,255,255,0.1);color:var(--white);}
+
+  .plan-feats{list-style:none;display:flex;flex-direction:column;gap:11px;margin-bottom:32px;flex:1;text-align:left;}
+  .plan-feats li{display:flex;align-items:flex-start;gap:10px;font-size:13px;font-weight:300;color:var(--text);}
+  .plan.featured .plan-feats li{color:rgba(255,255,255,0.82);}
+  .plan-feats li .ck{width:16px;height:16px;border-radius:50%;background:var(--teal);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}
+  .plan-feats li .ck svg{width:8px;height:8px;}
+
+  .plan-divider{height:1px;background:var(--border);margin-bottom:16px;}
+  .plan.featured .plan-divider{background:rgba(255,255,255,0.12);}
+  .plan-extra{font-size:12px;font-weight:300;color:var(--text-soft);margin-bottom:28px;font-style:italic;}
+  .plan.featured .plan-extra{color:rgba(255,255,255,0.5);}
+
+  .btn-plan{
+    display:block;width:100%;padding:15px;
+    font-size:14px;font-weight:700;letter-spacing:0.5px;
+    border-radius:8px;border:none;cursor:pointer;
+    text-decoration:none;text-align:center;
+    transition:background .25s,transform .2s,box-shadow .25s;
+  }
+  .btn-plan.light{background:var(--blue-deep);color:white;box-shadow:0 6px 18px rgba(26,58,92,0.25);}
+  .btn-plan.light:hover{background:var(--blue-mid);transform:translateY(-1px);}
+  .btn-plan.dark{background:var(--teal);color:white;box-shadow:0 8px 24px rgba(43,191,164,0.4);}
+  .btn-plan.dark:hover{background:#24A98F;transform:translateY(-1px);}
+
+  .pricing-note{margin-top:36px;font-size:13px;color:var(--text-soft);}
+  .pricing-note strong{color:var(--blue-deep);}
+
+  /* FAQ */
+  section.faq{padding:100px 80px;max-width:760px;margin:0 auto;}
+  .faq-item{border-bottom:1px solid var(--border);padding:24px 0;cursor:pointer;}
+  .faq-q-row{display:flex;justify-content:space-between;align-items:center;gap:20px;}
+  .faq-q{font-family:'Playfair Display',serif;font-size:19px;font-weight:500;color:var(--blue-deep);}
+  .faq-ico{width:26px;height:26px;border-radius:50%;border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:17px;color:var(--teal);flex-shrink:0;transition:transform .3s,background .3s;}
+  .faq-a{font-size:14px;font-weight:300;line-height:1.75;color:var(--text-soft);max-height:0;overflow:hidden;transition:all .3s;}
+  .faq-item.open .faq-a{max-height:160px;margin-top:14px;}
+  .faq-item.open .faq-ico{transform:rotate(45deg);background:var(--teal);border-color:var(--teal);color:white;}
+
+  /* FINAL CTA */
+  .final-cta{background:var(--blue-deep);padding:100px 80px;text-align:center;position:relative;overflow:hidden;}
+  .final-cta::before{content:'';position:absolute;width:700px;height:700px;border-radius:50%;background:radial-gradient(circle,rgba(43,191,164,0.1) 0%,transparent 70%);top:50%;left:50%;transform:translate(-50%,-50%);}
+  .final-cta h2{color:var(--white);margin:0 auto 20px;}
+  .final-cta h2 em{color:var(--teal-light);}
+  .final-cta p{font-size:16px;font-weight:300;color:rgba(255,255,255,0.6);margin-bottom:44px;position:relative;}
+  .cta-plans{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;position:relative;}
+  .btn-cta-plan{padding:15px 32px;font-size:14px;font-weight:600;border-radius:8px;border:none;cursor:pointer;text-decoration:none;display:inline-block;transition:background .25s,transform .2s;}
+  .btn-cta-plan.outline{background:transparent;border:1.5px solid rgba(255,255,255,0.3);color:rgba(255,255,255,0.8);}
+  .btn-cta-plan.outline:hover{border-color:white;color:white;transform:translateY(-1px);}
+  .btn-cta-plan.filled{background:var(--teal);color:white;box-shadow:0 8px 24px rgba(43,191,164,0.4);}
+  .btn-cta-plan.filled:hover{background:#24A98F;transform:translateY(-2px);}
+
+  /* FOOTER */
+  footer{background:#111C28;padding:28px 80px;display:flex;align-items:center;justify-content:space-between;border-top:1px solid rgba(255,255,255,0.06);flex-wrap:wrap;gap:16px;}
+  .foot-logo{font-family:'Playfair Display',serif;font-size:17px;color:rgba(255,255,255,0.55);}
+  .foot-links{display:flex;gap:28px;}
+  footer a{font-size:12px;color:rgba(255,255,255,0.38);text-decoration:none;transition:color .2s;}
+  footer a:hover{color:var(--teal);}
+  .foot-copy{font-size:11px;color:rgba(255,255,255,0.22);}
+
+  /* REVEAL */
+  .rv{opacity:0;transform:translateY(20px);transition:opacity .65s ease,transform .65s ease;}
+  .rv.ok{opacity:1;transform:translateY(0);}
+  .rv.d1{transition-delay:.1s;} .rv.d2{transition-delay:.2s;} .rv.d3{transition-delay:.3s;} .rv.d4{transition-delay:.4s;}
+
+  /* RESPONSIVE */
+  @media(max-width:1024px){
+    .hero{grid-template-columns:1fr;}
+    .hero-right{min-height:400px;}
+    .hero-left{padding:60px 40px;}
+    .steps{grid-template-columns:repeat(2,1fr);}
+    .step{border-bottom:1px solid var(--border);}
+    .feat-grid{grid-template-columns:repeat(2,1fr);}
+    .photo-section{grid-template-columns:1fr;}
+    .plans{grid-template-columns:1fr;max-width:440px;}
+    .plan.featured{transform:none;}
+    section.pad,section.dark,section.pricing,.final-cta{padding:72px 40px;}
+    nav{padding:16px 32px;}
+    .trust-bar{padding:18px 40px;gap:28px;}
+  }
+  @media(max-width:640px){
+    .steps{grid-template-columns:1fr;}
+    .feat-grid{grid-template-columns:1fr;}
+    section.pad,section.dark,section.pricing,section.faq,.final-cta{padding:56px 24px;}
+    nav{padding:14px 20px;}
+    footer{flex-direction:column;padding:28px 24px;}
+    .trust-sep{display:none;}
+    .trust-bar{flex-direction:column;gap:14px;}
+    .cta-plans{flex-direction:column;align-items:center;}
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo">Guest<span>Guide</span></div>
+  <a href="#pricing" class="nav-cta">Scegli il piano →</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-left">
+    <div class="hero-tag rv"><span></span>Guida digitale per strutture ricettive</div>
+    <h1 class="rv d1">La tua struttura<br>merita una<br><em>presentazione</em><br>perfetta.</h1>
+    <p class="hero-sub rv d2">Crea una guida professionale per i tuoi ospiti: bilingue, personalizzata, condivisibile via link o QR code. Senza abbonamenti, senza scadenze.</p>
+    <div class="hero-actions rv d3">
+      <a href="#pricing" class="btn-primary">Vedi i piani →</a>
+      <div class="price-inline">
+        <div class="amount">Da €25 IVA incl.</div>
+        <div class="note">Pagamento unico · nessun rinnovo</div>
+      </div>
+    </div>
+  </div>
+  <div class="hero-right">
+    <img class="hero-img" src="https://images.unsplash.com/photo-1566073771259-6a8506099945?w=1200&q=80&fit=crop" alt="Villa con piscina">
+    <div class="hero-img-overlay"></div>
+    <div class="hero-phone-area">
+      <div class="phone-float">
+        <div class="phone">
+          <div class="phone-bar"></div>
+          <div class="phone-screen">
+            <div class="ph-langs"><div class="ph-lang on">IT</div><div class="ph-lang">EN</div></div>
+            <div class="ph-header"><div class="ph-name">Villa Mediterranea</div><div class="ph-loc">Taormina · Sicilia</div></div>
+            <div class="ph-tabs"><div class="ph-tab on">Arrivo</div><div class="ph-tab">La Casa</div><div class="ph-tab">Dintorni</div></div>
+            <div class="ph-card">
+              <div class="ph-label">Check-in & Check-out</div>
+              <div class="ph-txt">Check-in: dalle <strong>15:00</strong><br>Check-out: entro le <strong>10:00</strong></div>
+              <div class="ph-txt" style="color:var(--teal);margin-top:4px;font-size:7px;">Cassetta chiavi → portone blu</div>
+            </div>
+            <div class="ph-card">
+              <div class="ph-label">WiFi</div>
+              <div class="ph-row"><div class="ph-txt">VillaMed_Guest</div><div class="ph-pass">sicilia2024</div></div>
+            </div>
+            <div class="ph-card">
+              <div class="ph-label">Ristoranti vicini</div>
+              <div class="ph-place"><span class="ph-pname">Osteria del Mare</span><span class="ph-pdist">180m ↗</span></div>
+              <div class="ph-place"><span class="ph-pname">Trattoria Etna</span><span class="ph-pdist">310m ↗</span></div>
+              <div class="ph-place"><span class="ph-pname">Bar Centrale</span><span class="ph-pdist">450m ↗</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TRUST BAR -->
+<div class="trust-bar">
+  <div class="trust-item">
+    <svg class="trust-ic" fill="none" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="rgba(255,255,255,0.5)" stroke-width="1.5"/><path d="M12 6v6l4 2" stroke="white" stroke-width="1.5" stroke-linecap="round"/></svg>
+    <span class="trust-txt">Pronto in 5 minuti</span>
+  </div>
+  <div class="trust-sep"></div>
+  <div class="trust-item">
+    <svg class="trust-ic" fill="none" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="rgba(255,255,255,0.5)" stroke-width="1.5"/><path d="M8 12h8M12 8v8" stroke="white" stroke-width="1.5" stroke-linecap="round"/></svg>
+    <span class="trust-txt">Italiano &amp; Inglese</span>
+  </div>
+  <div class="trust-sep"></div>
+  <div class="trust-item">
+    <svg class="trust-ic" fill="none" viewBox="0 0 24 24"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z" stroke="white" stroke-width="1.5" stroke-linejoin="round"/></svg>
+    <span class="trust-txt">Nessun abbonamento</span>
+  </div>
+  <div class="trust-sep"></div>
+  <div class="trust-item">
+    <svg class="trust-ic" fill="none" viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="3" stroke="white" stroke-width="1.5"/><circle cx="12" cy="16" r="1.5" fill="white"/></svg>
+    <span class="trust-txt">Nessuna app per gli ospiti</span>
+  </div>
+  <div class="trust-sep"></div>
+  <div class="trust-item">
+    <svg class="trust-ic" fill="none" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" stroke="white" stroke-width="1.5" stroke-linejoin="round"/></svg>
+    <span class="trust-txt">Pagamento sicuro con Stripe</span>
+  </div>
+</div>
+
+<!-- STEPS -->
+<section class="pad rv">
+  <div class="sec-tag">Come funziona</div>
+  <h2>Dal setup alla<br>condivisione in<br><em>cinque minuti.</em></h2>
+  <div class="steps">
+    <div class="step rv"><div class="step-num">01</div><div class="step-title">Acquista online</div><p class="step-text">Scegli il piano, paga in sicurezza con Stripe. Ricevi subito via email il codice licenza e il link di download.</p></div>
+    <div class="step rv d1"><div class="step-num">02</div><div class="step-title">Scarica il file</div><p class="step-text">GuestGuide è un singolo file HTML. Nessuna installazione, nessun account. Lo apri nel browser e sei operativo.</p></div>
+    <div class="step rv d2"><div class="step-num">03</div><div class="step-title">Configura la guida</div><p class="step-text">Inserisci orari, accesso, WiFi, regole. Cerca automaticamente ristoranti e attrazioni vicine. Scegli colori e template.</p></div>
+    <div class="step rv d3"><div class="step-num">04</div><div class="step-title">Pubblica e condividi</div><p class="step-text">Un clic per mettere online la guida. Condividi il link su WhatsApp o stampa il QR code da lasciare in casa.</p></div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="dark">
+  <div class="sec-tag rv">Tutto incluso in ogni piano</div>
+  <h2 class="rv">Ogni cosa che<br>un ospite vuole<br><em>sapere.</em></h2>
+  <div class="feat-grid">
+    <div class="feat rv"><span class="feat-icon">🗝️</span><div class="feat-title">Istruzioni di accesso</div><p class="feat-text">Codice cassetta chiavi, citofono, indicazioni precise. I tuoi ospiti arrivano senza chiamarti.</p></div>
+    <div class="feat rv d1"><span class="feat-icon">📶</span><div class="feat-title">WiFi a colpo d'occhio</div><p class="feat-text">Rete e password ben visibili alla prima apertura. Nessun post-it, nessuna email da cercare.</p></div>
+    <div class="feat rv d2"><span class="feat-icon">📍</span><div class="feat-title">Dintorni automatici</div><p class="feat-text">Ristoranti, farmacie, supermercati e attrazioni trovati via mappa. Con distanza e link Google Maps.</p></div>
+    <div class="feat rv"><span class="feat-icon">🌐</span><div class="feat-title">Bilingue IT / EN</div><p class="feat-text">Inserisci i testi in entrambe le lingue. Gli ospiti scelgono la loro con un clic.</p></div>
+   <div class="feat rv d1"><span class="feat-icon">🎨</span><div class="feat-title">Personalizzazione completa</div><p class="feat-text">Scegli colori di sfondo e accento con il color picker. Aggiungi il logo della tua struttura. La guida è davvero tua.</p></div>
+    <div class="feat rv d2"><span class="feat-icon">📲</span><div class="feat-title">Link + QR code</div><p class="feat-text">Condividi via WhatsApp, email, SMS. Genera il QR code da stampare e appendere in casa.</p></div>
+  </div>
+</section>
+
+<!-- PHOTO -->
+<div class="photo-section">
+  <div class="photo-col rv">
+    <img src="https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=800&q=80&fit=crop" alt="Camera da letto elegante">
+    <div class="photo-overlay"><div class="photo-caption">"Un'accoglienza professionale inizia prima dell'arrivo."<span>B&amp;B, affittacamere, ville, agriturismi</span></div></div>
+  </div>
+  <div class="photo-col rv d1">
+    <img src="https://images.unsplash.com/photo-1534430480872-3498386e7856?w=800&q=80&fit=crop" alt="Ospite con smartphone">
+    <div class="photo-overlay"><div class="photo-caption">"I tuoi ospiti trovano tutto dal loro smartphone."<span>Nessuna app da installare</span></div></div>
+  </div>
+</div>
+
+<!-- PRICING -->
+<section class="pricing" id="pricing">
+  <div class="sec-tag rv" style="justify-content:center;">Piani e prezzi</div>
+  <h2 class="rv" style="text-align:center;margin-left:auto;margin-right:auto;">Scegli il piano<br><em>giusto per te.</em></h2>
+  <p class="pricing-sub rv">Pagamento unico · nessun abbonamento · nessuna scadenza · IVA inclusa</p>
+
+  <div class="plans">
+
+    <!-- BASIC -->
+    <div class="plan rv">
+      <div class="plan-name">Basic</div>
+      <div class="plan-price"><sup>€</sup>25</div>
+      <div class="plan-iva">IVA inclusa</div>
+      <div class="plan-strutture">1 struttura</div>
+      <ul class="plan-feats">
+        <li><span class="ck"><svg viewBox="0 0 10 10" fill="none"><path d="M2 5l2.5 2.5L8 3" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Guida digitale bilingue IT/EN</li>
+        <li><span class="ck"><svg viewBox="0 0 10 10" fill="none"><path d="M2 5l2.5 2.5L8 3" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Personalizzazione completa: nome, colori, logo</li>
+        <li><span class="ck"><svg viewBox="0 0 10 10" fill="none"><path d="M2 5l2.5 2.5L8 3" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Check-in, Contatti, WiFi, Regole, Dintorni</li>
+        <li><span class="ck"><svg viewBox="0 0 10 10" fill="none"><path d="M2 5l2.5 2.5L8 3" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Ricerca automatica luoghi vicini</li>
+        <li><span class="ck"><svg viewBox="0 0 10 10" fill="none"><path d="M2 5l2.5 2.5L8 3" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Pubblicazione online + link WhatsApp</li>
+        <li><span class="ck"><svg viewBox="0 0 10 10" fill="none"><path d="M2 5l2.5 2.5L8 3" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>QR code da stampare</li>
+      </ul>
+      <div class="plan-divider"></div>
+      <div class="plan-extra">Ideale per chi gestisce un solo appartamento o casa vacanze</div>
+      <a href="https://buy.stripe.com/3cI14o2d4bXp3iDgCj4Rq01" class="btn-plan light">Acquista Basic →</a>
+    </div>
+
+    <!-- STANDARD (featured) -->
+    <div class="plan featured rv d1">
+      <div class="plan-badge">Più scelto</div>
+      <div class="plan-name">Standard</div>
+      <div class="plan-price"><sup>€</sup>35</div>
+      <div class="plan-iva">IVA inclusa</div>
+      <div class="plan-strutture">2 strutture</div>
+      <ul class="plan-feats">
+        <li><span class="ck"><svg viewBox="0 0 10 10" fill="none"><path d="M2 5l2.5 2.5L8 3" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Tutto il piano Basic</li>
+        <li><span class="ck"><svg viewBox="0 0 10 10" fill="none"><path d="M2 5l2.5 2.5L8 3" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Guide bilingue per 2 strutture</li>
+        <li><span class="ck"><svg viewBox="0 0 10 10" fill="none"><path d="M2 5l2.5 2.5L8 3" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Configurazione indipendente per ogni struttura</li>
+        <li><span class="ck"><svg viewBox="0 0 10 10" fill="none"><path d="M2 5l2.5 2.5L8 3" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Colori, dati e POI diversi per ognuna</li>
+        <li><span class="ck"><svg viewBox="0 0 10 10" fill="none"><path d="M2 5l2.5 2.5L8 3" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Un solo file, due guide separate</li>
+      </ul>
+      <div class="plan-divider"></div>
+      <div class="plan-extra">Perfetto per chi ha due proprietà — città e mare, o due camere in affitto breve</div>
+      <a href="https://buy.stripe.com/28EeVeg3UaTl1avbhZ4Rq00" class="btn-plan dark">Acquista Standard →</a>
+    </div>
+
+    <!-- PRO -->
+    <div class="plan rv d2">
+      <div class="plan-name">Pro</div>
+      <div class="plan-price"><sup>€</sup>45</div>
+      <div class="plan-iva">IVA inclusa</div>
+      <div class="plan-strutture">3 strutture</div>
+      <ul class="plan-feats">
+        <li><span class="ck"><svg viewBox="0 0 10 10" fill="none"><path d="M2 5l2.5 2.5L8 3" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Tutto il piano Standard</li>
+        <li><span class="ck"><svg viewBox="0 0 10 10" fill="none"><path d="M2 5l2.5 2.5L8 3" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Guide bilingue per 3 strutture</li>
+        <li><span class="ck"><svg viewBox="0 0 10 10" fill="none"><path d="M2 5l2.5 2.5L8 3" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Configurazione indipendente per ogni struttura</li>
+        <li><span class="ck"><svg viewBox="0 0 10 10" fill="none"><path d="M2 5l2.5 2.5L8 3" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Identità visiva diversa per ognuna</li>
+        <li><span class="ck"><svg viewBox="0 0 10 10" fill="none"><path d="M2 5l2.5 2.5L8 3" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>La scelta del property manager</li>
+      </ul>
+      <div class="plan-divider"></div>
+      <div class="plan-extra">La scelta ideale per il property manager o l'host con più proprietà</div>
+      <a href="https://buy.stripe.com/fZu5kEcRIf9B6uPgCj4Rq02" class="btn-plan light">Acquista Pro →</a>
+    </div>
+
+  </div>
+
+  <div class="pricing-note rv">Tutti i piani includono <strong>aggiornamenti futuri</strong>, supporto via email e <strong>nessuna scadenza</strong>.<br>Hai bisogno di più di 3 strutture? Scrivi a <a href="mailto:guestguide@coomunity.it" style="color:var(--teal);text-decoration:none;">guestguide@coomunity.it</a></div>
+</section>
+
+<!-- FAQ -->
+<section class="faq">
+  <div class="sec-tag rv">Domande frequenti</div>
+  <h2 class="rv" style="margin-bottom:32px;">Hai dei dubbi?<br><em>Eccoti le risposte.</em></h2>
+  <div class="faq-item rv" onclick="this.classList.toggle('open')"><div class="faq-q-row"><div class="faq-q">Devo rinnovare ogni anno?</div><div class="faq-ico">+</div></div><div class="faq-a">No. GuestGuide si acquista una volta sola e non ha scadenza. Nessun abbonamento, nessun rinnovo.</div></div>
+  <div class="faq-item rv" onclick="this.classList.toggle('open')"><div class="faq-q-row"><div class="faq-q">Gli ospiti devono scaricare un'app?</div><div class="faq-ico">+</div></div><div class="faq-a">No. Gli ospiti aprono semplicemente il link nel browser — nessuna app, nessuna registrazione.</div></div>
+  <div class="faq-item rv" onclick="this.classList.toggle('open')"><div class="faq-q-row"><div class="faq-q">Posso aggiornare la guida dopo averla pubblicata?</div><div class="faq-ico">+</div></div><div class="faq-a">Sì, puoi modificare le informazioni e ripubblicare in qualsiasi momento. Aggiornare una guida esistente non consuma crediti.</div></div>
+  <div class="faq-item rv" onclick="this.classList.toggle('open')"><div class="faq-q-row"><div class="faq-q">Ho bisogno di un hosting?</div><div class="faq-ico">+</div></div><div class="faq-a">No. La pubblicazione avviene automaticamente — non devi preoccuparti di server o configurazioni tecniche.</div></div>
+  <div class="faq-item rv" onclick="this.classList.toggle('open')"><div class="faq-q-row"><div class="faq-q">Posso personalizzare i colori e il template?</div><div class="faq-ico">+</div></div><div class="faq-a">Sì. Puoi personalizzare liberamente i colori di sfondo e accento.</div></div>
+  <div class="faq-item rv" onclick="this.classList.toggle('open')"><div class="faq-q-row"><div class="faq-q">Cosa ricevo dopo il pagamento?</div><div class="faq-ico">+</div></div><div class="faq-a">Ricevi subito via email il codice licenza e il link per scaricare GuestGuide. Puoi iniziare a configurare la tua guida immediatamente.</div></div>
+  <div class="faq-item rv" onclick="this.classList.toggle('open')"><div class="faq-q-row"><div class="faq-q">Ho bisogno di competenze tecniche?</div><div class="faq-ico">+</div></div><div class="faq-a">Zero. GuestGuide è pensato per essere usato da chiunque — apri il file nel browser, compili i campi, pubblichi con un clic.</div></div>
+</section>
+
+<!-- FINAL CTA -->
+<section class="final-cta">
+  <h2 class="rv">I tuoi ospiti meritano<br>una guida <em>all'altezza</em><br>della tua struttura.</h2>
+  <p class="rv">Scegli il piano adatto. Paghi una volta sola.</p>
+  <div class="cta-plans rv">
+    <a href="https://buy.stripe.com/3cI14o2d4bXp3iDgCj4Rq01" class="btn-cta-plan outline">Basic — €25</a>
+    <a href="https://buy.stripe.com/28EeVeg3UaTl1avbhZ4Rq00" class="btn-cta-plan filled">Standard — €35 ✦</a>
+    <a href="https://buy.stripe.com/fZu5kEcRIf9B6uPgCj4Rq02" class="btn-cta-plan outline">Pro — €45</a>
+  </div>
+</section>
+
+<footer>
+  <div class="foot-logo">GuestGuide</div>
+  <div class="foot-links">
+    <a href="mailto:guestguide@coomunity.it">guestguide@coomunity.it</a>
+    <a href="/supporto">Supporto</a>
+    <a href="/privacy">Privacy Policy</a>
+    <a href="/termini">Termini e Condizioni</a>
+  </div>
+  <div class="foot-copy">
+    © 2026 GuestGuide è un prodotto di proprietà di Amalis Group Srl ·
+    Via San Nicola, snc – 95040 Camporotondo Etneo (CT), Italia · P.IVA 06169160873<br>
+    GuestGuide è protetto da copyright. La riproduzione, distribuzione o condivisione non autorizzata del software
+    è vietata e perseguibile ai sensi della Legge n. 633/1941 sul diritto d'autore e del D.Lgs. 68/2003.
+  </div>
+</footer>
+
+<script>
+  const io = new IntersectionObserver((e) => {
+    e.forEach(x => { if(x.isIntersecting){ x.target.classList.add('ok'); io.unobserve(x.target); } });
+  }, {threshold:.1});
+  document.querySelectorAll('.rv').forEach(el => io.observe(el));
+  setTimeout(() => document.querySelectorAll('.hero .rv').forEach(el => el.classList.add('ok')), 80);
+</script>
+</body>
+</html>
