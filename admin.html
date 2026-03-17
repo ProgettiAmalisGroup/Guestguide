@@ -561,7 +561,7 @@ async function createLicense(){
     // Invia email via Edge Function
     await fetch(`${SUPABASE_URL}/functions/v1/create-license`, {
       method:'POST',
-      headers:{'Content-Type':'application/json'},
+      headers:{'Content-Type':'application/json', 'Authorization':`Bearer ${SUPABASE_ANON_KEY}`},
       body: JSON.stringify({
         type: 'manual_resend',
         data: { email, name, code, price_id: plan }
@@ -609,7 +609,7 @@ async function resendEmail(){
 
   await fetch(`${SUPABASE_URL}/functions/v1/create-license`, {
     method:'POST',
-    headers:{'Content-Type':'application/json'},
+    headers:{'Content-Type':'application/json', 'Authorization':`Bearer ${SUPABASE_ANON_KEY}`},
     body: JSON.stringify({
       type:'manual_resend',
       data:{ email:data[0].email, name:data[0].customer_name, code, price_id:plan }
