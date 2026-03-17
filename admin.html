@@ -478,6 +478,7 @@ function renderLicenses(licenses){
             : `<button class="btn btn-sm btn-success" onclick="toggleLicense('${l.id}',true)">Attiva</button>`
           }
           <button class="btn btn-sm btn-outline" onclick="setExpiry('${l.id}','${l.expires_at||''}')">Scadenza</button>
+          <button class="btn btn-sm btn-outline" onclick="copyRenewalLink('${l.code}','${l.slots_total}')" title="Copia link rinnovo">🔗</button>
           <button class="btn btn-sm btn-outline" onclick="prefillResend('${l.code}','${l.slots_total}')">✉</button>
         </div>
       </td>
@@ -654,6 +655,21 @@ async function loadGuides(){
 
 // ===== MODAL =====
 function closeModal(){ document.getElementById('confirm-modal').style.display='none'; }
+
+// ===== RENEWAL LINK =====
+const STRIPE_LINKS = {
+  1: 'https://buy.stripe.com/3cI14o2d4bXp3iDgCj4Rq01',
+  2: 'https://buy.stripe.com/28EeVeg3UaTl1avbhZ4Rq00',
+  3: 'https://buy.stripe.com/fZu5kEcRIf9B6uPgCj4Rq02'
+};
+
+function copyRenewalLink(code, slots){
+  const baseUrl = STRIPE_LINKS[parseInt(slots)] || STRIPE_LINKS[1];
+  const renewalUrl = `${baseUrl}?client_reference_id=${code}`;
+  navigator.clipboard.writeText(renewalUrl).then(()=>{
+    showToast('Link rinnovo copiato!', 'success');
+  });
+}
 
 // ===== TOAST =====
 function showToast(msg, type=''){
