@@ -369,6 +369,72 @@
   </div>
 </div>
 
+<!-- CAROUSEL -->
+<section class="pad" style="background:var(--blue-deep);padding-top:80px;padding-bottom:80px;">
+  <div style="text-align:center;margin-bottom:40px;">
+    <div class="sec-tag rv" style="justify-content:center;color:var(--teal-light);">Il prodotto in azione</div>
+    <h2 class="rv" style="color:white;text-align:center;margin:0 auto;max-width:480px;">Tutto quello che vedono <em>i tuoi ospiti.</em></h2>
+  </div>
+  <div style="position:relative;max-width:360px;margin:0 auto;">
+    <div id="carousel-track" style="display:flex;gap:0;overflow:hidden;border-radius:24px;box-shadow:0 32px 80px rgba(0,0,0,0.5);">
+      <img id="carousel-img" src="https://foavmbrrlrpehshvjxfk.supabase.co/storage/v1/object/public/images/arrivo.webp" style="width:100%;flex-shrink:0;display:block;border-radius:24px;transition:opacity .4s;">
+    </div>
+    <button onclick="carouselPrev()" style="position:absolute;left:-20px;top:50%;transform:translateY(-50%);width:40px;height:40px;border-radius:50%;background:white;border:none;cursor:pointer;font-size:16px;box-shadow:0 4px 16px rgba(0,0,0,0.2);display:flex;align-items:center;justify-content:center;">‹</button>
+    <button onclick="carouselNext()" style="position:absolute;right:-20px;top:50%;transform:translateY(-50%);width:40px;height:40px;border-radius:50%;background:white;border:none;cursor:pointer;font-size:16px;box-shadow:0 4px 16px rgba(0,0,0,0.2);display:flex;align-items:center;justify-content:center;">›</button>
+    <div id="carousel-dots" style="display:flex;justify-content:center;gap:6px;margin-top:20px;"></div>
+  </div>
+</section>
+
+<script>
+const carouselImages = [
+  {url:'https://foavmbrrlrpehshvjxfk.supabase.co/storage/v1/object/public/images/attivazione.webp', label:'Attivazione licenza'},
+  {url:'https://foavmbrrlrpehshvjxfk.supabase.co/storage/v1/object/public/images/impostazioni.webp', label:'Configurazione'},
+  {url:'https://foavmbrrlrpehshvjxfk.supabase.co/storage/v1/object/public/images/arrivo.webp', label:'Sezione arrivo'},
+  {url:'https://foavmbrrlrpehshvjxfk.supabase.co/storage/v1/object/public/images/contatti.webp', label:'Contatti'},
+  {url:'https://foavmbrrlrpehshvjxfk.supabase.co/storage/v1/object/public/images/la_casa.webp', label:'La casa & WiFi'},
+  {url:'https://foavmbrrlrpehshvjxfk.supabase.co/storage/v1/object/public/images/regole.webp', label:'Regole della casa'},
+  {url:'https://foavmbrrlrpehshvjxfk.supabase.co/storage/v1/object/public/images/dintorni.webp', label:'Dintorni'},
+  {url:'https://foavmbrrlrpehshvjxfk.supabase.co/storage/v1/object/public/images/english_version.webp', label:'Versione inglese'},
+  {url:'https://foavmbrrlrpehshvjxfk.supabase.co/storage/v1/object/public/images/pubblica.webp', label:'Pubblica online'},
+  {url:'https://foavmbrrlrpehshvjxfk.supabase.co/storage/v1/object/public/images/link_e_qr.webp', label:'Link & QR Code'},
+];
+let carouselIdx = 0;
+let carouselTimer;
+
+function carouselShow(idx){
+  carouselIdx = (idx + carouselImages.length) % carouselImages.length;
+  const img = document.getElementById('carousel-img');
+  img.style.opacity = '0';
+  setTimeout(() => {
+    img.src = carouselImages[carouselIdx].url;
+    img.style.opacity = '1';
+  }, 200);
+  document.querySelectorAll('.c-dot').forEach((d,i) => {
+    d.style.background = i === carouselIdx ? 'white' : 'rgba(255,255,255,0.3)';
+    d.style.width = i === carouselIdx ? '20px' : '6px';
+  });
+  resetTimer();
+}
+function carouselNext(){ carouselShow(carouselIdx + 1); }
+function carouselPrev(){ carouselShow(carouselIdx - 1); }
+function resetTimer(){ clearInterval(carouselTimer); carouselTimer = setInterval(carouselNext, 3500); }
+
+// Init dots
+window.addEventListener('DOMContentLoaded', () => {
+  const dots = document.getElementById('carousel-dots');
+  if(!dots) return;
+  carouselImages.forEach((_,i) => {
+    const d = document.createElement('div');
+    d.className = 'c-dot';
+    d.style.cssText = `height:6px;border-radius:3px;cursor:pointer;transition:all .3s;background:${i===0?'white':'rgba(255,255,255,0.3)'};width:${i===0?'20px':'6px'};`;
+    d.onclick = () => carouselShow(i);
+    dots.appendChild(d);
+  });
+  resetTimer();
+});
+</script>
+
+
 <!-- PRICING -->
 <section class="pricing" id="pricing">
   <div class="sec-tag rv" style="justify-content:center;">Piani e prezzi</div>
