@@ -627,22 +627,26 @@ function prefillResend(code, slots){
 
 // ===== GUIDES =====
 async function loadGuides(){
-  const res = await fetch(`${SUPABASE_URL}/rest/v1/gg_licenses?select=customer_name,email,published_guides`, {
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/gg_licenses?select=customer_name,email,published_guides,code`, {
     headers:{'Authorization':`Bearer ${SUPABASE_ANON_KEY}`,'apikey':SUPABASE_ANON_KEY}
   });
   const licenses = await res.json();
+  console.log('Licenses raw:', JSON.stringify(licenses));
   const tbody = document.getElementById('guides-tbody');
   const guides = [];
   licenses.forEach(l => {
-    (l.published_guides||[]).forEach(g => {
-      guides.push({...g, customer: l.customer_name, email: l.email});
+    let pg = l.published_guides;
+    if(typeof pg === 'string'){try{pg=JSON.parse(pg);}catch(e){pg=[];}}
+    if(!Array.isArray(pg)) pg = [];
+    pg.forEach(g => {
+      if(g && (g.url || g.name)) guides.push({...g, customer: l.customer_name, email: l.email});
     });
   });
   if(!guides.length){ tbody.innerHTML='<tr><td colspan="4" class="empty">Nessuna guida pubblicata</td></tr>'; return; }
   tbody.innerHTML = guides.map(g=>`<tr>
     <td>${g.name||'—'}</td>
     <td><div>${g.customer||'—'}</div><div style="font-size:11px;color:var(--text3);">${g.email}</div></td>
-    <td><a href="${g.url}" target="_blank" style="color:var(--accent);font-size:12px;font-family:'DM Mono',monospace;">${g.url}</a></td>
+    <td><a href="${g.url}" target="_blank" style="color:var(--accent);font-size:12px;font-family:'DM Mono',monospace;">${(g.url||'').replace('https://','')}</a></td>
     <td style="color:var(--text2);font-size:12px;">${g.updatedAt ? new Date(g.updatedAt).toLocaleDateString('it-IT') : '—'}</td>
   </tr>`).join('');
 }
