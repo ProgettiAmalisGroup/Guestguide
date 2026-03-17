@@ -564,7 +564,7 @@ async function createLicense(){
       headers:{'Content-Type':'application/json', 'Authorization':`Bearer ${SUPABASE_ANON_KEY}`},
       body: JSON.stringify({
         type: 'manual_resend',
-        data: { email, name, code, price_id: plan }
+        data: { email, name, code, price_id: plan, expires_at: expires ? new Date(expires).toISOString() : null }
       })
     });
 
