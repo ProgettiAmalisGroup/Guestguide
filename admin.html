@@ -602,7 +602,7 @@ async function resendEmail(){
   if(!code){ showToast('Inserisci il codice', 'error'); return; }
 
   // Cerca i dati della licenza
-  const res = await fetch(`${SUPABASE_URL}/rest/v1/gg_licenses?code=eq.${code}&select=email,customer_name`, {
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/gg_licenses?code=eq.${code}&select=email,customer_name,expires_at`, {
     headers:{'Authorization':`Bearer ${SUPABASE_ANON_KEY}`,'apikey':SUPABASE_ANON_KEY}
   });
   const data = await res.json();
@@ -613,7 +613,7 @@ async function resendEmail(){
     headers:{'Content-Type':'application/json', 'Authorization':`Bearer ${SUPABASE_ANON_KEY}`},
     body: JSON.stringify({
       type:'manual_resend',
-      data:{ email:data[0].email, name:data[0].customer_name, code, price_id:plan }
+      data:{ email:data[0].email, name:data[0].customer_name, code, price_id:plan, expires_at: data[0].expires_at || null }
     })
   });
   showToast('Email inviata a '+data[0].email, 'success');
