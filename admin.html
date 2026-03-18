@@ -208,6 +208,9 @@ select.inp{appearance:none;cursor:pointer;}
     <div class="nav-item" onclick="showTab('contacts')">
       <span class="nav-icon">👥</span><span>Contatti</span>
     </div>
+    <div class="nav-item" onclick="showTab('reviews')">
+      <span class="nav-icon">⭐</span><span>Recensioni</span>
+    </div>
     <div style="margin-top:auto;padding:20px;">
       <div style="font-size:11px;color:var(--text3);">Versione 1.0</div>
     </div>
@@ -404,7 +407,32 @@ select.inp{appearance:none;cursor:pointer;}
   </div>
 </div>
 
- <!-- TAB: CONTATTI -->
+ <!-- TAB: RECENSIONI -->
+    <div id="tab-reviews" style="display:none">
+      <div class="page-header">
+        <div class="page-title">Recensioni</div>
+        <div class="page-sub">Approva o rifiuta le recensioni prima della pubblicazione</div>
+      </div>
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">In attesa di approvazione</div>
+          <button class="btn btn-outline btn-sm" onclick="loadReviews()">↻ Aggiorna</button>
+        </div>
+        <div class="panel-body">
+          <div id="reviews-pending"></div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">Approvate</div>
+        </div>
+        <div class="panel-body">
+          <div id="reviews-approved"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: CONTATTI -->
     <div id="tab-contacts" style="display:none">
       <iframe src="contacts.html" style="width:100%;height:calc(100vh - 64px);border:none;border-radius:10px;" id="contacts-iframe"></iframe>
     </div>
@@ -456,14 +484,15 @@ document.getElementById('admin-pw').addEventListener('keydown', e => { if(e.key=
 
 // ===== TABS =====
 function showTab(tab){
-  ['licenses','create','guides','payments','contacts'].forEach(t => {
+  ['licenses','create','guides','payments','contacts','reviews'].forEach(t => {
     document.getElementById('tab-'+t).style.display = t===tab?'block':'none';
   });
   document.querySelectorAll('.nav-item').forEach((el,i) => {
-    el.classList.toggle('active', ['licenses','create','guides','payments','contacts'][i]===tab);
+    el.classList.toggle('active', ['licenses','create','guides','payments','contacts','reviews'][i]===tab);
   });
   if(tab==='guides') loadGuides();
   if(tab==='payments') loadPayments();
+  if(tab==='reviews') loadReviews();
 }
 
 // ===== LOAD LICENSES =====
@@ -772,6 +801,70 @@ async function loadPayments(){
       <td><span class="badge ${l.stripe_payment_intent?'badge-green':'badge-yellow'}">${l.stripe_payment_intent?'Pagato':'Manuale'}</span></td>
     </tr>`;
   }).join('');
+}
+
+// ===== REVIEWS =====
+async function loadReviews(){
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/gg_reviews?select=*&order=created_at.desc`, {
+    headers:{'Authorization':`Bearer ${SUPABASE_ANON_KEY}`,'apikey':SUPABASE_ANON_KEY}
+  });
+  const reviews = await res.json();
+  const pending = reviews.filter(r => !r.approved);
+  const approved = reviews.filter(r => r.approved);
+  renderReviews(pending, 'reviews-pending', true);
+  renderReviews(approved, 'reviews-approved', false);
+}
+
+function renderReviews(reviews, containerId, isPending){
+  const container = document.getElementById(containerId);
+  if(!reviews.length){ container.innerHTML='<div class="empty">Nessuna recensione</div>'; return; }
+  container.innerHTML = reviews.map(r => {
+    const stelle = '★'.repeat(r.stelle) + '☆'.repeat(5-r.stelle);
+    const logo = r.foto_url
+      ? `<img src="${r.foto_url}" style="width:48px;height:48px;border-radius:50%;object-fit:cover;border:2px solid var(--border);">`
+      : `<div style="width:48px;height:48px;border-radius:50%;background:var(--accent-soft);color:var(--accent);display:flex;align-items:center;justify-content:center;font-weight:600;font-size:16px;">${r.nome.charAt(0)}</div>`;
+    return `<div style="padding:16px;border:1px solid var(--border);border-radius:10px;margin-bottom:12px;display:flex;gap:16px;align-items:flex-start;">
+      ${logo}
+      <div style="flex:1;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+          <div>
+            <span style="font-weight:600;">${r.nome} ${r.cognome||''}</span>
+            <span style="font-size:12px;color:var(--text2);margin-left:8px;">${r.ruolo||''} · ${r.struttura||''} ${r.citta?'— '+r.citta:''}</span>
+          </div>
+          <div style="display:flex;gap:6px;">
+            ${isPending
+              ? `<button class="btn btn-sm btn-success" onclick="approveReview('${r.id}')">✓ Approva</button>
+                 <button class="btn btn-sm btn-danger" onclick="deleteReview('${r.id}')">✕ Rifiuta</button>`
+              : `<button class="btn btn-sm btn-danger" onclick="deleteReview('${r.id}')">🗑 Elimina</button>`
+            }
+          </div>
+        </div>
+        <div style="color:var(--yellow);font-size:14px;margin-bottom:6px;">${stelle}</div>
+        <div style="font-size:13px;color:var(--text2);line-height:1.6;">${r.testo}</div>
+        <div style="font-size:11px;color:var(--text3);margin-top:6px;">${new Date(r.created_at).toLocaleDateString('it-IT')}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function approveReview(id){
+  await fetch(`${SUPABASE_URL}/rest/v1/gg_reviews?id=eq.${id}`, {
+    method:'PATCH',
+    headers:{'Authorization':`Bearer ${SUPABASE_ANON_KEY}`,'apikey':SUPABASE_ANON_KEY,'Content-Type':'application/json'},
+    body: JSON.stringify({approved: true})
+  });
+  showToast('Recensione approvata', 'success');
+  loadReviews();
+}
+
+async function deleteReview(id){
+  if(!confirm('Eliminare questa recensione?')) return;
+  await fetch(`${SUPABASE_URL}/rest/v1/gg_reviews?id=eq.${id}`, {
+    method:'DELETE',
+    headers:{'Authorization':`Bearer ${SUPABASE_ANON_KEY}`,'apikey':SUPABASE_ANON_KEY}
+  });
+  showToast('Recensione eliminata', 'success');
+  loadReviews();
 }
 
 // ===== EDIT EMAIL =====
