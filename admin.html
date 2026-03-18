@@ -281,9 +281,14 @@ select.inp{appearance:none;cursor:pointer;}
               </select>
             </div>
             <div class="form-group">
-              <div class="form-label">Scadenza (opzionale — per prova gratuita)</div>
-              <input class="inp" type="date" id="new-expires">
-            </div>
+  <div class="form-label">Scadenza (opzionale — per prova gratuita)</div>
+  <input class="inp" type="date" id="new-expires">
+  <div style="display:flex;gap:6px;margin-top:6px;">
+    <button class="btn btn-outline btn-sm" onclick="setTrialDays(7)">7 giorni</button>
+    <button class="btn btn-outline btn-sm" onclick="setTrialDays(14)">14 giorni</button>
+    <button class="btn btn-outline btn-sm" onclick="setTrialDays(30)">30 giorni</button>
+  </div>
+</div>
             <div class="form-group full">
               <div class="form-label">Codice personalizzato (opzionale — lascia vuoto per generare automaticamente)</div>
               <input class="inp" type="text" id="new-code" placeholder="Es. GG26-MARIO-ROSS" style="font-family:'DM Mono',monospace;letter-spacing:.05em;" oninput="this.value=this.value.toUpperCase()">
@@ -499,6 +504,12 @@ async function toggleLicense(id, active){
   });
   showToast(active ? 'Licenza attivata' : 'Licenza disattivata', active?'success':'');
   loadLicenses();
+}
+
+function setTrialDays(days){
+  const d = new Date();
+  d.setDate(d.getDate() + days);
+  document.getElementById('new-expires').value = d.toISOString().slice(0,10);
 }
 
 // ===== EXPIRY =====
