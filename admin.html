@@ -202,6 +202,9 @@ select.inp{appearance:none;cursor:pointer;}
     <div class="nav-item" onclick="showTab('guides')">
       <span class="nav-icon">📄</span><span>Guide pubblicate</span>
     </div>
+    <div class="nav-item" onclick="showTab('payments')">
+      <span class="nav-icon">💳</span><span>Pagamenti</span>
+    </div>
     <div style="margin-top:auto;padding:20px;">
       <div style="font-size:11px;color:var(--text3);">Versione 1.0</div>
     </div>
@@ -363,6 +366,44 @@ select.inp{appearance:none;cursor:pointer;}
   </div>
 </div>
 
+<!-- TAB: PAGAMENTI -->
+<div id="tab-payments" style="display:none">
+  <div class="page-header">
+    <div class="page-title">Pagamenti</div>
+    <div class="page-sub">Storico acquisti e ricavi</div>
+  </div>
+  <div class="stats-grid" style="grid-template-columns:repeat(3,1fr)">
+    <div class="stat-card"><div class="stat-label">Totale ricavi</div><div class="stat-val" id="pay-total">—</div><div class="stat-sub">IVA esclusa</div></div>
+    <div class="stat-card"><div class="stat-label">Licenze pagate</div><div class="stat-val" id="pay-count">—</div><div class="stat-sub">no trial</div></div>
+    <div class="stat-card"><div class="stat-label">Ticket medio</div><div class="stat-val" id="pay-avg">—</div><div class="stat-sub">per licenza</div></div>
+  </div>
+  <div class="panel">
+    <div class="panel-header">
+      <div class="panel-title">Storico pagamenti</div>
+      <button class="btn btn-outline btn-sm" onclick="loadPayments()">↻ Aggiorna</button>
+    </div>
+    <div class="panel-body">
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Data / Ora</th>
+              <th>Cliente</th>
+              <th>Piano</th>
+              <th>Importo</th>
+              <th>Stripe Session</th>
+              <th>Tipo</th>
+            </tr>
+          </thead>
+          <tbody id="payments-tbody">
+            <tr><td colspan="6" class="empty"><div class="spinner"></div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL CONFERMA -->
 <div id="confirm-modal" style="display:none" class="modal-overlay">
   <div class="modal">
@@ -407,13 +448,14 @@ document.getElementById('admin-pw').addEventListener('keydown', e => { if(e.key=
 
 // ===== TABS =====
 function showTab(tab){
-  ['licenses','create','guides'].forEach(t => {
+  ['licenses','create','guides','payments'].forEach(t => {
     document.getElementById('tab-'+t).style.display = t===tab?'block':'none';
   });
   document.querySelectorAll('.nav-item').forEach((el,i) => {
-    el.classList.toggle('active', ['licenses','create','guides'][i]===tab);
+    el.classList.toggle('active', ['licenses','create','guides','payments'][i]===tab);
   });
   if(tab==='guides') loadGuides();
+  if(tab==='payments') loadPayments();
 }
 
 // ===== LOAD LICENSES =====
@@ -485,6 +527,7 @@ function renderLicenses(licenses){
           <button class="btn btn-sm btn-outline" onclick="setExpiry('${l.id}','${l.expires_at||''}')">Scadenza</button>
           <button class="btn btn-sm btn-outline" onclick="copyRenewalLink('${l.code}','${l.slots_total}')" title="Copia link rinnovo">🔗</button>
           <button class="btn btn-sm btn-outline" onclick="prefillResend('${l.code}','${l.slots_total}')">✉</button>
+          <button class="btn btn-sm btn-outline" onclick="editEmail('${l.id}','${l.email}')" title="Modifica email">✏</button>
         </div>
       </td>
     </tr>`;
@@ -680,6 +723,64 @@ function copyRenewalLink(code, slots){
   navigator.clipboard.writeText(renewalUrl).then(()=>{
     showToast('Link rinnovo copiato!', 'success');
   });
+}
+
+// ===== PAYMENTS =====
+const PLAN_PRICES = {
+  1: 25,
+  2: 35,
+  3: 45
+};
+
+async function loadPayments(){
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/gg_licenses?select=*&order=created_at.desc`, {
+    headers:{'Authorization':`Bearer ${SUPABASE_ANON_KEY}`,'apikey':SUPABASE_ANON_KEY}
+  });
+  const licenses = await res.json();
+  const paid = licenses.filter(l => l.stripe_session_id && !l.expires_at);
+  const tbody = document.getElementById('payments-tbody');
+
+  const total = paid.reduce((acc,l) => acc + (PLAN_PRICES[l.slots_total]||0), 0);
+  const avg = paid.length ? Math.round(total/paid.length) : 0;
+  document.getElementById('pay-total').textContent = '€'+total;
+  document.getElementById('pay-count').textContent = paid.length;
+  document.getElementById('pay-avg').textContent = '€'+avg;
+
+  if(!paid.length){ tbody.innerHTML='<tr><td colspan="6" class="empty">Nessun pagamento trovato</td></tr>'; return; }
+
+  tbody.innerHTML = paid.map(l => {
+    const date = new Date(l.created_at);
+    const dateStr = date.toLocaleDateString('it-IT');
+    const timeStr = date.toLocaleTimeString('it-IT', {hour:'2-digit',minute:'2-digit'});
+    const price = PLAN_PRICES[l.slots_total] || 0;
+    const planName = l.slots_total===1?'Basic':l.slots_total===2?'Standard':'Pro';
+    const sessionShort = l.stripe_session_id ? l.stripe_session_id.slice(0,20)+'...' : '—';
+    return `<tr>
+      <td><div>${dateStr}</div><div style="font-size:11px;color:var(--text3);">${timeStr}</div></td>
+      <td><div>${l.customer_name||'—'}</div><div style="font-size:11px;color:var(--text3);">${l.email}</div></td>
+      <td><span class="badge badge-blue">${planName} · ${l.slots_total}x</span></td>
+      <td><strong style="color:var(--green);">€${price}</strong></td>
+      <td><span class="mono" style="font-size:11px;" title="${l.stripe_session_id||''}">${sessionShort}</span></td>
+      <td><span class="badge ${l.stripe_payment_intent?'badge-green':'badge-yellow'}">${l.stripe_payment_intent?'Pagato':'Manuale'}</span></td>
+    </tr>`;
+  }).join('');
+}
+
+// ===== EDIT EMAIL =====
+async function editEmail(id, currentEmail){
+  const newEmail = prompt('Modifica email cliente:', currentEmail);
+  if(!newEmail || newEmail === currentEmail) return;
+  await fetch(`${SUPABASE_URL}/rest/v1/gg_licenses?id=eq.${id}`, {
+    method:'PATCH',
+    headers:{
+      'Authorization':`Bearer ${SUPABASE_ANON_KEY}`,
+      'apikey':SUPABASE_ANON_KEY,
+      'Content-Type':'application/json'
+    },
+    body: JSON.stringify({email: newEmail.trim().toLowerCase()})
+  });
+  showToast('Email aggiornata', 'success');
+  loadLicenses();
 }
 
 // ===== TOAST =====
