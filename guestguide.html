@@ -1,0 +1,1839 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GuestGuide — Setup</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --bg:#1A1714;--bg2:#2D2925;--accent:#C4A96D;
+  --cream:#F9F5EE;--muted:#8C7F6E;--border:rgba(196,169,109,0.2);
+  --text-main:#F9F5EE;--text-muted:#8C7F6E;--card-border:rgba(255,255,255,0.08);
+}
+body{font-family:'Jost',sans-serif;background:#f4f4f0;color:#1a1a1a;min-height:100vh;}
+
+/* ===== SETUP MODE ===== */
+#setup-mode{display:block;}
+#guide-mode{display:none;}
+
+.setup-wrap{max-width:960px;margin:0 auto;padding:2rem 1rem;}
+.setup-header{text-align:center;margin-bottom:2.5rem;}
+#slot-bar{margin-bottom:1.5rem;}
+.setup-header h1{font-family:'Cormorant Garamond',serif;font-size:2.2rem;font-weight:300;color:#1a1a1a;margin-bottom:0.3rem;}
+.setup-header p{font-size:13px;color:#888;letter-spacing:0.05em;}
+
+.setup-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;align-items:start;}
+@media(max-width:700px){
+  .setup-grid{grid-template-columns:1fr;}
+  .setup-wrap{padding:1rem 0.75rem;}
+  .setup-header h1{font-size:1.6rem;}
+  .setup-panel{max-height:none;padding:1.25rem;}
+  .preview-wrap{display:none;}
+  .publish-btn{position:fixed;bottom:0;left:0;right:0;border-radius:0;z-index:200;margin:0;padding:1.1rem;}
+  #setup-mode{padding-bottom:70px;}
+}
+@media(max-width:480px){
+  .two-fields{grid-template-columns:1fr;}
+  .field input[type=text],.field input[type=time],.field input[type=tel],.field input[type=number],.field textarea{font-size:14px;}
+}
+
+.setup-panel{background:#fff;border-radius:12px;border:0.5px solid #e0e0e0;padding:1.5rem;overflow-y:auto;max-height:80vh;}
+.setup-panel h2{font-size:12px;font-weight:500;letter-spacing:0.15em;text-transform:uppercase;color:#999;margin-bottom:1.25rem;}
+
+.s-section{margin-bottom:1.75rem;}
+.s-section-label{font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:#bbb;margin-bottom:0.75rem;padding-bottom:0.4rem;border-bottom:0.5px solid #eee;}
+.field{margin-bottom:0.75rem;}
+.field label{display:block;font-size:11px;color:#888;margin-bottom:4px;}
+.field input[type=text],.field input[type=time],.field input[type=tel],.field input[type=number],.field textarea{
+  width:100%;padding:8px 10px;font-size:13px;font-family:'Jost',sans-serif;
+  border:0.5px solid #ddd;border-radius:8px;background:#fafafa;color:#1a1a1a;outline:none;
+  transition:border-color 0.15s;
+}
+.field input:focus,.field textarea:focus{border-color:#aaa;}
+.field textarea{resize:vertical;min-height:60px;line-height:1.5;}
+.two-fields{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+
+/* swatches */
+.swatch-group{margin-bottom:0.75rem;}
+.swatch-label{font-size:11px;color:#888;margin-bottom:6px;}
+.swatches{display:flex;gap:7px;flex-wrap:wrap;align-items:center;}
+.swatch{width:26px;height:26px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:all 0.15s;flex-shrink:0;}
+.swatch.selected{border-color:#1a1a1a;transform:scale(1.15);}
+.swatch.custom{background:conic-gradient(red,yellow,lime,cyan,blue,magenta,red);position:relative;overflow:hidden;}
+.swatch.custom input[type=color]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
+
+/* logo */
+.logo-upload{border:0.5px dashed #ccc;border-radius:8px;padding:0.75rem;text-align:center;cursor:pointer;color:#aaa;font-size:12px;transition:all 0.2s;position:relative;overflow:hidden;}
+.logo-upload:hover{border-color:#999;background:#f9f9f9;}
+.logo-upload input{position:absolute;inset:0;opacity:0;cursor:pointer;}
+#logo-preview-setup{max-height:36px;max-width:100px;object-fit:contain;display:none;margin:0 auto 4px;}
+
+/* POI section */
+.poi-category{margin-bottom:1rem;}
+.poi-cat-label{font-size:11px;font-weight:500;color:#555;margin-bottom:0.5rem;display:flex;align-items:center;gap:6px;}
+.poi-fetch-btn{
+  font-size:10px;letter-spacing:0.1em;padding:3px 10px;
+  border:0.5px solid #ccc;border-radius:20px;background:transparent;
+  color:#888;cursor:pointer;transition:all 0.15s;
+}
+.poi-fetch-btn:hover{border-color:#999;color:#555;}
+.poi-fetch-btn.loading{color:#aaa;pointer-events:none;}
+.poi-list{display:flex;flex-direction:column;gap:6px;}
+.poi-item{display:grid;grid-template-columns:1fr auto;gap:6px;align-items:center;background:#f9f9f9;border:0.5px solid #eee;border-radius:6px;padding:8px 10px;}
+.poi-item input{border:none;background:transparent;font-size:12px;color:#333;font-family:'Jost',sans-serif;outline:none;width:100%;}
+.poi-remove{width:18px;height:18px;border-radius:50%;background:#eee;border:none;cursor:pointer;font-size:11px;color:#999;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.poi-remove:hover{background:#ffd5d5;color:#c00;}
+.poi-add-btn{font-size:11px;color:#aaa;background:none;border:0.5px dashed #ddd;border-radius:6px;padding:5px 10px;cursor:pointer;width:100%;margin-top:4px;transition:all 0.15s;}
+.poi-add-btn:hover{border-color:#aaa;color:#666;}
+
+/* lang pills */
+.lang-pill{display:flex;align-items:center;justify-content:center;padding:6px 4px;border:0.5px solid #ddd;border-radius:6px;cursor:pointer;font-size:11px;font-weight:400;color:#555;transition:all 0.15s;background:#fafafa;}
+.lang-pill input{display:none;}
+.lang-pill:has(input:checked){border-color:#1a1a1a;background:#1a1a1a;color:#fff;}
+.lang-pill span{pointer-events:none;}
+
+/* rules */
+.rule-item{display:flex;gap:6px;margin-bottom:6px;align-items:flex-start;}
+.rule-item input{flex:1;}
+.rule-remove{width:28px;height:28px;border-radius:50%;background:#eee;border:none;cursor:pointer;font-size:11px;color:#999;flex-shrink:0;margin-top:1px;}
+.rule-remove:hover{background:#ffd5d5;color:#c00;}
+
+/* CTA */
+.publish-btn{
+  display:block;width:100%;padding:1rem;margin-top:1rem;
+  background:#1a1a1a;color:#fff;border:none;border-radius:8px;
+  font-family:'Jost',sans-serif;font-size:12px;letter-spacing:0.2em;text-transform:uppercase;
+  cursor:pointer;transition:all 0.2s;
+}
+.publish-btn:hover{background:#333;}
+
+/* preview panel */
+.preview-wrap{position:sticky;top:1rem;}
+.preview-phone{
+  background:var(--bg);border-radius:24px;overflow:hidden;
+  border:1px solid rgba(255,255,255,0.1);
+  box-shadow:0 20px 60px rgba(0,0,0,0.3);
+  max-height:78vh;display:flex;flex-direction:column;
+}
+.preview-topbar{
+  background:rgba(0,0,0,0.3);padding:0.5rem 1rem;
+  font-size:9px;letter-spacing:0.2em;text-transform:uppercase;
+  color:rgba(255,255,255,0.3);flex-shrink:0;text-align:center;
+}
+.preview-scroll{flex:1;overflow-y:auto;scrollbar-width:none;}
+.preview-scroll::-webkit-scrollbar{display:none;}
+
+/* ===== GUIDE MODE ===== */
+#guide-mode{min-height:100vh;}
+
+.g-hero{padding:2.5rem 1.5rem 2rem;text-align:center;position:relative;}
+.g-hero::after{content:'';position:absolute;bottom:0;left:10%;right:10%;height:1px;background:var(--border);}
+.g-ornament{font-size:10px;letter-spacing:0.35em;text-transform:uppercase;margin-bottom:0.75rem;color:var(--accent);}
+.g-name{font-family:'Cormorant Garamond',serif;font-size:2.4rem;font-weight:300;line-height:1.1;margin-bottom:0.3rem;color:var(--text-main);}
+.g-location{font-size:12px;font-weight:300;letter-spacing:0.2em;margin-bottom:1.25rem;color:var(--text-muted);}
+.g-logo{max-height:44px;max-width:120px;object-fit:contain;margin:0 auto 1rem;display:none;}
+
+.lang-switch{display:inline-flex;border:1px solid var(--border);border-radius:2px;overflow:hidden;}
+.lang-btn{padding:6px 16px;font-family:'Jost',sans-serif;font-size:11px;letter-spacing:0.1em;border:none;cursor:pointer;transition:all 0.2s;background:transparent;color:var(--text-muted);}
+
+/* nav */
+.g-nav{display:flex;overflow-x:auto;border-bottom:1px solid var(--border);scrollbar-width:none;justify-content:center;}
+.g-nav::-webkit-scrollbar{display:none;}
+.g-nav-item{flex-shrink:0;padding:0.9rem 1.1rem;font-size:10px;letter-spacing:0.18em;text-transform:uppercase;cursor:pointer;border-bottom:2px solid transparent;transition:all 0.2s;white-space:nowrap;font-weight:400;color:var(--text-muted);}
+.g-nav-item.active{border-bottom-color:var(--accent);color:var(--accent);}
+
+/* sections */
+.g-section{display:none;padding:1.75rem 1.25rem;max-width:560px;margin:0 auto;}
+.g-section.active{display:block;}
+.g-section-header{margin-bottom:1.5rem;padding-bottom:0.75rem;border-bottom:1px solid var(--border);}
+.g-label{font-size:9px;letter-spacing:0.3em;text-transform:uppercase;margin-bottom:0.4rem;color:var(--accent);}
+.g-title{font-family:'Cormorant Garamond',serif;font-size:1.8rem;font-weight:300;color:var(--text-main);}
+
+/* cards */
+.g-card{background:var(--card-bg);border:1px solid var(--card-border);border-radius:2px;padding:1.25rem;margin-bottom:0.75rem;}
+.g-card-label{font-size:9px;letter-spacing:0.2em;text-transform:uppercase;color:var(--text-muted);margin-bottom:5px;}
+.g-card-val{font-family:'Cormorant Garamond',serif;font-size:1.3rem;font-weight:400;color:var(--text-main);}
+.g-card-sub{font-size:12px;margin-top:4px;color:var(--text-muted);font-weight:300;}
+.two-cards{display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;margin-bottom:0.75rem;}
+
+/* contact */
+.g-contact{display:flex;align-items:center;gap:0.75rem;padding:1rem 1.25rem;background:var(--card-bg);border:1px solid var(--card-border);border-radius:2px;margin-bottom:0.75rem;}
+.g-contact-dot{width:9px;height:9px;border-radius:50%;background:var(--accent);flex-shrink:0;}
+.g-contact-name{font-size:14px;color:var(--text-main);}
+.g-contact-detail{font-size:11px;color:var(--text-muted);margin-top:2px;font-weight:300;}
+
+/* wifi */
+.g-wifi{background:var(--card-bg);border:1px solid var(--accent);border-radius:2px;padding:1.5rem;text-align:center;margin-bottom:0.75rem;}
+.g-wifi-net{font-family:'Cormorant Garamond',serif;font-size:1.3rem;margin-bottom:0.75rem;color:var(--text-main);}
+.g-wifi-pw{font-family:monospace;font-size:1rem;letter-spacing:0.08em;color:var(--accent);}
+
+/* rules */
+.g-rule{display:flex;gap:1rem;padding:0.9rem 0;border-bottom:1px solid var(--border);align-items:flex-start;}
+.g-rule-num{font-family:'Cormorant Garamond',serif;font-size:1.3rem;color:var(--accent);opacity:0.4;flex-shrink:0;min-width:22px;line-height:1;}
+.g-rule-text{font-size:13px;color:var(--text-muted);line-height:1.6;font-weight:300;}
+
+/* poi */
+.poi-section-label{font-size:9px;letter-spacing:0.25em;text-transform:uppercase;margin:1rem 0 0.5rem;color:var(--accent);opacity:0.7;}
+.g-poi{display:flex;justify-content:space-between;align-items:flex-start;padding:0.9rem 1.25rem;background:var(--card-bg);border:1px solid var(--card-border);border-radius:2px;margin-bottom:0.6rem;cursor:pointer;transition:border-color 0.15s;}
+.g-poi:hover{border-color:var(--accent);}
+.g-poi-name{font-size:13px;color:var(--text-main);}
+.g-poi-type{font-size:10px;color:var(--text-muted);margin-top:2px;font-weight:300;letter-spacing:0.05em;}
+.g-poi-right{text-align:right;flex-shrink:0;}
+.g-poi-dist{font-size:11px;color:var(--text-muted);}
+.g-poi-link{font-size:10px;color:var(--accent);margin-top:3px;letter-spacing:0.08em;opacity:0.7;}
+.poi-loading{font-size:12px;color:var(--text-muted);text-align:center;padding:1rem;font-weight:300;}
+
+/* cta */
+.g-cta{display:block;width:100%;padding:0.9rem;background:transparent;border:1px solid var(--accent);color:var(--accent);border-radius:2px;font-family:'Jost',sans-serif;font-size:10px;letter-spacing:0.25em;text-transform:uppercase;cursor:pointer;transition:all 0.2s;margin-top:1.25rem;text-decoration:none;text-align:center;}
+.g-cta:hover{background:var(--accent);color:var(--bg);}
+
+/* back btn */
+.back-btn{position:fixed;bottom:1.5rem;right:1.5rem;width:44px;height:44px;border-radius:50%;border:1px solid var(--border);background:var(--card-bg);color:var(--text-muted);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:100;}
+.back-btn:hover{color:var(--accent);border-color:var(--accent);}
+
+/* footer */
+.g-footer{padding:2rem;text-align:center;border-top:1px solid var(--border);margin-top:2rem;}
+.g-footer-text{font-size:11px;color:var(--text-muted);font-weight:300;letter-spacing:0.1em;}
+.g-footer-brand{font-family:'Cormorant Garamond',serif;font-size:12px;margin-top:0.4rem;color:var(--text-muted);opacity:0.4;}
+</style>
+</head>
+<body>
+
+<!-- ========== LICENSE GATE ========== -->
+<div id="license-gate" style="display:flex;align-items:center;justify-content:center;min-height:100vh;background:#f4f4f0;">
+  <div style="background:#fff;border-radius:16px;border:0.5px solid #e0e0e0;padding:2.5rem 2rem;max-width:400px;width:100%;text-align:center;box-shadow:0 8px 40px rgba(0,0,0,0.08);">
+    <div style="font-family:'Cormorant Garamond',serif;font-size:2rem;font-weight:300;color:#1a1a1a;margin-bottom:0.25rem;">GuestGuide</div>
+    <div style="font-size:12px;color:#aaa;letter-spacing:0.1em;margin-bottom:2rem;">La tua guida digitale per gli ospiti</div>
+    <div style="font-size:13px;color:#555;margin-bottom:1rem;text-align:left;">Inserisci il codice licenza ricevuto dopo l'acquisto:</div>
+    <input type="text" id="license-input" placeholder="XXXX-XXXX-XXXX"
+      style="width:100%;padding:12px 14px;font-size:15px;font-family:'Jost',sans-serif;letter-spacing:0.15em;text-align:center;text-transform:uppercase;border:0.5px solid #ddd;border-radius:8px;background:#fafafa;color:#1a1a1a;outline:none;margin-bottom:0.75rem;"
+      oninput="this.value=this.value.toUpperCase()" onkeydown="if(event.key==='Enter')activateLicense()">
+    <div id="license-error" style="font-size:12px;color:#c00;margin-bottom:0.75rem;display:none;">Codice non valido. Controlla e riprova.</div>
+    <button onclick="activateLicense()"
+      style="width:100%;padding:0.9rem;background:#1a1a1a;color:#fff;border:none;border-radius:8px;font-family:'Jost',sans-serif;font-size:12px;letter-spacing:0.2em;text-transform:uppercase;cursor:pointer;">
+      Attiva licenza
+    </button>
+    <div style="margin-top:1.5rem;font-size:11px;color:#bbb;">Non hai ancora una licenza? <a href="/cdn-cgi/l/email-protection#96fff8f0f9d6f1e3f3e5e2f1e3fff2f3b8ffe2" style="color:#888;text-decoration:underline;">Acquistala qui</a></div>
+    <div style="margin-top:1rem;"><button onclick="showAdmin()" style="background:none;border:none;font-size:10px;color:#ddd;cursor:pointer;letter-spacing:0.1em;">· · ·</button></div>
+  </div>
+</div>
+
+<!-- ========== ADMIN PANEL ========== -->
+<div id="admin-panel" style="display:none;align-items:center;justify-content:center;min-height:100vh;background:#f4f4f0;">
+  <div style="background:#fff;border-radius:16px;border:0.5px solid #e0e0e0;padding:2rem;max-width:520px;width:100%;box-shadow:0 8px 40px rgba(0,0,0,0.08);">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;">
+      <div style="font-family:'Cormorant Garamond',serif;font-size:1.5rem;font-weight:300;">GuestGuide — Admin</div>
+      <button onclick="hideAdmin()" style="background:none;border:none;font-size:20px;color:#aaa;cursor:pointer;">×</button>
+    </div>
+
+    <div id="admin-auth" style="">
+      <div style="font-size:12px;color:#888;margin-bottom:8px;">Password admin:</div>
+      <input type="password" id="admin-pw-input" placeholder="••••••••"
+        style="width:100%;padding:8px 12px;font-size:13px;border:0.5px solid #ddd;border-radius:8px;background:#fafafa;color:#1a1a1a;outline:none;margin-bottom:8px;"
+        onkeydown="if(event.key==='Enter')checkAdmin()">
+      <div id="admin-pw-error" style="font-size:11px;color:#c00;display:none;margin-bottom:6px;">Password errata.</div>
+      <button onclick="checkAdmin()" style="width:100%;padding:0.7rem;background:#1a1a1a;color:#fff;border:none;border-radius:8px;font-family:'Jost',sans-serif;font-size:11px;letter-spacing:0.15em;text-transform:uppercase;cursor:pointer;">Accedi</button>
+    </div>
+
+    <div id="admin-content" style="display:none;">
+      <div style="margin-bottom:1.5rem;">
+        <div style="font-size:11px;color:#888;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:8px;">Genera nuovo codice</div>
+        <div style="display:flex;gap:8px;">
+          <input type="text" id="admin-prefix" placeholder="Prefisso (es. GG25)" value="GG25" maxlength="4"
+            style="width:90px;padding:8px 10px;font-size:13px;border:0.5px solid #ddd;border-radius:8px;background:#fafafa;color:#1a1a1a;outline:none;text-transform:uppercase;font-family:monospace;">
+          <button onclick="generateCode()" style="flex:1;padding:0.6rem;background:#1a1a1a;color:#fff;border:none;border-radius:8px;font-family:'Jost',sans-serif;font-size:11px;letter-spacing:0.15em;text-transform:uppercase;cursor:pointer;">Genera</button>
+        </div>
+        <div id="generated-code" style="display:none;margin-top:10px;background:#f4f4f0;border-radius:8px;padding:12px;display:flex;align-items:center;justify-content:space-between;">
+          <span id="generated-code-text" style="font-family:monospace;font-size:16px;letter-spacing:0.15em;color:#1a1a1a;font-weight:500;"></span>
+          <div style="display:flex;gap:6px;">
+            <button onclick="copyCode()" style="padding:5px 12px;border:0.5px solid #ddd;border-radius:6px;background:#fff;font-size:11px;cursor:pointer;color:#555;">Copia</button>
+            <button onclick="addCodeToFile()" style="padding:5px 12px;border:0.5px solid #1a1a1a;border-radius:6px;background:#1a1a1a;color:#fff;font-size:11px;cursor:pointer;">+ Aggiungi</button>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div style="font-size:11px;color:#888;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:8px;">Codici attivi (<span id="codes-count">0</span>)</div>
+        <div id="codes-list" style="max-height:240px;overflow-y:auto;display:flex;flex-direction:column;gap:6px;"></div>
+      </div>
+
+      <div style="margin-top:1.25rem;padding-top:1rem;border-top:0.5px solid #eee;">
+        <div style="font-size:11px;color:#aaa;margin-bottom:6px;">⚠ Dopo aver aggiunto codici, scarica il file aggiornato:</div>
+        <button onclick="downloadUpdatedFile()" style="width:100%;padding:0.7rem;background:transparent;color:#1a1a1a;border:1px solid #1a1a1a;border-radius:8px;font-family:'Jost',sans-serif;font-size:11px;letter-spacing:0.15em;text-transform:uppercase;cursor:pointer;">↓ Scarica file aggiornato</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== SETUP MODE ========== -->
+<div id="setup-mode" style="display:none;">
+<div class="setup-wrap">
+
+  <div class="setup-header">
+    <h1>GuestGuide</h1>
+    <p>Configura la tua guida per gli ospiti · Set up your guest guide</p>
+    <div id="slot-bar" style="display:flex;flex-direction:column;align-items:center;gap:8px;margin-top:1.25rem;width:100%;"></div>
+
+  <div class="setup-grid">
+    <!-- LEFT: form -->
+    <div class="setup-panel">
+      <h2>Configurazione</h2>
+
+      <!-- Identità -->
+      <div class="s-section">
+        <div class="s-section-label">Identità · Identity</div>
+        <div class="field">
+          <label>Nome struttura · Property name</label>
+          <input type="text" id="s-name" value="Villa Aurelia" oninput="livePreview()">
+        </div>
+        <div class="field">
+          <label>Tipo struttura · Property type</label>
+          <select id="s-type" onchange="livePreview()" style="width:100%;padding:8px 10px;font-size:13px;font-family:'Jost',sans-serif;border:0.5px solid #ddd;border-radius:8px;background:#fafafa;color:#1a1a1a;outline:none;">
+            <option value="Casa Vacanze · Holiday Home">Casa Vacanze · Holiday Home</option>
+            <option value="B&amp;B · Bed &amp; Breakfast">B&B · Bed &amp; Breakfast</option>
+            <option value="Affittacamere · Rooms for Rent">Affittacamere · Rooms for Rent</option>
+            <option value="Appartamento · Apartment">Appartamento · Apartment</option>
+            <option value="Villa · Villa">Villa · Villa</option>
+            <option value="Hotel · Hotel">Hotel · Hotel</option>
+            <option value="Albergo · Hotel">Albergo · Hotel</option>
+            <option value="Agriturismo · Farmhouse">Agriturismo · Farmhouse</option>
+            <option value="Chalet · Chalet">Chalet · Chalet</option>
+            <option value="Barca · Boat">Barca · Boat</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Luogo · Location</label>
+          <input type="text" id="s-location" value="Catania, Sicilia" oninput="livePreview()">
+        </div>
+        <div class="field">
+          <label>Indirizzo completo (per ricerca POI) · Full address</label>
+          <input type="text" id="s-address" value="Via Etnea 142, Catania" oninput="livePreview()">
+        </div>
+        <div class="field">
+          <label>Logo (opzionale)</label>
+          <div class="logo-upload">
+            <img id="logo-preview-setup" src="" alt="">
+            <span id="logo-setup-label">Clicca per caricare · Click to upload</span>
+            <input type="file" accept="image/*" onchange="loadLogo(this)">
+          </div>
+        </div>
+      </div>
+
+      <!-- Colori -->
+      <div class="s-section">
+        <div class="s-section-label">Colori · Colors</div>
+        <div class="swatch-group">
+          <div class="swatch-label">Sfondo · Background</div>
+          <div class="swatches" id="bg-swatches">
+            <div class="swatch selected" style="background:#1A1714" data-color="#1A1714" onclick="setBg(this)"></div>
+            <div class="swatch" style="background:#0D1B2A" data-color="#0D1B2A" onclick="setBg(this)"></div>
+            <div class="swatch" style="background:#1A2A1E" data-color="#1A2A1E" onclick="setBg(this)"></div>
+            <div class="swatch" style="background:#1E1A2A" data-color="#1E1A2A" onclick="setBg(this)"></div>
+            <div class="swatch" style="background:#F5F0E8" data-color="#F5F0E8" onclick="setBg(this)"></div>
+            <div class="swatch" style="background:#EEF2F0" data-color="#EEF2F0" onclick="setBg(this)"></div>
+            <div class="swatch custom"><input type="color" value="#1A1714" oninput="setBgHex(this.value)"></div>
+          </div>
+        </div>
+        <div class="swatch-group">
+          <div class="swatch-label">Accento · Accent</div>
+          <div class="swatches" id="accent-swatches">
+            <div class="swatch selected" style="background:#C4A96D" data-color="#C4A96D" onclick="setAccent(this)"></div>
+            <div class="swatch" style="background:#7E9B8A" data-color="#7E9B8A" onclick="setAccent(this)"></div>
+            <div class="swatch" style="background:#8B9DC3" data-color="#8B9DC3" onclick="setAccent(this)"></div>
+            <div class="swatch" style="background:#C47E7E" data-color="#C47E7E" onclick="setAccent(this)"></div>
+            <div class="swatch" style="background:#B5977A" data-color="#B5977A" onclick="setAccent(this)"></div>
+            <div class="swatch" style="background:#9BB09B" data-color="#9BB09B" onclick="setAccent(this)"></div>
+            <div class="swatch custom"><input type="color" value="#C4A96D" oninput="setAccentHex(this.value)"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Check-in -->
+      <div class="s-section">
+        <div class="s-section-label">Check-in & Check-out</div>
+        <div class="two-fields">
+          <div class="field"><label>Check-in</label><input type="time" id="s-checkin" value="15:00" oninput="livePreview()"></div>
+          <div class="field"><label>Check-out</label><input type="time" id="s-checkout" value="10:00" oninput="livePreview()"></div>
+        </div>
+        <div class="field">
+          <label>Come accedere · How to access</label>
+          <textarea id="s-access" oninput="livePreview()">Cassetta chiavi codice 4821 · Scala B, Interno 3</textarea>
+        </div>
+      </div>
+
+      <!-- Contatti -->
+      <div class="s-section">
+        <div class="s-section-label">Contatti · Contacts</div>
+        <div class="field"><label>Nome host · Host name</label><input type="text" id="s-host" value="Marco Russo" oninput="livePreview()"></div>
+        <div class="field"><label>Telefono / WhatsApp</label><input type="tel" id="s-phone" value="+39 333 456 7890" oninput="livePreview()"></div>
+        <div class="field"><label>Email (opzionale)</label><input type="text" id="s-email" value="" oninput="livePreview()"></div>
+      </div>
+
+      <!-- WiFi -->
+      <div class="s-section">
+        <div class="s-section-label">WiFi</div>
+        <div class="field"><label>Nome rete · Network name</label><input type="text" id="s-wifiname" value="VillaAurelia_5G" oninput="livePreview()"></div>
+        <div class="field"><label>Password</label><input type="text" id="s-wifipw" value="sicilia2024!" oninput="livePreview()"></div>
+      </div>
+
+      <!-- Istruzioni casa -->
+      <div class="s-section">
+        <div class="s-section-label">Istruzioni & Info · House instructions</div>
+        <div id="instructions-list"></div>
+        <button class="poi-add-btn" onclick="addInstruction()">+ Aggiungi istruzione</button>
+      </div>
+
+      <!-- Regole -->
+      <div class="s-section">
+        <div class="s-section-label">Regole della casa · House rules</div>
+        <div id="rules-list"></div>
+        <button class="poi-add-btn" onclick="addRule('','')">+ Aggiungi regola</button>
+      </div>
+
+      <!-- POI -->
+      <div class="s-section">
+        <div class="s-section-label">Dintorni · Around you</div>
+        <div class="field">
+          <label>Raggio di ricerca (metri) · Search radius</label>
+          <input type="number" id="s-radius" value="600" min="100" max="2000" step="100" oninput="livePreview()">
+        </div>
+
+        <div class="poi-category">
+          <div class="poi-cat-label">
+            🍽 Ristoranti &amp; Bar
+            <button class="poi-fetch-btn" onclick="fetchPOI('restaurant',this)">Cerca con OSM</button>
+          </div>
+          <div class="poi-list" id="poi-restaurant"></div>
+          <button class="poi-add-btn" onclick="addPOI('restaurant')">+ Aggiungi manualmente</button>
+        </div>
+
+        <div class="poi-category">
+          <div class="poi-cat-label">
+            💊 Farmacie
+            <button class="poi-fetch-btn" onclick="fetchPOI('pharmacy',this)">Cerca con OSM</button>
+          </div>
+          <div class="poi-list" id="poi-pharmacy"></div>
+          <button class="poi-add-btn" onclick="addPOI('pharmacy')">+ Aggiungi manualmente</button>
+        </div>
+
+        <div class="poi-category">
+          <div class="poi-cat-label">
+            🛒 Supermercati
+            <button class="poi-fetch-btn" onclick="fetchPOI('supermarket',this)">Cerca con OSM</button>
+          </div>
+          <div class="poi-list" id="poi-supermarket"></div>
+          <button class="poi-add-btn" onclick="addPOI('supermarket')">+ Aggiungi manualmente</button>
+        </div>
+
+        <div class="poi-category">
+          <div class="poi-cat-label">
+            🏛 Attrazioni
+            <button class="poi-fetch-btn" onclick="fetchPOI('attraction',this)">Cerca con OSM</button>
+          </div>
+          <div class="poi-list" id="poi-attraction"></div>
+          <button class="poi-add-btn" onclick="addPOI('attraction')">+ Aggiungi manualmente</button>
+        </div>
+      </div>
+
+      <!-- Lingue -->
+      <div class="s-section">
+        <div class="s-section-label">Lingue attive · Active languages</div>
+        <div style="font-size:11px;color:#aaa;margin-bottom:8px;">Max 6 lingue · Seleziona quelle dei tuoi ospiti</div>
+        <div id="lang-checkboxes" style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;">
+          <label class="lang-pill"><input type="checkbox" value="en" checked onchange="updateLangButtons()"><span>🇬🇧 EN</span></label>
+          <label class="lang-pill"><input type="checkbox" value="fr" onchange="updateLangButtons()"><span>🇫🇷 FR</span></label>
+          <label class="lang-pill"><input type="checkbox" value="es" onchange="updateLangButtons()"><span>🇪🇸 ES</span></label>
+          <label class="lang-pill"><input type="checkbox" value="de" onchange="updateLangButtons()"><span>🇩🇪 DE</span></label>
+          <label class="lang-pill"><input type="checkbox" value="pt" onchange="updateLangButtons()"><span>🇵🇹 PT</span></label>
+          <label class="lang-pill"><input type="checkbox" value="nl" onchange="updateLangButtons()"><span>🇳🇱 NL</span></label>
+          <label class="lang-pill"><input type="checkbox" value="pl" onchange="updateLangButtons()"><span>🇵🇱 PL</span></label>
+          <label class="lang-pill"><input type="checkbox" value="ru" onchange="updateLangButtons()"><span>🇷🇺 RU</span></label>
+          <label class="lang-pill"><input type="checkbox" value="zh" onchange="updateLangButtons()"><span>🇨🇳 ZH</span></label>
+          <label class="lang-pill"><input type="checkbox" value="ja" onchange="updateLangButtons()"><span>🇯🇵 JA</span></label>
+          <label class="lang-pill"><input type="checkbox" value="ko" onchange="updateLangButtons()"><span>🇰🇷 KO</span></label>
+          <label class="lang-pill"><input type="checkbox" value="ar" onchange="updateLangButtons()"><span>🇸🇦 AR</span></label>
+        </div>
+        <div id="lang-limit-warn" style="display:none;font-size:11px;color:#c00;margin-top:6px;">Massimo 6 lingue selezionabili.</div>
+      </div>
+
+      <!-- Note ospiti -->
+      <div class="s-section">
+        <div class="s-section-label">Messaggio di benvenuto · Welcome message</div>
+        <div class="field">
+          <label>Italiano (IT)</label>
+          <textarea id="s-welcome" rows="3" oninput="livePreview()">Benvenuti nella nostra casa! Siamo felici di avervi qui. Non esitate a contattarci per qualsiasi necessità.</textarea>
+        </div>
+      </div>
+
+      <button class="publish-btn" onclick="exportGuide()" style="margin-top:0.5rem;background:transparent;color:#1a1a1a;border:1px solid #1a1a1a;">↓ Esporta guida da condividere</button>
+    </div>
+
+    <!-- RIGHT: preview -->
+    <div class="preview-wrap">
+      <div class="preview-phone" id="preview-phone">
+        <div class="preview-topbar">Anteprima · Preview</div>
+        <div class="preview-scroll" id="preview-inner"></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<!-- ========== GUIDE MODE ========== -->
+<div id="guide-mode">
+  <button class="back-btn" onclick="backToSetup()" title="Torna al setup">✎</button>
+  <button onclick="exportGuide()" style="position:fixed;bottom:1.5rem;left:1.5rem;padding:0.6rem 1.2rem;border-radius:20px;border:1px solid var(--border);background:var(--card-bg);color:var(--accent);font-family:'Jost',sans-serif;font-size:11px;letter-spacing:0.15em;cursor:pointer;z-index:100;">↓ Esporta</button>
+
+  <div id="guide-hero" class="g-hero">
+    <img id="g-logo" class="g-logo" src="" alt="">
+    <div class="g-ornament" id="g-ornament"></div>
+    <div class="g-name" id="g-name"></div>
+    <div class="g-location" id="g-location"></div>
+    <div class="lang-switch" id="guide-lang-switch">
+      <button class="lang-btn active" onclick="setLang('it')">IT</button>
+      <button class="lang-btn" onclick="setLang('en')">EN</button>
+    </div>
+  </div>
+
+  <nav class="g-nav" id="g-nav">
+    <div class="g-nav-item active" data-sec="arrivo" onclick="showSec(this)">
+      <span class="lt">Arrivo</span><span class="le" style="display:none">Arrival</span>
+    </div>
+    <div class="g-nav-item" data-sec="contatti" onclick="showSec(this)">
+      <span class="lt">Contatti</span><span class="le" style="display:none">Contacts</span>
+    </div>
+    <div class="g-nav-item" data-sec="casa" onclick="showSec(this)">
+      <span class="lt">La Casa</span><span class="le" style="display:none">The Home</span>
+    </div>
+    <div class="g-nav-item" data-sec="regole" onclick="showSec(this)">
+      <span class="lt">Regole</span><span class="le" style="display:none">Rules</span>
+    </div>
+    <div class="g-nav-item" data-sec="dintorni" onclick="showSec(this)">
+      <span class="lt">Dintorni</span><span class="le" style="display:none">Around</span>
+    </div>
+  </nav>
+
+  <!-- ARRIVO -->
+  <div class="g-section active" id="sec-arrivo">
+    <div class="g-section-header">
+      <div class="g-label" id="lbl-arrivo"></div>
+      <div class="g-title" id="ttl-arrivo"></div>
+    </div>
+    <div class="two-cards">
+      <div class="g-card">
+        <div class="g-card-label">Check-in</div>
+        <div class="g-card-val" id="g-checkin"></div>
+      </div>
+      <div class="g-card">
+        <div class="g-card-label">Check-out</div>
+        <div class="g-card-val" id="g-checkout"></div>
+      </div>
+    </div>
+    <div class="g-card">
+      <div class="g-card-label" id="lbl-access"></div>
+      <div class="g-card-val" style="font-size:1rem;font-family:'Jost',sans-serif;font-weight:300;" id="g-access"></div>
+    </div>
+    <div class="g-card">
+      <div class="g-card-label">Indirizzo · Address</div>
+      <div class="g-card-val" style="font-size:1rem;font-family:'Jost',sans-serif;font-weight:300;" id="g-address"></div>
+    </div>
+    <a class="g-cta" id="g-maps-btn" href="#" target="_blank" rel="noopener">Google Maps ↗</a>
+    <div class="g-card" style="margin-top:0.75rem;">
+      <div class="g-card-label" id="lbl-welcome"></div>
+      <div class="g-card-val" style="font-size:0.95rem;font-family:'Jost',sans-serif;font-weight:300;line-height:1.6;" id="g-welcome"></div>
+    </div>
+  </div>
+
+  <!-- CONTATTI -->
+  <div class="g-section" id="sec-contatti">
+    <div class="g-section-header">
+      <div class="g-label" id="lbl-contatti"></div>
+      <div class="g-title" id="ttl-contatti"></div>
+    </div>
+    <div id="g-contacts-list"></div>
+    <a class="g-cta" id="g-wa-btn" href="#" target="_blank" rel="noopener">WhatsApp Host ↗</a>
+  </div>
+
+  <!-- CASA -->
+  <div class="g-section" id="sec-casa">
+    <div class="g-section-header">
+      <div class="g-label" id="lbl-casa"></div>
+      <div class="g-title" id="ttl-casa"></div>
+    </div>
+    <div class="g-wifi" id="g-wifi-block">
+      <div class="g-card-label">WiFi</div>
+      <div class="g-wifi-net" id="g-wifiname"></div>
+      <div class="g-card-label" style="margin-top:0.5rem;" id="lbl-pw"></div>
+      <div class="g-wifi-pw" id="g-wifipw"></div>
+    </div>
+    <div id="g-instructions-list"></div>
+  </div>
+
+  <!-- REGOLE -->
+  <div class="g-section" id="sec-regole">
+    <div class="g-section-header">
+      <div class="g-label" id="lbl-regole-label"></div>
+      <div class="g-title" id="ttl-regole"></div>
+    </div>
+    <div id="g-rules-list"></div>
+  </div>
+
+  <!-- DINTORNI -->
+  <div class="g-section" id="sec-dintorni">
+    <div class="g-section-header">
+      <div class="g-label" id="lbl-dintorni"></div>
+      <div class="g-title" id="ttl-dintorni"></div>
+    </div>
+    <div id="g-poi-restaurant-wrap"></div>
+    <div id="g-poi-pharmacy-wrap"></div>
+    <div id="g-poi-supermarket-wrap"></div>
+    <div id="g-poi-attraction-wrap"></div>
+  </div>
+
+  <div class="g-footer">
+    <div class="g-footer-text" id="g-footer-text"></div>
+    <a href="https://guestguide.coomunity.it" target="_blank" style="display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:20px;padding:4px 12px;font-size:10px;color:rgba(255,255,255,0.4);letter-spacing:0.1em;text-decoration:none;margin-top:0.6rem;">Creato con <strong style="color:rgba(255,255,255,0.7);">GuestGuide</strong></a>
+  </div>
+</div>
+
+<script>
+// ===== STATE =====
+let bgColor = '#0D1F2D';
+let accentColor = '#E8A44A';
+let logoData = null;
+let currentLang = 'it';
+let poiData = {restaurant:[], pharmacy:[], supermarket:[], attraction:[]};
+let rules = [
+  {it:'Silenzio dalle 22:00 alle 08:00', en:'Quiet hours from 10 PM to 8 AM'},
+  {it:'Vietato fumare in ambienti chiusi', en:'No smoking indoors'},
+  {it:'Animali ammessi, segnalare al check-in', en:'Pets allowed, notify at check-in'},
+  {it:'Lasciare la casa in ordine alla partenza', en:'Leave the home tidy on departure'}
+];
+let instructions = []; // {title:'', text:''}
+
+// ===== ADMIN =====
+const ADMIN_PASSWORD = 'guestguide2024'; // cambia questa password
+
+let generatedCodeTemp = null;
+
+function showAdmin(){
+  document.getElementById('license-gate').style.display = 'none';
+  document.getElementById('admin-panel').style.display = 'flex';
+  document.getElementById('admin-pw-input').focus();
+}
+function hideAdmin(){
+  document.getElementById('admin-panel').style.display = 'none';
+  document.getElementById('license-gate').style.display = 'flex';
+  document.getElementById('admin-auth').style.display = 'block';
+  document.getElementById('admin-content').style.display = 'none';
+  document.getElementById('admin-pw-input').value = '';
+}
+function checkAdmin(){
+  const pw = document.getElementById('admin-pw-input').value;
+  if(pw === ADMIN_PASSWORD){
+    document.getElementById('admin-auth').style.display = 'none';
+    document.getElementById('admin-content').style.display = 'block';
+    renderCodesList();
+  } else {
+    document.getElementById('admin-pw-error').style.display = 'block';
+  }
+}
+function generateCode(){
+  const prefix = (document.getElementById('admin-prefix').value||'GG25').toUpperCase().slice(0,4);
+  const part1 = Math.random().toString(36).substring(2,6).toUpperCase();
+  const part2 = Math.random().toString(36).substring(2,6).toUpperCase();
+  generatedCodeTemp = `${prefix}-${part1}-${part2}`;
+  const box = document.getElementById('generated-code');
+  document.getElementById('generated-code-text').textContent = generatedCodeTemp;
+  box.style.display = 'flex';
+}
+function copyCode(){
+  if(!generatedCodeTemp) return;
+  navigator.clipboard.writeText(generatedCodeTemp).then(()=>{
+    const btn = event.target;
+    btn.textContent = '✓ Copiato';
+    setTimeout(()=>btn.textContent='Copia', 1500);
+  });
+}
+function addCodeToFile(){
+  if(!generatedCodeTemp) return;
+  if(!VALID_LICENSES.includes(generatedCodeTemp)){
+    VALID_LICENSES.push(generatedCodeTemp);
+  }
+  renderCodesList();
+  const btn = event.target;
+  btn.textContent = '✓ Aggiunto';
+  btn.style.background = '#2a7a2a';
+  setTimeout(()=>{ btn.textContent='+ Aggiungi'; btn.style.background='#1a1a1a'; }, 1500);
+}
+function renderCodesList(){
+  document.getElementById('codes-count').textContent = VALID_LICENSES.length;
+  document.getElementById('codes-list').innerHTML = VALID_LICENSES.map((c,i)=>`
+    <div style="display:flex;align-items:center;justify-content:space-between;background:#f9f9f9;border:0.5px solid #eee;border-radius:6px;padding:8px 12px;">
+      <span style="font-family:monospace;font-size:13px;letter-spacing:0.1em;color:#1a1a1a;">${c}</span>
+      <div style="display:flex;gap:6px;">
+        <button onclick="navigator.clipboard.writeText('${c}').then(()=>{this.textContent='✓';setTimeout(()=>this.textContent='Copia',1200)})" style="padding:3px 10px;border:0.5px solid #ddd;border-radius:4px;background:#fff;font-size:10px;cursor:pointer;color:#555;">Copia</button>
+        <button onclick="VALID_LICENSES.splice(${i},1);renderCodesList()" style="padding:3px 8px;border:0.5px solid #fcc;border-radius:4px;background:#fff8f8;font-size:10px;cursor:pointer;color:#c00;">×</button>
+      </div>
+    </div>`).join('');
+}
+function downloadUpdatedFile(){
+  // Read current file source and replace the VALID_LICENSES array
+  const source = document.documentElement.outerHTML;
+  const newLicenseLine = `const VALID_LICENSES = [\n  '${VALID_LICENSES.join("',\n  '")}',\n  // aggiungi altri codici qui\n];`;
+  const updated = source.replace(/const VALID_LICENSES = \[[\s\S]*?\/\/ aggiungi altri codici qui\n\];/, newLicenseLine);
+  const blob = new Blob([updated], {type:'text/html;charset=utf-8'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'guestguide-master.html';
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+// ===== TRANSLATION SYSTEM =====
+const DEEPL_KEY = '795fe226-048c-44ed-bae5-76f06fb692f8:fx';
+
+function updateLangButtons(){
+  const allChecked = document.querySelectorAll('#lang-checkboxes input:checked');
+  const warn = document.getElementById('lang-limit-warn');
+  if(allChecked.length > 6){
+    event?.target?.checked !== undefined && (event.target.checked = false);
+    if(warn) warn.style.display = 'block';
+    setTimeout(()=>{ if(warn) warn.style.display='none'; }, 2000);
+  } else {
+    if(warn) warn.style.display = 'none';
+  }
+  const checked = Array.from(document.querySelectorAll('#lang-checkboxes input:checked')).map(i=>i.value);
+  ['en','fr','es','de','pt','nl','pl','ru','zh','ja','ko','ar'].forEach(l => {
+    const field = document.getElementById('field-'+l);
+    if(field) field.style.display = checked.includes(l) ? 'block' : 'none';
+  });
+  const sw = document.getElementById('guide-lang-switch');
+  if(sw){
+    sw.innerHTML = '<button class="lang-btn active" onclick="setLang(\'it\')">IT</button>' +
+  checked.map(l => '<button class="lang-btn" onclick="setLang(\'' + l + '\')">' + l.toUpperCase() + '</button>').join('');
+  }
+  livePreview();
+}
+
+async function translateAll(){
+  const btn = document.getElementById('translate-btn');
+  const sourceText = document.getElementById('s-welcome').value;
+  if(!sourceText.trim()){ alert('Inserisci prima il testo in italiano.'); return; }
+  const checked = Array.from(document.querySelectorAll('#lang-checkboxes input:checked')).map(i=>i.value);
+  if(checked.length === 0){ alert('Seleziona almeno una lingua.'); return; }
+  btn.textContent = '⟳ Traduzione in corso...';
+  btn.disabled = true;
+  const langMap = {en:'EN', fr:'FR', es:'ES', de:'DE', zh:'ZH'};
+  for(const lang of checked){
+    const el = document.getElementById('s-welcome-'+lang);
+    if(!el) continue;
+    try {
+      if(lang === 'ar'){
+       const res = await fetch('https://foavmbrrlrpehshvjxfk.supabase.co/functions/v1/translate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text: sourceText, targetLang: 'AR' })
+        });
+        const data = await res.json();
+        el.value = data.translated;
+      } else {
+        const res = await fetch('https://foavmbrrlrpehshvjxfk.supabase.co/functions/v1/translate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text: sourceText, targetLang: langMap[lang] })
+        });
+        const data = await res.json();
+        el.value = data.translated;
+      }
+    } catch(e){
+      el.value = '[Errore - inserisci manualmente]';
+    }
+  }
+  btn.textContent = '✦ Traduci automaticamente';
+  btn.disabled = false;
+  livePreview();
+}
+
+// ===== LICENSE & SLOT SYSTEM =====
+const MAX_SLOTS = 3;
+const SUPABASE_URL = 'https://foavmbrrlrpehshvjxfk.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZvYXZtYnJybHJwZWhzaHZqeGZrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMwNzM2NjMsImV4cCI6MjA4ODY0OTY2M30.-PxTvs4uA9U88QMGrjaJxh_6h3ELxGFGGu3iHsBUvuA';
+
+let currentLicenseCode = null;
+let currentSlot = 0;
+let currentSlotsTotal = 3; // aggiornato dalla licenza
+
+function licenseKey(code){ return 'gg_slots_' + code; }
+
+function getSlots(code){
+  try {
+    const saved = JSON.parse(localStorage.getItem(licenseKey(code)));
+    if(saved && saved.length >= currentSlotsTotal) return saved;
+    // resize if slots changed
+    const base = saved || [];
+    while(base.length < currentSlotsTotal) base.push({});
+    return base;
+  } catch(e){ return Array.from({length: currentSlotsTotal}, () => ({})); }
+}
+
+function saveCurrentSlot(){
+  if(!currentLicenseCode) return;
+  const slots = getSlots(currentLicenseCode);
+  slots[currentSlot] = captureState();
+  localStorage.setItem(licenseKey(currentLicenseCode), JSON.stringify(slots));
+}
+
+function captureState(){
+  const g = id => document.getElementById(id)?.value || '';
+  return {
+    name: g('s-name'), type: g('s-type'), location: g('s-location'),
+    address: g('s-address'), checkin: g('s-checkin'), checkout: g('s-checkout'),
+    access: g('s-access'), host: g('s-host'), phone: g('s-phone'), email: g('s-email'),
+    wifiname: g('s-wifiname'), wifipw: g('s-wifipw'),
+    welcome: g('s-welcome'), welcomeEn: g('s-welcome-en'),
+    bgColor, accentColor, rules, instructions, poiData, logoData
+  };
+}
+
+function restoreState(state){
+  if(!state || !state.name) return;
+  const set = (id, val) => { const el = document.getElementById(id); if(el && val !== undefined) el.value = val; };
+  set('s-name', state.name); set('s-type', state.type); set('s-location', state.location);
+  set('s-address', state.address); set('s-checkin', state.checkin); set('s-checkout', state.checkout);
+  set('s-access', state.access); set('s-host', state.host); set('s-phone', state.phone);
+  set('s-email', state.email); set('s-wifiname', state.wifiname); set('s-wifipw', state.wifipw);
+  set('s-welcome', state.welcome); set('s-welcome-en', state.welcomeEn);
+  if(state.bgColor) bgColor = state.bgColor;
+  if(state.accentColor) accentColor = state.accentColor;
+  if(state.rules) { rules = state.rules; renderRules(); }
+  if(state.instructions) { instructions = state.instructions; renderInstructions(); }
+  if(state.poiData) { poiData = state.poiData; ['restaurant','pharmacy','supermarket','attraction'].forEach(t => renderPOISetup(t)); }
+  if(state.logoData) { logoData = state.logoData; const p = document.getElementById('logo-preview-setup'); if(p){ p.src=logoData; p.style.display='block'; document.getElementById('logo-setup-label').style.display='none'; } }
+  else { logoData = null; const p = document.getElementById('logo-preview-setup'); if(p){ p.style.display='none'; document.getElementById('logo-setup-label').style.display='block'; } }
+  // restore color swatches selection
+  document.querySelectorAll('#bg-swatches .swatch:not(.custom)').forEach(s => s.classList.toggle('selected', s.dataset.color === bgColor));
+  document.querySelectorAll('#accent-swatches .swatch:not(.custom)').forEach(s => s.classList.toggle('selected', s.dataset.color === accentColor));
+  livePreview();
+}
+
+function renderSlotPicker(code){
+  const slots = getSlots(code).slice(0, currentSlotsTotal);
+  const bar = document.getElementById('slot-bar');
+  if(!bar) return;
+  const tierLabel = currentSlotsTotal === 1 ? 'Basic · 1 struttura' : currentSlotsTotal === 2 ? 'Standard · 2 strutture' : 'Pro · 3 strutture';
+  bar.innerHTML = 
+    '<div style="width:100%;text-align:center;font-size:10px;color:#aaa;letter-spacing:0.1em;margin-bottom:8px;text-transform:uppercase;">' + tierLabel + '</div>' +
+    '<div style="display:flex;gap:8px;justify-content:center;width:100%;">' +
+    slots.map((s,i) => `
+      <div onclick="switchSlot(${i})" style="
+        flex:1;min-width:100px;max-width:160px;padding:0.6rem 0.5rem;text-align:center;cursor:pointer;border-radius:8px;
+        background:${i===currentSlot?'#1a1a1a':'#f4f4f0'};
+        color:${i===currentSlot?'#fff':'#888'};
+        border:0.5px solid ${i===currentSlot?'#1a1a1a':'#e0e0e0'};
+        transition:all 0.15s;font-size:11px;font-weight:${i===currentSlot?'500':'400'};">
+        <div style="font-size:9px;letter-spacing:0.1em;text-transform:uppercase;opacity:0.6;margin-bottom:2px;">Casa ${i+1}</div>
+        <div style="font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${s.name||'— vuota —'}</div>
+      </div>`).join('') +
+    '</div>';
+}
+
+function switchSlot(i){
+  saveCurrentSlot();
+  currentSlot = i;
+  const slots = getSlots(currentLicenseCode);
+  // reset defaults for empty slot
+  if(!slots[i] || !slots[i].name){
+    bgColor = '#0D1F2D'; accentColor = '#E8A44A'; logoData = null;
+    rules = [
+      {it:'Silenzio dalle 22:00 alle 08:00', en:'Quiet hours from 10 PM to 8 AM'},
+      {it:'Vietato fumare in ambienti chiusi', en:'No smoking indoors'},
+      {it:'Animali ammessi, segnalare al check-in', en:'Pets allowed, notify at check-in'},
+      {it:'Lasciare la casa in ordine alla partenza', en:'Leave the home tidy on departure'}
+    ];
+    poiData = {restaurant:[], pharmacy:[], supermarket:[], attraction:[]};
+    ['s-name','s-location','s-address','s-host','s-phone','s-email','s-wifiname','s-wifipw'].forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
+    document.getElementById('s-type').value = 'Casa Vacanze · Holiday Home';
+    document.getElementById('s-checkin').value = '15:00';
+    document.getElementById('s-checkout').value = '10:00';
+    document.getElementById('s-access').value = '';
+    document.getElementById('s-welcome').value = '';
+    document.getElementById('s-welcome-en').value = '';
+    const p = document.getElementById('logo-preview-setup'); if(p){ p.style.display='none'; document.getElementById('logo-setup-label').style.display='block'; }
+    document.querySelectorAll('#bg-swatches .swatch:not(.custom)').forEach((s,idx) => s.classList.toggle('selected', idx===0));
+    document.querySelectorAll('#accent-swatches .swatch:not(.custom)').forEach((s,idx) => s.classList.toggle('selected', idx===0));
+    renderRules();
+    instructions = [];
+    renderInstructions();
+    ['restaurant','pharmacy','supermarket','attraction'].forEach(t => renderPOISetup(t));
+  } else {
+    restoreState(slots[i]);
+  }
+  renderSlotPicker(currentLicenseCode);
+  livePreview();
+}
+
+async function activateLicense(){
+  const input = document.getElementById('license-input').value.trim().toUpperCase();
+  const err = document.getElementById('license-error');
+  const btn = document.querySelector('#license-gate button');
+  if(!input){ err.style.display='block'; err.textContent='Inserisci un codice.'; return; }
+
+  btn.textContent = 'Verifica...';
+  btn.disabled = true;
+
+  try {
+    const res = await fetch(`${SUPABASE_URL}/functions/v1/verify-license`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` },
+      body: JSON.stringify({ code: input })
+    });
+    const data = await res.json();
+    if(data.expired){
+      err.style.display = 'block';
+      err.textContent = 'Licenza scaduta. Acquista su guestguide.coomunity.it';
+      btn.textContent = 'Attiva licenza';
+      btn.disabled = false;
+      return;
+    }
+    if(data.valid){
+      currentLicenseCode = input;
+      currentSlotsTotal = data.slots_total || 3;
+      localStorage.setItem('gg_license_code', input);
+      localStorage.setItem('gg_slots_total_' + input, currentSlotsTotal);
+      if(!localStorage.getItem(licenseKey(input))){
+        localStorage.setItem(licenseKey(input), JSON.stringify(Array.from({length: currentSlotsTotal}, () => ({}))));
+      }
+      err.style.display = 'none';
+      showSetup();
+    } else {
+      err.style.display = 'block';
+      err.textContent = 'Codice non valido. Controlla e riprova.';
+      document.getElementById('license-input').style.borderColor = '#c00';
+      setTimeout(()=>{ document.getElementById('license-input').style.borderColor='#ddd'; }, 1500);
+    }
+  } catch(e) {
+    // Fallback offline: se già attivato in precedenza, accetta
+    const stored = localStorage.getItem('gg_license_code');
+    if(stored && stored === input){
+      currentLicenseCode = input; showSetup();
+    } else {
+      err.style.display = 'block';
+      err.textContent = 'Errore di connessione. Riprova tra poco.';
+    }
+  }
+  btn.textContent = 'Attiva licenza';
+  btn.disabled = false;
+}
+
+function showSetup(){
+  document.getElementById('license-gate').style.display = 'none';
+  document.getElementById('setup-mode').style.display = 'block';
+  currentSlot = 0;
+  const slots = getSlots(currentLicenseCode);
+  if(slots[0] && slots[0].name) restoreState(slots[0]);
+  else { renderRules(); renderInstructions(); }
+  renderSlotPicker(currentLicenseCode);
+  livePreview();
+}
+
+function checkLicense(){
+  const stored = localStorage.getItem('gg_license_code');
+  if(stored){
+    currentLicenseCode = stored;
+    currentSlotsTotal = parseInt(localStorage.getItem('gg_slots_total_' + stored)) || 3;
+    if(!localStorage.getItem(licenseKey(stored))){
+      localStorage.setItem(licenseKey(stored), JSON.stringify(Array.from({length: currentSlotsTotal}, () => ({}))));
+    }
+    showSetup();
+  }
+  // else rimane sulla schermata di attivazione
+}
+
+// ===== INIT =====
+window.onload = () => {
+  checkLicense();
+};
+
+// ===== COLORS =====
+function isDark(hex){
+  const r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);
+  return (r*299+g*587+b*114)/1000 < 140;
+}
+function applyColors(){
+  const dark = isDark(bgColor);
+  const textMain = dark?'rgba(249,245,238,0.95)':'rgba(0,0,0,0.92)';
+  const textMuted = dark?'rgba(255,255,255,0.42)':'rgba(0,0,0,0.75)';
+  const cardBg = dark?'rgba(255,255,255,0.04)':'rgba(0,0,0,0.04)';
+  const cardBorder = dark?'rgba(255,255,255,0.1)':'rgba(0,0,0,0.12)';
+  const border = dark?'rgba(255,255,255,0.1)':'rgba(0,0,0,0.12)';
+  document.documentElement.style.setProperty('--bg', bgColor);
+  document.documentElement.style.setProperty('--bg2', shiftColor(bgColor, dark?15:-15));
+  document.documentElement.style.setProperty('--accent', accentColor);
+  document.documentElement.style.setProperty('--text-main', textMain);
+  document.documentElement.style.setProperty('--text-muted', textMuted);
+  document.documentElement.style.setProperty('--card-bg', cardBg);
+  document.documentElement.style.setProperty('--card-border', cardBorder);
+  document.documentElement.style.setProperty('--border', border);
+  const guide = document.getElementById('guide-mode');
+  if(guide.style.display==='block'){
+    guide.style.background = bgColor;
+    guide.style.color = textMain;
+  }
+  // lang active button
+  const activeLang = document.querySelector('.lang-btn.active');
+  if(activeLang){ activeLang.style.background = accentColor; activeLang.style.color = isDark(accentColor)?'#fff':'#111'; }
+  // preview phone bg
+  document.getElementById('preview-phone').style.background = bgColor;
+  // preview topbar contrast
+  const topbar = document.querySelector('.preview-topbar');
+  if(topbar){ topbar.style.color = dark?'rgba(255,255,255,0.3)':'rgba(0,0,0,0.3)'; topbar.style.background = dark?'rgba(0,0,0,0.25)':'rgba(0,0,0,0.07)'; }
+}
+function shiftColor(hex, amount){
+  let r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);
+  r=Math.max(0,Math.min(255,r+amount));g=Math.max(0,Math.min(255,g+amount));b=Math.max(0,Math.min(255,b+amount));
+  return '#'+[r,g,b].map(x=>x.toString(16).padStart(2,'0')).join('');
+}
+function setBg(el){
+  document.querySelectorAll('#bg-swatches .swatch').forEach(e=>e.classList.remove('selected'));
+  el.classList.add('selected'); bgColor=el.dataset.color; livePreview();
+}
+function setBgHex(hex){ bgColor=hex; document.querySelectorAll('#bg-swatches .swatch:not(.custom)').forEach(e=>e.classList.remove('selected')); livePreview(); }
+function setAccent(el){
+  document.querySelectorAll('#accent-swatches .swatch').forEach(e=>e.classList.remove('selected'));
+  el.classList.add('selected'); accentColor=el.dataset.color; livePreview();
+}
+function setAccentHex(hex){ accentColor=hex; document.querySelectorAll('#accent-swatches .swatch:not(.custom)').forEach(e=>e.classList.remove('selected')); livePreview(); }
+
+// ===== LOGO =====
+function loadLogo(input){
+  if(!input.files[0]) return;
+  const r=new FileReader();
+  r.onload=e=>{
+    logoData=e.target.result;
+    const p=document.getElementById('logo-preview-setup');
+    p.src=logoData; p.style.display='block';
+    document.getElementById('logo-setup-label').style.display='none';
+    livePreview();
+  };
+  r.readAsDataURL(input.files[0]);
+}
+
+// ===== RULES =====
+function addRule(it, en){
+  rules.push({it: it||'', en: en||''});
+  renderRules();
+}
+function renderRules(){
+  const el = document.getElementById('rules-list');
+  el.innerHTML = '';
+  rules.forEach((r,i)=>{
+    const div = document.createElement('div');
+    div.className = 'rule-item';
+    div.style.cssText = 'flex-direction:column;gap:4px;background:#f9f9f9;border:0.5px solid #eee;border-radius:6px;padding:8px 10px;margin-bottom:6px;';
+    div.innerHTML = `
+      <div style="display:flex;gap:6px;align-items:center;">
+        <span style="font-size:10px;color:#aaa;min-width:20px;">IT</span>
+        <input type="text" value="${(r.it||'').replace(/"/g,'&quot;')}" placeholder="Regola in italiano" onchange="rules[${i}].it=this.value;livePreview()" style="flex:1;">
+        <button class="rule-remove" onclick="rules.splice(${i},1);renderRules();livePreview()">×</button>
+      </div>
+      <div style="display:flex;gap:6px;align-items:center;">
+        <span style="font-size:10px;color:#aaa;min-width:20px;">EN</span>
+        <input type="text" value="${(r.en||'').replace(/"/g,'&quot;')}" placeholder="Rule in English" onchange="rules[${i}].en=this.value;livePreview()" style="flex:1;">
+      </div>`;
+    el.appendChild(div);
+  });
+  livePreview();
+}
+
+// ===== INSTRUCTIONS =====
+function addInstruction(){
+  instructions.push({title:'', text:''});
+  renderInstructions();
+}
+
+function renderInstructions(){
+  const el = document.getElementById('instructions-list');
+  if(!el) return;
+  el.innerHTML = '';
+  instructions.forEach((ins,i)=>{
+    const div = document.createElement('div');
+    div.style.cssText = 'background:#f9f9f9;border:0.5px solid #eee;border-radius:6px;padding:10px;margin-bottom:8px;';
+    div.innerHTML = `
+      <div style="display:flex;gap:6px;align-items:center;margin-bottom:6px;">
+        <input type="text" value="${(ins.title||'').replace(/"/g,'&quot;')}" placeholder="Titolo (es. Jacuzzi, Sauna...)" 
+          onchange="instructions[${i}].title=this.value" 
+          style="flex:1;padding:6px 8px;font-size:12px;font-family:'Jost',sans-serif;border:0.5px solid #ddd;border-radius:6px;background:#fff;outline:none;">
+        <button onclick="instructions.splice(${i},1);renderInstructions()" 
+          style="width:24px;height:24px;border-radius:50%;background:#eee;border:none;cursor:pointer;font-size:11px;color:#999;flex-shrink:0;">×</button>
+      </div>
+      <textarea placeholder="Descrizione (es. Temperatura massima 38°C, tempo max 20 min...)" 
+        onchange="instructions[${i}].text=this.value"
+        style="width:100%;padding:6px 8px;font-size:12px;font-family:'Jost',sans-serif;border:0.5px solid #ddd;border-radius:6px;background:#fff;outline:none;resize:vertical;min-height:60px;line-height:1.5;">${(ins.text||'').replace(/</g,'&lt;')}</textarea>
+    `;
+    el.appendChild(div);
+  });
+}
+
+// ===== POI =====
+async function fetchPOI(type, btn){
+  const address = document.getElementById('s-address').value.trim();
+  const radiusEl = document.getElementById('s-radius');
+  const radius = parseInt(radiusEl ? radiusEl.value : 600) || 600;
+  if(!address){ alert('Inserisci prima un indirizzo completo.'); return; }
+
+  btn.textContent = 'Ricerca...';
+  btn.disabled = true;
+
+  try {
+    // Step 1: geocode
+    const geoRes = await fetch(`https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(address)}`, { headers: { 'Accept-Language': 'it' } });
+    const geoData = await geoRes.json();
+    if (!geoData.length) { alert('Indirizzo non trovato.'); btn.textContent='Cerca con OSM'; btn.disabled=false; return; }
+    const lat = parseFloat(geoData[0].lat), lon = parseFloat(geoData[0].lon);
+
+    // Step 2: build query
+    const queryMap = {
+      restaurant:  `(node["amenity"="restaurant"](around:${radius},${lat},${lon});node["amenity"="bar"](around:${radius},${lat},${lon});node["amenity"="cafe"](around:${radius},${lat},${lon});node["amenity"="fast_food"](around:${radius},${lat},${lon});way["amenity"="restaurant"](around:${radius},${lat},${lon});way["amenity"="bar"](around:${radius},${lat},${lon});)`,
+      pharmacy:    `(node["amenity"="pharmacy"](around:${radius},${lat},${lon});way["amenity"="pharmacy"](around:${radius},${lat},${lon});)`,
+      supermarket: `(node["shop"="supermarket"](around:${radius},${lat},${lon});way["shop"="supermarket"](around:${radius},${lat},${lon});node["shop"="convenience"](around:${radius},${lat},${lon});way["shop"="convenience"](around:${radius},${lat},${lon});)`,
+      attraction:  `(node["tourism"="attraction"](around:${radius},${lat},${lon});node["tourism"="museum"](around:${radius},${lat},${lon});node["tourism"="viewpoint"](around:${radius},${lat},${lon});way["tourism"="museum"](around:${radius},${lat},${lon});way["tourism"="attraction"](around:${radius},${lat},${lon});node["historic"="monument"](around:${radius},${lat},${lon});node["historic"="castle"](around:${radius},${lat},${lon});)`
+    };
+    const q = `[out:json][timeout:25];${queryMap[type]};out center tags 20;`;
+
+    // Step 3: try endpoints with progressive delay
+    const endpoints = [
+      'https://overpass-api.de/api/interpreter',
+      'https://overpass.kumi.systems/api/interpreter',
+      'https://maps.mail.ru/osm/tools/overpass/api/interpreter'
+    ];
+    let ovData = null;
+    let lastStatus = '';
+    for (let i = 0; i < endpoints.length; i++) {
+      const ep = endpoints[i];
+      if (i > 0) await new Promise(res => setTimeout(res, 1500));
+      try {
+        const r = await fetch(ep, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'User-Agent': 'GuestGuide/1.0 (vacation rental app)'
+          },
+          body: 'data=' + encodeURIComponent(q)
+        });
+        lastStatus += `${ep.split('/')[2]}:${r.status} `;
+        if (r.status === 200) { ovData = await r.json(); break; }
+      } catch(e) { lastStatus += `${ep.split('/')[2]}:ERR `; }
+    }
+    if (!ovData) throw new Error(`Server OSM non raggiungibili (${lastStatus.trim()}).\nAspetta qualche minuto e riprova.`);
+
+    const items = ovData.elements
+      .map(e => {
+        const elat = e.lat ?? e.center?.lat;
+        const elon = e.lon ?? e.center?.lon;
+        if (!elat || !elon) return null;
+        const name = e.tags?.name || e.tags?.['name:it'] || e.tags?.['name:en'] || '';
+        if (!name) return null;
+        const d = Math.round(Math.sqrt(Math.pow((elat-lat)*111320,2)+Math.pow((elon-lon)*111320*Math.cos(lat*Math.PI/180),2)));
+        const mapsUrl = `https://www.google.com/maps/search/${encodeURIComponent(name)}/@${elat},${elon},17z`;
+        return { name, type: e.tags?.amenity||e.tags?.shop||e.tags?.tourism||e.tags?.historic||'', dist:d, url:mapsUrl, lat:elat, lon:elon };
+      })
+      .filter(Boolean)
+      .filter((e,i,arr) => arr.findIndex(x=>x.name===e.name)===i)
+      .sort((a,b)=>a.dist-b.dist)
+      .slice(0,10);
+
+    if (!items.length) alert(`Nessun risultato nel raggio di ${radius}m. Prova ad aumentare il raggio.`);
+    poiData[type] = items;
+    renderPOISetup(type);
+    livePreview();
+
+  } catch(err) {
+    alert(err.message);
+  }
+  btn.textContent = 'Cerca con OSM';
+  btn.disabled = false;
+}
+
+function renderPOISetup(type){
+  const el = document.getElementById(`poi-${type}`);
+  el.innerHTML='';
+  poiData[type].forEach((p,i)=>{
+    const div=document.createElement('div');
+    div.className='poi-item';
+    div.innerHTML=`<input type="text" value="${p.name.replace(/"/g,'&quot;')}" onchange="poiData['${type}'][${i}].name=this.value;livePreview()"><button class="poi-remove" onclick="poiData['${type}'].splice(${i},1);renderPOISetup('${type}');livePreview()">×</button>`;
+    el.appendChild(div);
+  });
+}
+
+function addPOI(type){
+  poiData[type].push({name:'Nuovo posto', type:'', dist:0, url:'', lat:0, lon:0});
+  renderPOISetup(type);
+  livePreview();
+}
+
+// ===== LIVE PREVIEW =====
+function livePreview(){
+  applyColors();
+  const dark = isDark(bgColor);
+  const tm = dark?'rgba(249,245,238,0.92)':'rgba(0,0,0,0.92)';
+  const mu = dark?'rgba(255,255,255,0.42)':'rgba(0,0,0,0.75)';
+  const cb = dark?'rgba(255,255,255,0.1)':'rgba(0,0,0,0.12)';
+  const cbg = dark?'rgba(255,255,255,0.04)':'rgba(0,0,0,0.04)';
+
+  const name = document.getElementById('s-name').value||'La tua struttura';
+  const propType = document.getElementById('s-type')?.value||'Casa Vacanze · Holiday Home';
+  const location = document.getElementById('s-location').value||'Città';
+  const checkin = document.getElementById('s-checkin').value||'15:00';
+  const checkout = document.getElementById('s-checkout').value||'10:00';
+  const host = document.getElementById('s-host').value||'Host';
+  const phone = document.getElementById('s-phone').value||'';
+  const wifiname = document.getElementById('s-wifiname').value||'---';
+  const wifipw = document.getElementById('s-wifipw').value||'---';
+
+  const poiHtml = (type) => poiData[type].slice(0,3).map(p=>`
+    <div style="display:flex;justify-content:space-between;padding:0.6rem 0.75rem;background:${cbg};border:1px solid ${cb};border-radius:2px;margin-bottom:0.4rem;">
+      <span style="font-size:11px;color:${tm};">${p.name}</span>
+      <span style="font-size:10px;color:${mu};">${p.dist?p.dist+'m':''}</span>
+    </div>`).join('');
+
+  document.getElementById('preview-inner').innerHTML = `
+    <div style="text-align:center;padding:1.5rem 1rem 1rem;border-bottom:1px solid ${cb};">
+      ${logoData?`<img src="${logoData}" style="max-height:28px;max-width:90px;object-fit:contain;margin:0 auto 0.5rem;display:block;">`:''}
+      <div style="font-size:8px;letter-spacing:0.3em;text-transform:uppercase;color:${accentColor};margin-bottom:0.4rem;">${propType}</div>
+      <div style="font-family:'Cormorant Garamond',serif;font-size:1.5rem;font-weight:300;color:${tm};">${name}</div>
+      <div style="font-size:10px;font-weight:300;letter-spacing:0.15em;color:${mu};margin-top:2px;">${location}</div>
+    </div>
+    <div style="padding:1rem;">
+      <div style="font-size:8px;letter-spacing:0.25em;text-transform:uppercase;color:${accentColor};margin-bottom:0.5rem;">Check-in · Check-out</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem;margin-bottom:0.5rem;">
+        <div style="background:${cbg};border:1px solid ${cb};border-radius:2px;padding:0.75rem;">
+          <div style="font-size:8px;text-transform:uppercase;letter-spacing:0.15em;color:${mu};margin-bottom:3px;">Check-in</div>
+          <div style="font-family:'Cormorant Garamond',serif;font-size:1.1rem;color:${tm};">${checkin}</div>
+        </div>
+        <div style="background:${cbg};border:1px solid ${cb};border-radius:2px;padding:0.75rem;">
+          <div style="font-size:8px;text-transform:uppercase;letter-spacing:0.15em;color:${mu};margin-bottom:3px;">Check-out</div>
+          <div style="font-family:'Cormorant Garamond',serif;font-size:1.1rem;color:${tm};">${checkout}</div>
+        </div>
+      </div>
+      <div style="font-size:8px;letter-spacing:0.25em;text-transform:uppercase;color:${accentColor};margin:0.75rem 0 0.4rem;">Contatti</div>
+      <div style="display:flex;align-items:center;gap:0.5rem;padding:0.6rem 0.75rem;background:${cbg};border:1px solid ${cb};border-radius:2px;margin-bottom:0.4rem;">
+        <div style="width:7px;height:7px;border-radius:50%;background:${accentColor};flex-shrink:0;"></div>
+        <div><div style="font-size:11px;color:${tm};">${host}</div><div style="font-size:9px;color:${mu};">${phone}</div></div>
+      </div>
+      <div style="font-size:8px;letter-spacing:0.25em;text-transform:uppercase;color:${accentColor};margin:0.75rem 0 0.4rem;">WiFi</div>
+      <div style="background:${cbg};border:1px solid ${accentColor};border-radius:2px;padding:0.75rem;text-align:center;">
+        <div style="font-family:'Cormorant Garamond',serif;font-size:1rem;color:${tm};margin-bottom:4px;">${wifiname}</div>
+        <div style="font-family:monospace;font-size:0.85rem;color:${accentColor};">${wifipw}</div>
+      </div>
+      ${poiData.restaurant.length?`<div style="font-size:8px;letter-spacing:0.25em;text-transform:uppercase;color:${accentColor};margin:0.75rem 0 0.4rem;">Ristoranti</div>${poiHtml('restaurant')}`:''}
+      ${poiData.pharmacy.length?`<div style="font-size:8px;letter-spacing:0.25em;text-transform:uppercase;color:${accentColor};margin:0.75rem 0 0.4rem;">Farmacie</div>${poiHtml('pharmacy')}`:''}
+    </div>
+  `;
+}
+
+// ===== PUBLISH =====
+function publishGuide(){
+  saveCurrentSlot();
+  renderSlotPicker(currentLicenseCode);
+  applyColors();
+
+  const name = document.getElementById('s-name').value||'La tua struttura';
+  const location = document.getElementById('s-location').value||'';
+  const address = document.getElementById('s-address').value||'';
+  const checkin = document.getElementById('s-checkin').value||'15:00';
+  const checkout = document.getElementById('s-checkout').value||'10:00';
+  const access = document.getElementById('s-access').value||'';
+  const host = document.getElementById('s-host').value||'Host';
+  const phone = document.getElementById('s-phone').value||'';
+  const email = document.getElementById('s-email').value||'';
+  const wifiname = document.getElementById('s-wifiname').value||'';
+  const wifipw = document.getElementById('s-wifipw').value||'';
+  const welcomeIt = document.getElementById('s-welcome').value||'';
+  const welcomeEn = document.getElementById('s-welcome-en').value||'';
+
+  // Logo
+  const logoEl = document.getElementById('g-logo');
+  if(logoData){ logoEl.src=logoData; logoEl.style.display='block'; } else { logoEl.style.display='none'; }
+
+  document.getElementById('g-ornament').textContent = document.getElementById('s-type')?.value || 'Casa Vacanze · Holiday Home';
+  document.getElementById('g-name').textContent = name;
+  document.getElementById('g-location').textContent = location;
+  document.getElementById('g-checkin').textContent = checkin;
+  document.getElementById('g-checkout').textContent = checkout;
+  document.getElementById('g-access').textContent = access;
+  document.getElementById('g-address').textContent = address;
+  document.getElementById('g-wifiname').textContent = wifiname;
+  document.getElementById('g-wifipw').textContent = wifipw;
+
+  // Instructions
+  const instrList = document.getElementById('g-instructions-list');
+  instrList.innerHTML = instructions.map(ins => ins.title || ins.text ? `
+    <div class="g-card" style="margin-top:0.75rem;">
+      ${ins.title ? `<div class="g-card-label lt">${ins.title}</div>` : ''}
+      <div style="font-size:0.9rem;font-family:'Jost',sans-serif;font-weight:300;line-height:1.6;margin-top:4px;">
+        <span class="lt">${ins.text||''}</span>
+        <span class="le" style="display:none">${ins.text||''}</span>
+      </div>
+    </div>` : '').join('');
+
+  // Maps link
+  const mapsBtn = document.getElementById('g-maps-btn');
+  mapsBtn.href = `https://www.google.com/maps/search/${encodeURIComponent(address)}`;
+
+  // WhatsApp
+  const waBtn = document.getElementById('g-wa-btn');
+  waBtn.href = `https://wa.me/${phone.replace(/\D/g,'')}`;
+
+  // Contacts
+  const contactsList = document.getElementById('g-contacts-list');
+  contactsList.innerHTML = `
+    <div class="g-contact">
+      <div class="g-contact-dot"></div>
+      <div>
+        <div class="g-contact-name">${host}</div>
+        <div class="g-contact-detail">${phone}</div>
+      </div>
+    </div>
+    ${email?`<div class="g-contact"><div class="g-contact-dot"></div><div><div class="g-contact-name">Email</div><div class="g-contact-detail">${email}</div></div></div>`:''}
+    <div class="g-contact">
+      <div class="g-contact-dot"></div>
+      <div>
+        <div class="g-contact-name lt">Emergenze</div>
+        <div class="g-contact-name le" style="display:none">Emergencies</div>
+        <div class="g-contact-detail">112 · Carabinieri: 112 · Ambulanza: 118</div>
+      </div>
+    </div>
+  `;
+
+  // Rules
+  const rulesList = document.getElementById('g-rules-list');
+  rulesList.innerHTML = rules.map((r,i)=>`
+    <div class="g-rule">
+      <div class="g-rule-num">${String(i+1).padStart(2,'0')}</div>
+      <div class="g-rule-text">
+        <span class="lt">${r.it||r.en||''}</span>
+        <span class="le" style="display:none">${r.en||r.it||''}</span>
+      </div>
+    </div>
+  `).join('');
+
+  // Welcome message
+  document.getElementById('g-welcome').innerHTML = `<span class="lt">${welcomeIt}</span><span class="le" style="display:none">${welcomeEn}</span>`;
+
+  // POI sections
+  const poiCats = [
+    {key:'restaurant', labelIt:'Ristoranti & Bar', labelEn:'Restaurants & Bars', id:'g-poi-restaurant-wrap'},
+    {key:'pharmacy', labelIt:'Farmacie', labelEn:'Pharmacies', id:'g-poi-pharmacy-wrap'},
+    {key:'supermarket', labelIt:'Supermercati', labelEn:'Supermarkets', id:'g-poi-supermarket-wrap'},
+    {key:'attraction', labelIt:'Attrazioni', labelEn:'Attractions', id:'g-poi-attraction-wrap'},
+  ];
+  const addr = document.getElementById('s-address').value||'';
+  poiCats.forEach(cat=>{
+    const wrap = document.getElementById(cat.id);
+    if(!poiData[cat.key].length){ wrap.innerHTML=''; return; }
+    wrap.innerHTML = `
+      <div class="poi-section-label"><span class="lt">${cat.labelIt}</span><span class="le" style="display:none">${cat.labelEn}</span></div>
+      ${poiData[cat.key].map((p,i)=>{
+        const link = (p.lat && p.lon)
+          ? `https://www.google.com/maps/search/${encodeURIComponent(p.name)}/@${p.lat},${p.lon},17z`
+          : `https://www.google.com/maps/search/${encodeURIComponent(p.name+' '+addr)}`;
+        return `
+        <div class="g-poi" data-url="${link.replace(/"/g,'&quot;')}" onclick="window.open(this.closest('[data-url]').dataset.url,'_blank')">
+          <div>
+            <div class="g-poi-name">${p.name}</div>
+            <div class="g-poi-type">${p.type||''}</div>
+          </div>
+          <div class="g-poi-right">
+            ${p.dist?`<div class="g-poi-dist">${p.dist}m</div>`:''}
+            <div class="g-poi-link">Maps ↗</div>
+          </div>
+        </div>`;
+      }).join('')}
+    `;
+  });
+
+  // i18n labels
+  setLang('it');
+
+  // Switch modes
+  document.getElementById('setup-mode').style.display='none';
+  document.getElementById('guide-mode').style.display='block';
+  applyColors();
+  window.scrollTo(0,0);
+}
+
+// ===== GUIDE CONTROLS =====
+function backToSetup(){
+  document.getElementById('guide-mode').style.display='none';
+  document.getElementById('setup-mode').style.display='block';
+  window.scrollTo(0,0);
+}
+
+function showSec(el){
+  document.querySelectorAll('.g-nav-item').forEach(n=>{n.classList.remove('active');n.style.borderBottomColor='transparent';n.style.color='';});
+  document.querySelectorAll('.g-section').forEach(s=>s.classList.remove('active'));
+  el.classList.add('active');
+  el.style.color = accentColor;
+  el.style.borderBottomColor = accentColor;
+  document.getElementById('sec-'+el.dataset.sec).classList.add('active');
+}
+
+// ===== EXPORT =====
+function exportGuide(){
+  const state = captureState();
+  const name = state.name || 'guida-ospiti';
+  const slug = name.toLowerCase().replace(/\s+/g,'-').replace(/[^a-z0-9-]/g,'');
+
+  // Build POI HTML for each category
+  const poiCats = [
+    {key:'restaurant', it:'Ristoranti & Bar', en:'Restaurants & Bars'},
+    {key:'pharmacy',   it:'Farmacie',         en:'Pharmacies'},
+    {key:'supermarket',it:'Supermercati',      en:'Supermarkets'},
+    {key:'attraction', it:'Attrazioni',        en:'Attractions'},
+  ];
+
+  const dark = isDark(state.bgColor||'#1A1714');
+  const tm = dark?'rgba(249,245,238,0.95)':'rgba(0,0,0,0.92)';
+  const mu = dark?'rgba(255,255,255,0.42)':'rgba(0,0,0,0.75)';
+  const cb = dark?'rgba(255,255,255,0.1)':'rgba(0,0,0,0.12)';
+  const cbg = dark?'rgba(255,255,255,0.04)':'rgba(0,0,0,0.04)';
+  const ac = state.accentColor||'#C4A96D';
+  const bg = state.bgColor||'#1A1714';
+  const acText = isDark(ac) ? '#fff' : '#111'; // pre-calcolato per evitare apici annidati
+
+  const poiSections = poiCats.map(cat => {
+    const items = (state.poiData||{})[cat.key]||[];
+    if(!items.length) return '';
+    const addr = state.address||'';
+    return `
+    <div class="poi-section-label"><span class="lt">${cat.it}</span><span class="le" style="display:none">${cat.en}</span></div>
+    ${items.map(p => {
+      const link = (p.lat&&p.lon)
+        ? `https://www.google.com/maps/search/${encodeURIComponent(p.name)}/@${p.lat},${p.lon},17z`
+        : `https://www.google.com/maps/search/${encodeURIComponent(p.name+' '+addr)}`;
+      return `<div class="g-poi" data-url="${link.replace(/"/g,'&quot;')}" onclick="window.open(this.closest('[data-url]').dataset.url,'_blank')">
+        <div><div class="g-poi-name">${p.name}</div><div class="g-poi-type">${p.type||''}</div></div>
+        <div class="g-poi-right">${p.dist?`<div class="g-poi-dist">${p.dist}m</div>`:''}<div class="g-poi-link">Maps &#8599;</div></div>
+      </div>`;
+    }).join('')}`;
+  }).join('');
+
+  const rulesHtml = (state.rules||[]).map((r,i)=>`
+    <div class="g-rule">
+      <div class="g-rule-num">${String(i+1).padStart(2,'0')}</div>
+      <div class="g-rule-text">
+        <span class="lt">${r.it||r.en||''}</span>
+        <span class="le" style="display:none">${r.en||r.it||''}</span>
+      </div>
+    </div>`).join('');
+
+  const waHref = `https://wa.me/${(state.phone||'').replace(/\D/g,'')}`;
+  const mapsHref = `https://www.google.com/maps/search/${encodeURIComponent(state.address||'')}`;
+
+  const html = `<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>${state.name||'Guest Guide'}</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{--bg:${bg};--accent:${ac};--text-main:${tm};--text-muted:${mu};--card-bg:${cbg};--card-border:${cb};--border:${cb};}
+body{font-family:'Jost',sans-serif;background:var(--bg);color:var(--text-main);min-height:100vh;}
+.g-hero{padding:2.5rem 1.5rem 2rem;text-align:center;border-bottom:1px solid var(--border);}
+.g-ornament{font-size:10px;letter-spacing:.35em;text-transform:uppercase;color:var(--accent);margin-bottom:.75rem;}
+.g-name{font-family:'Cormorant Garamond',serif;font-size:2.4rem;font-weight:300;line-height:1.1;margin-bottom:.3rem;}
+.g-location{font-size:12px;font-weight:300;letter-spacing:.2em;margin-bottom:1.25rem;color:var(--text-muted);}
+.g-logo{max-height:44px;max-width:120px;object-fit:contain;margin:0 auto 1rem;display:block;}
+.lang-switch{display:inline-flex;border:1px solid var(--border);border-radius:2px;overflow:hidden;}
+.lang-btn{padding:6px 16px;font-family:'Jost',sans-serif;font-size:11px;border:none;cursor:pointer;background:transparent;color:var(--text-muted);}
+.lang-btn.active{background:${ac};color:${acText};}
+.g-nav{display:flex;overflow-x:auto;border-bottom:1px solid var(--border);scrollbar-width:none;justify-content:center;}
+.g-nav::-webkit-scrollbar{display:none;}
+.g-nav-item{flex-shrink:0;padding:.9rem 1.1rem;font-size:10px;letter-spacing:.18em;text-transform:uppercase;cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;color:var(--text-muted);}
+.g-nav-item.active{border-bottom-color:${ac};color:${ac};}
+.g-section{display:none;padding:1.75rem 1.25rem;max-width:560px;margin:0 auto;}
+.g-section.active{display:block;}
+.g-section-header{margin-bottom:1.5rem;padding-bottom:.75rem;border-bottom:1px solid var(--border);}
+.g-label{font-size:9px;letter-spacing:.3em;text-transform:uppercase;margin-bottom:.4rem;color:${ac};}
+.g-title{font-family:'Cormorant Garamond',serif;font-size:1.8rem;font-weight:300;}
+.g-card{background:var(--card-bg);border:1px solid var(--card-border);border-radius:2px;padding:1.25rem;margin-bottom:.75rem;}
+.g-card-label{font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--text-muted);margin-bottom:5px;}
+.g-card-val{font-family:'Cormorant Garamond',serif;font-size:1.3rem;font-weight:400;}
+.two-cards{display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-bottom:.75rem;}
+.g-contact{display:flex;align-items:center;gap:.75rem;padding:1rem 1.25rem;background:var(--card-bg);border:1px solid var(--card-border);border-radius:2px;margin-bottom:.75rem;}
+.g-contact-dot{width:9px;height:9px;border-radius:50%;background:${ac};flex-shrink:0;}
+.g-contact-name{font-size:14px;}
+.g-contact-detail{font-size:11px;color:var(--text-muted);margin-top:2px;font-weight:300;}
+.g-wifi{background:var(--card-bg);border:1px solid ${ac};border-radius:2px;padding:1.5rem;text-align:center;margin-bottom:.75rem;}
+.g-wifi-net{font-family:'Cormorant Garamond',serif;font-size:1.3rem;margin-bottom:.75rem;}
+.g-wifi-pw{font-family:monospace;font-size:1rem;letter-spacing:.08em;color:${ac};}
+.g-rule{display:flex;gap:1rem;padding:.9rem 0;border-bottom:1px solid var(--border);align-items:flex-start;}
+.g-rule-num{font-family:'Cormorant Garamond',serif;font-size:1.3rem;color:${ac};opacity:.4;flex-shrink:0;min-width:22px;line-height:1;}
+.g-rule-text{font-size:13px;color:var(--text-muted);line-height:1.6;font-weight:300;}
+.poi-section-label{font-size:9px;letter-spacing:.25em;text-transform:uppercase;margin:1rem 0 .5rem;color:${ac};opacity:.8;}
+.g-poi{display:flex;justify-content:space-between;align-items:flex-start;padding:.9rem 1.25rem;background:var(--card-bg);border:1px solid var(--card-border);border-radius:2px;margin-bottom:.6rem;cursor:pointer;}
+.g-poi:hover{border-color:${ac};}
+.g-poi-name{font-size:13px;}
+.g-poi-type{font-size:10px;color:var(--text-muted);margin-top:2px;font-weight:300;}
+.g-poi-right{text-align:right;flex-shrink:0;}
+.g-poi-dist{font-size:11px;color:var(--text-muted);}
+.g-poi-link{font-size:10px;color:${ac};margin-top:3px;letter-spacing:.08em;}
+.g-cta{display:block;width:100%;padding:.9rem;background:transparent;border:1px solid ${ac};color:${ac};border-radius:2px;font-family:'Jost',sans-serif;font-size:10px;letter-spacing:.25em;text-transform:uppercase;cursor:pointer;margin-top:1.25rem;text-decoration:none;text-align:center;}
+.g-footer{padding:2rem;text-align:center;border-top:1px solid var(--border);margin-top:2rem;}
+.g-footer-text{font-size:11px;color:var(--text-muted);font-weight:300;letter-spacing:.1em;}
+.g-footer-brand{font-family:'Cormorant Garamond',serif;font-size:12px;margin-top:.4rem;color:var(--text-muted);opacity:.4;}
+</style>
+</head>
+<body>
+<div class="g-hero">
+  ${state.logoData?`<img src="${state.logoData}" class="g-logo" alt="logo">`:''}
+  <div class="g-ornament">${state.type||'Casa Vacanze &middot; Holiday Home'}</div>
+  <div class="g-name">${state.name||''}</div>
+  <div class="g-location">${state.location||''}</div>
+  <div class="lang-switch">
+    <button class="lang-btn active" id="btn-it" onclick="setLang('it')">IT</button>
+    <button class="lang-btn" id="btn-en" onclick="setLang('en')">EN</button>
+  </div>
+</div>
+<nav class="g-nav">
+  <div class="g-nav-item active" data-sec="arrivo" onclick="showSec(this)"><span class="lt">Arrivo</span><span class="le" style="display:none">Arrival</span></div>
+  <div class="g-nav-item" data-sec="contatti" onclick="showSec(this)"><span class="lt">Contatti</span><span class="le" style="display:none">Contacts</span></div>
+  <div class="g-nav-item" data-sec="casa" onclick="showSec(this)"><span class="lt">La Casa</span><span class="le" style="display:none">The Home</span></div>
+  <div class="g-nav-item" data-sec="regole" onclick="showSec(this)"><span class="lt">Regole</span><span class="le" style="display:none">Rules</span></div>
+  <div class="g-nav-item" data-sec="dintorni" onclick="showSec(this)"><span class="lt">Dintorni</span><span class="le" style="display:none">Around</span></div>
+</nav>
+
+<div class="g-section active" id="sec-arrivo">
+  <div class="g-section-header"><div class="g-label lt">Check-in &middot; Check-out</div><div class="g-title lt">Il tuo arrivo</div><div class="g-title le" style="display:none">Your arrival</div></div>
+  <div class="two-cards">
+    <div class="g-card"><div class="g-card-label">Check-in</div><div class="g-card-val">${state.checkin||'15:00'}</div></div>
+    <div class="g-card"><div class="g-card-label">Check-out</div><div class="g-card-val">${state.checkout||'10:00'}</div></div>
+  </div>
+  <div class="g-card"><div class="g-card-label lt">Come accedere</div><div class="g-card-label le" style="display:none">How to access</div><div class="g-card-val" style="font-size:1rem;font-family:'Jost',sans-serif;font-weight:300;">${state.access||''}</div></div>
+  <div class="g-card"><div class="g-card-label">Indirizzo &middot; Address</div><div class="g-card-val" style="font-size:1rem;font-family:'Jost',sans-serif;font-weight:300;">${state.address||''}</div></div>
+  <a class="g-cta" href="${mapsHref}" target="_blank">Google Maps &#8599;</a>
+  <div class="g-card" style="margin-top:.75rem;">
+    <div class="g-card-label lt">Benvenuti</div><div class="g-card-label le" style="display:none">Welcome</div>
+    <div style="font-size:.95rem;font-family:'Jost',sans-serif;font-weight:300;line-height:1.6;margin-top:4px;">
+      <span class="lt">${state.welcome||''}</span><span class="le" style="display:none">${state.welcomeEn||''}</span>
+    </div>
+  </div>
+</div>
+
+<div class="g-section" id="sec-contatti">
+  <div class="g-section-header"><div class="g-label lt">Sempre disponibili</div><div class="g-label le" style="display:none">Always available</div><div class="g-title lt">Contatti</div><div class="g-title le" style="display:none">Contacts</div></div>
+  <div class="g-contact"><div class="g-contact-dot"></div><div><div class="g-contact-name">${state.host||''}</div><div class="g-contact-detail">${state.phone||''}</div></div></div>
+  ${state.email?`<div class="g-contact"><div class="g-contact-dot"></div><div><div class="g-contact-name">Email</div><div class="g-contact-detail">${state.email}</div></div></div>`:''}
+  <div class="g-contact"><div class="g-contact-dot"></div><div><div class="g-contact-name lt">Emergenze</div><div class="g-contact-name le" style="display:none">Emergencies</div><div class="g-contact-detail">112 &middot; Ambulanza: 118</div></div></div>
+  <a class="g-cta" href="${waHref}" target="_blank">WhatsApp Host &#8599;</a>
+</div>
+
+<div class="g-section" id="sec-casa">
+  <div class="g-section-header"><div class="g-label lt">Accesso & Comfort</div><div class="g-label le" style="display:none">Access & Comfort</div><div class="g-title lt">La casa</div><div class="g-title le" style="display:none">The home</div></div>
+  <div class="g-wifi">
+    <div class="g-card-label">WiFi</div>
+    <div class="g-wifi-net">${state.wifiname||''}</div>
+    <div class="g-card-label lt">Password</div><div class="g-card-label le" style="display:none">Password</div>
+    <div class="g-wifi-pw">${state.wifipw||''}</div>
+  </div>
+  ${(state.instructions||[]).map(ins => ins.title||ins.text ? `
+  <div class="g-card" style="margin-top:0.75rem;">
+    ${ins.title ? `<div class="g-card-label">${ins.title}</div>` : ''}
+    <div style="font-size:0.9rem;font-family:'Jost',sans-serif;font-weight:300;line-height:1.6;margin-top:4px;">
+      <span class="lt">${ins.text||''}</span>
+      <span class="le" style="display:none">${ins.text||''}</span>
+    </div>
+  </div>` : '').join('')}
+</div>
+
+<div class="g-section" id="sec-regole">
+  <div class="g-section-header"><div class="g-label lt">Per tutti</div><div class="g-label le" style="display:none">For everyone</div><div class="g-title lt">Regole della casa</div><div class="g-title le" style="display:none">House rules</div></div>
+  ${rulesHtml}
+</div>
+
+<div class="g-section" id="sec-dintorni">
+  <div class="g-section-header"><div class="g-label lt">Scelti dall'host</div><div class="g-label le" style="display:none">Host's picks</div><div class="g-title lt">Dintorni</div><div class="g-title le" style="display:none">Around you</div></div>
+  ${poiSections}
+</div>
+
+<div class="g-footer">
+  <div class="g-footer-text lt">Buona permanenza</div>
+  <div class="g-footer-text le" style="display:none">We wish you a wonderful stay</div>
+  <div class="g-footer-brand">GuestGuide</div>
+</div>
+
+<script>
+function showSec(el){
+  document.querySelectorAll('.g-nav-item').forEach(n=>{n.classList.remove('active');n.style.color='';n.style.borderBottomColor='transparent';});
+  document.querySelectorAll('.g-section').forEach(s=>s.classList.remove('active'));
+  el.classList.add('active');
+  el.style.color='${ac}';
+  el.style.borderBottomColor='${ac}';
+  document.getElementById('sec-'+el.dataset.sec).classList.add('active');
+}
+function setLang(lang){
+  document.querySelectorAll('.lt').forEach(e=>e.style.display=lang==='it'?'':'none');
+  document.querySelectorAll('.le').forEach(e=>e.style.display=lang==='en'?'':'none');
+  document.querySelectorAll('.lang-btn').forEach(b=>{
+    const active=(b.id==='btn-it'&&lang==='it')||(b.id==='btn-en'&&lang==='en');
+    b.classList.toggle('active',active);
+    b.style.background=active?'${ac}':'transparent';
+    b.style.color=active?'${acText}':'';
+  });
+}
+${'<'}/script>
+${'<'}/body>
+${'<'}/html>`;
+
+  // Sostituisci caratteri speciali con entità HTML usando codepoint Unicode
+  const safeHtml = html
+    .replace(/\u00B7/g, '&middot;')      // &middot;
+    .replace(/\u2197/g, '&#8599;')       // &#8599;
+    .replace(/\u2190/g, '&#8592;')       // &#8592;
+    .replace(/\u2192/g, '&#8594;')       // &#8594;
+    .replace(/\u2193/g, '&#8595;')       // &#8595;
+    .replace(/\u2191/g, '&#8593;')       // &#8593;
+    .replace(/\u00E9/g, '&eacute;')      // é
+    .replace(/\u00E8/g, '&egrave;')      // è
+    .replace(/\u00E0/g, '&agrave;')      // à
+    .replace(/\u00F9/g, '&ugrave;')      // ù
+    .replace(/\u00EC/g, '&igrave;')      // ì
+    .replace(/\u00F2/g, '&ograve;')      // ò
+    .replace(/\u00E4/g, '&auml;')        // ä
+    .replace(/\u00F6/g, '&ouml;')        // ö
+    .replace(/\u00FC/g, '&uuml;')        // ü
+    .replace(/\u00DF/g, '&szlig;')       // ß
+    .replace(/\u00F1/g, '&ntilde;')      // ñ
+    .replace(/\u2019/g, '&#8217;')       // '
+    .replace(/\u2018/g, '&#8216;')       // '
+    .replace(/\u201C/g, '&#8220;')       // "
+    .replace(/\u201D/g, '&#8221;')       // "
+    .replace(/\u00C0/g, '&Agrave;')      // À
+    .replace(/\u00C8/g, '&Egrave;')      // È
+    .replace(/\u00C9/g, '&Eacute;')      // É
+    .replace(/\u00CC/g, '&Igrave;')      // Ì
+    .replace(/\u00D2/g, '&Ograve;')      // Ò
+    .replace(/\u00D9/g, '&Ugrave;');     // Ù
+
+  // Mostra modal di pubblicazione
+  showPublishModal(safeHtml);
+}
+
+function showPublishModal(html) {
+  // Rimuovi modal precedente se esiste
+  const existing = document.getElementById('publish-modal');
+  if(existing) existing.remove();
+
+  const modal = document.createElement('div');
+  modal.id = 'publish-modal';
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:9999;display:flex;align-items:center;justify-content:center;padding:1rem;';
+  modal.innerHTML = `
+    <div style="background:#fff;border-radius:16px;padding:2rem;max-width:480px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,0.3);">
+      <div style="font-family:'Cormorant Garamond',serif;font-size:1.5rem;font-weight:300;margin-bottom:0.25rem;">Pubblica la guida</div>
+      <div style="font-size:12px;color:#aaa;margin-bottom:1.5rem;">Scegli come condividerla con gli ospiti</div>
+
+      <div id="pm-options" style="display:flex;flex-direction:column;gap:0.75rem;">
+        <button onclick="deployToNetlify()" style="display:flex;align-items:center;gap:1rem;padding:1rem 1.25rem;border:0.5px solid #ddd;border-radius:10px;background:#f9f9f9;cursor:pointer;text-align:left;transition:all 0.15s;" onmouseover="this.style.borderColor='#1a1a1a'" onmouseout="this.style.borderColor='#ddd'">
+          <div style="width:40px;height:40px;background:#00ad9f;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+          </div>
+          <div>
+            <div style="font-size:14px;font-weight:500;color:#1a1a1a;">Pubblica online automaticamente</div>
+            <div style="font-size:12px;color:#888;margin-top:2px;">Ottieni un link da condividere su WhatsApp — gratis</div>
+          </div>
+        </button>
+
+        <button onclick="downloadGuide()" style="display:flex;align-items:center;gap:1rem;padding:1rem 1.25rem;border:0.5px solid #ddd;border-radius:10px;background:#f9f9f9;cursor:pointer;text-align:left;transition:all 0.15s;" onmouseover="this.style.borderColor='#1a1a1a'" onmouseout="this.style.borderColor='#ddd'">
+          <div style="width:40px;height:40px;background:#1a1a1a;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          </div>
+          <div>
+            <div style="font-size:14px;font-weight:500;color:#1a1a1a;">Scarica il file HTML</div>
+            <div style="font-size:12px;color:#888;margin-top:2px;">Caricalo manualmente su Netlify Drop o altro hosting</div>
+          </div>
+        </button>
+      </div>
+
+      <div id="pm-loading" style="display:none;text-align:center;padding:1.5rem 0;">
+        <div style="font-size:13px;color:#888;margin-bottom:0.5rem;">Pubblicazione in corso...</div>
+        <div style="width:100%;height:3px;background:#eee;border-radius:2px;overflow:hidden;">
+          <div id="pm-progress" style="height:100%;background:#00ad9f;border-radius:2px;width:0%;transition:width 0.3s;"></div>
+        </div>
+      </div>
+
+      <div id="pm-result" style="display:none;">
+        <div style="background:#f0faf9;border:1px solid #00ad9f33;border-radius:10px;padding:1.25rem;margin-bottom:1rem;">
+          <div style="font-size:11px;color:#00ad9f;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:6px;">&#10003; Guida pubblicata</div>
+          <div id="pm-link" style="font-size:13px;color:#1a1a1a;word-break:break-all;margin-bottom:10px;"></div>
+          <button id="pm-copy-btn" onclick="copyGuideLink()" style="width:100%;padding:0.6rem;background:#1a1a1a;color:#fff;border:none;border-radius:6px;font-family:'Jost',sans-serif;font-size:11px;letter-spacing:0.15em;text-transform:uppercase;cursor:pointer;">Copia link</button>
+        </div>
+        <div style="background:#fff;border:0.5px solid #eee;border-radius:10px;padding:1.25rem;margin-bottom:1rem;text-align:center;">
+          <div style="font-size:11px;color:#aaa;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:12px;">QR Code da stampare</div>
+          <div id="pm-qrcode" style="display:inline-block;padding:12px;background:#fff;border-radius:8px;border:0.5px solid #eee;"></div>
+          <div style="margin-top:10px;">
+            <button onclick="downloadQR()" style="padding:0.5rem 1.25rem;background:transparent;border:0.5px solid #ddd;border-radius:6px;font-family:'Jost',sans-serif;font-size:11px;color:#555;cursor:pointer;letter-spacing:0.1em;">
+              Scarica QR Code
+            </button>
+          </div>
+        </div>
+        <div style="font-size:11px;color:#aaa;text-align:center;">Condividi il link o stampa il QR code per i tuoi ospiti</div>
+      </div>
+
+      <div id="pm-error" style="display:none;background:#fff8f8;border:1px solid #fcc;border-radius:10px;padding:1rem;margin-bottom:1rem;">
+        <div style="font-size:13px;color:#c00;" id="pm-error-text"></div>
+      </div>
+
+      <button onclick="document.getElementById('publish-modal').remove()" style="width:100%;padding:0.6rem;background:transparent;border:0.5px solid #ddd;border-radius:8px;font-family:'Jost',sans-serif;font-size:11px;color:#aaa;cursor:pointer;margin-top:0.75rem;">Chiudi</button>
+    </div>
+  `;
+  document.body.appendChild(modal);
+
+  // Salva html per uso nei button handler
+  window._exportHtml = html;
+}
+
+function downloadGuide() {
+  const blob = new Blob([window._exportHtml], {type:'text/html;charset=utf-8'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'index.html';
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+async function deployToNetlify() {
+  const modal = document.getElementById('publish-modal');
+  modal.querySelector('#pm-options').style.display = 'none';
+  modal.querySelector('#pm-loading').style.display = 'block';
+
+  let progress = 0;
+  const bar = modal.querySelector('#pm-progress');
+  const timer = setInterval(() => {
+    progress = Math.min(progress + Math.random() * 15, 80);
+    bar.style.width = progress + '%';
+  }, 300);
+
+  try {
+    const state = captureState();
+    const activeLangs = Array.from(document.querySelectorAll('#lang-checkboxes input:checked')).map(i=>i.value);
+
+    // Chiama Edge Function publish-guide che traduce e pubblica server-side
+    const res = await fetch(`${SUPABASE_URL}/functions/v1/publish-guide`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+      },
+      body: JSON.stringify({
+        state,
+        activeLangs,
+        licenseCode: currentLicenseCode,
+        slotIndex: currentSlot
+      })
+    });
+
+    const data = await res.json();
+    if(!res.ok || !data.success) throw new Error(data.error || 'Errore durante la pubblicazione.');
+
+    const publicUrl = data.url;
+
+    clearInterval(timer);
+    bar.style.width = '100%';
+    await new Promise(r => setTimeout(r, 300));
+
+    window._guideUrl = publicUrl;
+    modal.querySelector('#pm-loading').style.display = 'none';
+    modal.querySelector('#pm-result').style.display = 'block';
+    modal.querySelector('#pm-link').textContent = publicUrl;
+
+    // Genera QR code
+    const qrContainer = document.getElementById('pm-qrcode');
+    qrContainer.innerHTML = '';
+    new QRCode(qrContainer, {
+      text: publicUrl,
+      width: 160,
+      height: 160,
+      colorDark: '#1a1a1a',
+      colorLight: '#ffffff',
+      correctLevel: QRCode.CorrectLevel.M
+    });
+
+    // Aggiorna slot bar
+    renderSlotPicker(currentLicenseCode);
+
+  } catch(err) {
+    clearInterval(timer);
+    modal.querySelector('#pm-loading').style.display = 'none';
+    modal.querySelector('#pm-options').style.display = 'flex';
+    modal.querySelector('#pm-error').style.display = 'block';
+    modal.querySelector('#pm-error-text').textContent = err.message || 'Errore durante la pubblicazione.';
+  }
+}
+
+function copyGuideLink() {
+  const url = window._guideUrl;
+  if(!url) return;
+  navigator.clipboard.writeText(url).then(() => {
+    const btn = document.getElementById('pm-copy-btn');
+    btn.textContent = '&#10003; Copiato!';
+    btn.style.background = '#00ad9f';
+    setTimeout(() => { btn.textContent = 'Copia link'; btn.style.background = '#1a1a1a'; }, 2000);
+  });
+}
+
+function downloadQR() {
+  const qrContainer = document.getElementById('pm-qrcode');
+  if(!qrContainer) return;
+  const canvas = qrContainer.querySelector('canvas');
+  const img = qrContainer.querySelector('img');
+  if(canvas) {
+    const a = document.createElement('a');
+    a.download = 'qrcode-guida.png';
+    a.href = canvas.toDataURL('image/png');
+    a.click();
+  } else if(img) {
+    const a = document.createElement('a');
+    a.download = 'qrcode-guida.png';
+    a.href = img.src;
+    a.click();
+  }
+}
+
+function setLang(lang){
+  currentLang = lang;
+  document.querySelectorAll('.lt').forEach(e=>e.style.display = lang==='it'?'':'none');
+  document.querySelectorAll('.le').forEach(e=>e.style.display = lang==='en'?'':'none');
+  document.querySelectorAll('.lang-btn').forEach(b=>{
+    const active = (b.id==='btn-it'&&lang==='it')||(b.id==='btn-en'&&lang==='en');
+    b.classList.toggle('active',active);
+    b.style.background = active ? accentColor : 'transparent';
+    b.style.color = active ? (isDark(accentColor)?'#fff':'#111') : '';
+  });
+
+  const dark = isDark(bgColor);
+  const i18n = {
+    it:{arrivo:'Check-in · Check-out',ttlArrivo:'Il tuo arrivo',contatti:'Sempre disponibili',ttlContatti:'Contatti',casa:'Accesso & Comfort',ttlCasa:'La casa',regole:'Per tutti',ttlRegole:'Regole della casa',dintorni:"Scelti dall'host",ttlDintorni:'Dintorni',access:'Come accedere',welcome:'Benvenuti',pw:'Password',footer:'Buona permanenza',waBtn:'WhatsApp Host ↗'},
+    en:{arrivo:'Check-in · Check-out',ttlArrivo:'Your arrival',contatti:'Always available',ttlContatti:'Contacts',casa:'Access & Comfort',ttlCasa:'The home',regole:'For everyone',ttlRegole:'House rules',dintorni:"Host's picks",ttlDintorni:'Around you',access:'How to access',welcome:'Welcome',pw:'Password',footer:'We wish you a wonderful stay',waBtn:'WhatsApp Host ↗'}
+  };
+  const t = i18n[lang];
+  const set = (id,val)=>{ const el=document.getElementById(id); if(el) el.textContent=val; };
+  set('lbl-arrivo',t.arrivo); set('ttl-arrivo',t.ttlArrivo);
+  set('lbl-contatti',t.contatti); set('ttl-contatti',t.ttlContatti);
+  set('lbl-casa',t.casa); set('ttl-casa',t.ttlCasa);
+  set('lbl-regole-label',t.regole); set('ttl-regole',t.ttlRegole);
+  set('lbl-dintorni',t.dintorni); set('ttl-dintorni',t.ttlDintorni);
+  set('lbl-access',t.access); set('lbl-welcome',t.welcome); set('lbl-pw',t.pw);
+  set('g-footer-text',t.footer);
+  const waBtn = document.getElementById('g-wa-btn');
+  if(waBtn) waBtn.textContent = t.waBtn;
+}
+</script>
+</body>
+</html>
