@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>GuestGuide — Contatti</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --bg:#F4F4F0;--surface:#FFFFFF;--surface2:#F9F9F7;--border:#E8E8E4;--border2:#DDDDD9;
+  --text:#1A1A1A;--text2:#666660;--text3:#AAAAAA;--accent:#4F6EF7;--accent-soft:rgba(79,110,247,0.12);
+  --green:#16A34A;--green-soft:rgba(22,163,74,0.1);--red:#DC2626;--red-soft:rgba(220,38,38,0.1);
+  --yellow:#D97706;--yellow-soft:rgba(217,119,6,0.1);--purple:#7C3AED;--purple-soft:rgba(124,58,237,0.1);
+  --radius:10px;
+}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:14px;}
+
+.wrap{padding:24px;}
+
+/* STATS */
+.stats-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-bottom:28px;}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;}
+.stat-label{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--text3);margin-bottom:8px;}
+.stat-val{font-size:26px;font-weight:600;font-family:'DM Mono',monospace;}
+.stat-sub{font-size:11px;color:var(--text2);margin-top:4px;}
+
+/* PANEL */
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:20px;}
+.panel-header{padding:18px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.panel-title{font-size:14px;font-weight:500;}
+.panel-body{padding:20px;}
+.page-header{margin-bottom:28px;display:flex;align-items:center;justify-content:space-between;}
+.page-title{font-size:20px;font-weight:600;}
+.page-sub{font-size:13px;color:var(--text2);margin-top:4px;}
+
+/* BUTTONS */
+.btn{padding:9px 18px;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer;border:none;transition:all .15s;}
+.btn-accent{background:var(--accent);color:#fff;}
+.btn-accent:hover{opacity:.85;}
+.btn-outline{background:transparent;color:var(--text2);border:1px solid var(--border2);}
+.btn-outline:hover{color:var(--text);border-color:var(--text3);}
+.btn-sm{padding:5px 12px;font-size:12px;}
+.btn-danger{background:var(--red-soft);color:var(--red);border:1px solid rgba(239,68,68,0.2);}
+.btn-danger:hover{background:rgba(239,68,68,0.2);}
+
+/* TABLE */
+.table-wrap{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;}
+th{font-size:11px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:var(--text3);padding:10px 14px;text-align:left;border-bottom:1px solid var(--border);}
+td{padding:12px 14px;border-bottom:1px solid var(--border);font-size:13px;vertical-align:middle;}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:rgba(0,0,0,0.01);}
+
+/* BADGES */
+.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:20px;font-size:11px;font-weight:500;}
+.badge-green{background:var(--green-soft);color:var(--green);}
+.badge-red{background:var(--red-soft);color:var(--red);}
+.badge-yellow{background:var(--yellow-soft);color:var(--yellow);}
+.badge-blue{background:var(--accent-soft);color:var(--accent);}
+.badge-purple{background:var(--purple-soft);color:var(--purple);}
+.badge-gray{background:#f0f0f0;color:#666;}
+
+/* SEARCH & FILTER */
+.toolbar{display:flex;gap:10px;margin-bottom:16px;align-items:center;flex-wrap:wrap;}
+.toolbar .inp{max-width:260px;}
+select.inp{appearance:none;cursor:pointer;max-width:180px;}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:500;display:flex;align-items:center;justify-content:center;padding:20px;}
+.modal{background:var(--surface);border:1px solid var(--border2);border-radius:14px;padding:28px;max-width:560px;width:100%;max-height:90vh;overflow-y:auto;}
+.modal-title{font-size:16px;font-weight:600;margin-bottom:20px;}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.form-group{display:flex;flex-direction:column;gap:5px;}
+.form-group.full{grid-column:1/-1;}
+.form-label{font-size:11px;color:var(--text2);font-weight:500;letter-spacing:.05em;}
+.modal-btns{display:flex;gap:10px;margin-top:20px;justify-content:flex-end;}
+textarea.inp{resize:vertical;min-height:80px;}
+
+/* CALENDARIO */
+.calendar-section{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:20px;}
+.cal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.cal-title{font-size:15px;font-weight:600;}
+.cal-nav{display:flex;gap:8px;}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;}
+.cal-day-label{font-size:11px;color:var(--text3);text-align:center;padding:4px;font-weight:500;}
+.cal-day{min-height:52px;border-radius:8px;padding:4px 6px;font-size:12px;cursor:pointer;transition:all .15s;border:1px solid transparent;position:relative;}
+.cal-day:hover{background:var(--bg);border-color:var(--border2);}
+.cal-day.today{border-color:var(--accent);background:var(--accent-soft);}
+.cal-day.other-month{color:var(--text3);}
+.cal-day-num{font-weight:500;margin-bottom:2px;}
+.cal-dot{width:6px;height:6px;border-radius:50%;display:inline-block;margin:1px;}
+.cal-dot-blue{background:var(--accent);}
+.cal-dot-green{background:var(--green);}
+.cal-dot-yellow{background:var(--yellow);}
+
+/* APPUNTAMENTI */
+.appointment-list{display:flex;flex-direction:column;gap:8px;margin-top:12px;}
+.appointment-item{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px 14px;display:flex;align-items:center;justify-content:space-between;}
+.appointment-info{display:flex;flex-direction:column;gap:2px;}
+.appointment-name{font-size:13px;font-weight:500;}
+.appointment-time{font-size:12px;color:var(--text2);}
+
+/* TOAST */
+.toast{position:fixed;bottom:24px;right:24px;background:var(--surface2);border:1px solid var(--border2);border-radius:10px;padding:12px 18px;font-size:13px;z-index:9999;transform:translateY(20px);opacity:0;transition:all .25s;pointer-events:none;}
+.toast.show{transform:translateY(0);opacity:1;}
+.toast.success{border-color:rgba(34,197,94,0.3);color:var(--green);}
+.toast.error{border-color:rgba(239,68,68,0.3);color:var(--red);}
+
+.empty{text-align:center;padding:40px;color:var(--text3);font-size:13px;}
+.spinner{width:16px;height:16px;border:2px solid var(--border2);border-top-color:var(--accent);border-radius:50%;animation:spin .6s linear infinite;display:inline-block;}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+@media(max-width:900px){
+  .stats-grid{grid-template-columns:1fr 1fr;}
+  .sidebar{width:60px;}
+  .sidebar .nav-item span:last-child,.sidebar-logo-text,.sidebar-logo-sub{display:none;}
+  .main{margin-left:60px;}
+  .form-grid{grid-template-columns:1fr;}
+}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+    <!-- STATS -->
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-label">Totale contatti</div><div class="stat-val" id="stat-total">—</div></div>
+      <div class="stat-card"><div class="stat-label">Da contattare</div><div class="stat-val" id="stat-da-contattare" style="color:var(--yellow)">—</div></div>
+      <div class="stat-card"><div class="stat-label">Interessati</div><div class="stat-val" id="stat-interessati" style="color:var(--accent)">—</div></div>
+      <div class="stat-card"><div class="stat-label">Clienti</div><div class="stat-val" id="stat-clienti" style="color:var(--green)">—</div></div>
+      <div class="stat-card"><div class="stat-label">Non interessati</div><div class="stat-val" id="stat-non-interessati" style="color:var(--text3)">—</div></div>
+    </div>
+
+    <!-- CALENDARIO -->
+    <div class="calendar-section">
+      <div class="cal-header">
+        <div class="cal-title" id="cal-title"></div>
+        <div class="cal-nav">
+          <button class="btn btn-outline btn-sm" onclick="calPrev()">←</button>
+          <button class="btn btn-outline btn-sm" onclick="calToday()">Oggi</button>
+          <button class="btn btn-outline btn-sm" onclick="calNext()">→</button>
+        </div>
+      </div>
+      <div class="cal-grid" id="cal-grid"></div>
+      <div id="day-appointments" style="display:none">
+        <div style="font-size:13px;font-weight:500;margin-top:16px;margin-bottom:8px;" id="day-appointments-title"></div>
+        <div class="appointment-list" id="appointment-list"></div>
+      </div>
+    </div>
+
+    <!-- LISTA CONTATTI -->
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-title">Tutti i contatti</div>
+        <button class="btn btn-accent btn-sm" onclick="openModal()">+ Nuovo contatto</button>
+      </div>
+      <div class="panel-body">
+        <div class="toolbar">
+          <input class="inp" type="text" id="search-inp" placeholder="Cerca nome, email, telefono..." oninput="filterContacts()">
+          <select class="inp" id="filter-stato" onchange="filterContacts()">
+            <option value="">Tutti gli stati</option>
+            <option value="da_contattare">Da contattare</option>
+            <option value="contattato">Contattato</option>
+            <option value="interessato">Interessato</option>
+            <option value="non_interessato">Non interessato</option>
+            <option value="cliente">Cliente</option>
+          </select>
+          <select class="inp" id="filter-canale" onchange="filterContacts()">
+            <option value="">Tutti i canali</option>
+            <option value="whatsapp">WhatsApp</option>
+            <option value="email">Email</option>
+            <option value="telefono">Telefono</option>
+            <option value="referral">Referral</option>
+            <option value="altro">Altro</option>
+          </select>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Nome</th>
+                <th>Contatto</th>
+                <th>Strutture</th>
+                <th>Stato</th>
+                <th>Canale</th>
+                <th>Prossimo contatto</th>
+                <th>Note</th>
+                <th>Azioni</th>
+              </tr>
+            </thead>
+            <tbody id="contacts-tbody">
+              <tr><td colspan="8" class="empty"><div class="spinner"></div></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- MODAL CONTATTO -->
+<div id="contact-modal" style="display:none" class="modal-overlay">
+  <div class="modal">
+    <div class="modal-title" id="modal-title">Nuovo contatto</div>
+    <div class="form-grid">
+      <div class="form-group">
+        <div class="form-label">Nome *</div>
+        <input class="inp" type="text" id="f-nome" placeholder="Mario">
+      </div>
+      <div class="form-group">
+        <div class="form-label">Cognome</div>
+        <input class="inp" type="text" id="f-cognome" placeholder="Rossi">
+      </div>
+      <div class="form-group">
+        <div class="form-label">Email</div>
+        <input class="inp" type="email" id="f-email" placeholder="mario@email.it">
+      </div>
+      <div class="form-group">
+        <div class="form-label">Telefono</div>
+        <input class="inp" type="tel" id="f-telefono" placeholder="+39 333 123 4567">
+      </div>
+      <div class="form-group">
+        <div class="form-label">N° strutture</div>
+        <input class="inp" type="number" id="f-strutture" placeholder="1" min="0">
+      </div>
+      <div class="form-group">
+        <div class="form-label">Canale</div>
+        <select class="inp" id="f-canale">
+          <option value="whatsapp">WhatsApp</option>
+          <option value="email">Email</option>
+          <option value="telefono">Telefono</option>
+          <option value="referral">Referral</option>
+          <option value="altro">Altro</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <div class="form-label">Stato</div>
+        <select class="inp" id="f-stato">
+          <option value="da_contattare">Da contattare</option>
+          <option value="contattato">Contattato</option>
+          <option value="interessato">Interessato</option>
+          <option value="non_interessato">Non interessato</option>
+          <option value="cliente">Cliente</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <div class="form-label">Prossimo contatto (data e ora)</div>
+        <input class="inp" type="datetime-local" id="f-data-contatto">
+      </div>
+      <div class="form-group full">
+        <div class="form-label">Note</div>
+        <textarea class="inp" id="f-note" placeholder="Appunti, osservazioni..."></textarea>
+      </div>
+    </div>
+    <div class="modal-btns">
+      <button class="btn btn-outline" onclick="closeModal()">Annulla</button>
+      <button class="btn btn-accent" onclick="saveContact()"><span id="save-btn-text">Salva contatto</span></button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+const SUPABASE_URL = 'https://foavmbrrlrpehshvjxfk.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZvYXZtYnJybHJwZWhzaHZqeGZrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMwNzM2NjMsImV4cCI6MjA4ODY0OTY2M30.-PxTvs4uA9U88QMGrjaJxh_6h3ELxGGu3iHsBUvuA';
+
+let allContacts = [];
+let editingId = null;
+let calYear, calMonth;
+
+const STATO_BADGE = {
+  da_contattare: '<span class="badge badge-yellow">Da contattare</span>',
+  contattato:    '<span class="badge badge-blue">Contattato</span>',
+  interessato:   '<span class="badge badge-purple">Interessato</span>',
+  non_interessato:'<span class="badge badge-gray">Non interessato</span>',
+  cliente:       '<span class="badge badge-green">Cliente</span>',
+};
+
+const CANALE_LABEL = {
+  whatsapp: '💬 WhatsApp',
+  email: '✉ Email',
+  telefono: '📞 Telefono',
+  referral: '🤝 Referral',
+  altro: '— Altro',
+};
+
+// ===== LOGIN =====
+window.addEventListener('load', () => { loadContacts(); initCalendar(); });
+
+// ===== LOAD =====
+async function loadContacts(){
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/gg_contacts?select=*&order=created_at.desc`, {
+    headers:{'Authorization':`Bearer ${SUPABASE_ANON_KEY}`,'apikey':SUPABASE_ANON_KEY}
+  });
+  allContacts = await res.json();
+  renderContacts(allContacts);
+  updateStats(allContacts);
+  renderCalendar();
+}
+
+function updateStats(contacts){
+  document.getElementById('stat-total').textContent = contacts.length;
+  document.getElementById('stat-da-contattare').textContent = contacts.filter(c=>c.stato==='da_contattare').length;
+  document.getElementById('stat-interessati').textContent = contacts.filter(c=>c.stato==='interessato').length;
+  document.getElementById('stat-clienti').textContent = contacts.filter(c=>c.stato==='cliente').length;
+  document.getElementById('stat-non-interessati').textContent = contacts.filter(c=>c.stato==='non_interessato').length;
+}
+
+function filterContacts(){
+  const q = document.getElementById('search-inp').value.toLowerCase();
+  const stato = document.getElementById('filter-stato').value;
+  const canale = document.getElementById('filter-canale').value;
+  const filtered = allContacts.filter(c => {
+    const matchQ = !q || (c.nome||'').toLowerCase().includes(q) || (c.cognome||'').toLowerCase().includes(q) || (c.email||'').toLowerCase().includes(q) || (c.telefono||'').toLowerCase().includes(q);
+    const matchStato = !stato || c.stato === stato;
+    const matchCanale = !canale || c.canale === canale;
+    return matchQ && matchStato && matchCanale;
+  });
+  renderContacts(filtered);
+}
+
+function renderContacts(contacts){
+  const tbody = document.getElementById('contacts-tbody');
+  if(!contacts.length){ tbody.innerHTML='<tr><td colspan="8" class="empty">Nessun contatto trovato</td></tr>'; return; }
+  tbody.innerHTML = contacts.map(c => {
+    const dataContatto = c.data_contatto ? new Date(c.data_contatto) : null;
+    const isToday = dataContatto && dataContatto.toDateString() === new Date().toDateString();
+    const isPast = dataContatto && dataContatto < new Date();
+    const dataStr = dataContatto
+      ? `<span style="color:${isPast&&!isToday?'var(--red)':isToday?'var(--green)':'var(--text2)'};font-size:12px;">
+          ${dataContatto.toLocaleDateString('it-IT')} ${dataContatto.toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'})}
+          ${isToday?'<strong>(oggi)</strong>':''}
+        </span>`
+      : '<span style="color:var(--text3)">—</span>';
+    const note = c.note ? `<span title="${c.note}" style="font-size:12px;color:var(--text2);max-width:160px;display:inline-block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${c.note}</span>` : '<span style="color:var(--text3)">—</span>';
+    return `<tr>
+      <td><div style="font-weight:500;">${c.nome} ${c.cognome||''}</div><div style="font-size:11px;color:var(--text3);">${c.created_at?new Date(c.created_at).toLocaleDateString('it-IT'):''}</div></td>
+      <td><div style="font-size:12px;">${c.email||'—'}</div><div style="font-size:12px;color:var(--text2);">${c.telefono||''}</div></td>
+      <td><span style="font-family:'DM Mono',monospace;font-size:13px;">${c.strutture||0}</span></td>
+      <td>${STATO_BADGE[c.stato]||c.stato}</td>
+      <td><span style="font-size:12px;">${CANALE_LABEL[c.canale]||c.canale}</span></td>
+      <td>${dataStr}</td>
+      <td>${note}</td>
+      <td>
+        <div style="display:flex;gap:6px;">
+          <button class="btn btn-sm btn-outline" onclick="openModal('${c.id}')">✏</button>
+          <button class="btn btn-sm btn-danger" onclick="deleteContact('${c.id}','${c.nome}')">🗑</button>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+// ===== MODAL =====
+function openModal(id=null){
+  editingId = id;
+  document.getElementById('modal-title').textContent = id ? 'Modifica contatto' : 'Nuovo contatto';
+  document.getElementById('save-btn-text').textContent = id ? 'Salva modifiche' : 'Salva contatto';
+  if(id){
+    const c = allContacts.find(x=>x.id===id);
+    if(!c) return;
+    document.getElementById('f-nome').value = c.nome||'';
+    document.getElementById('f-cognome').value = c.cognome||'';
+    document.getElementById('f-email').value = c.email||'';
+    document.getElementById('f-telefono').value = c.telefono||'';
+    document.getElementById('f-strutture').value = c.strutture||0;
+    document.getElementById('f-canale').value = c.canale||'whatsapp';
+    document.getElementById('f-stato').value = c.stato||'da_contattare';
+    document.getElementById('f-note').value = c.note||'';
+    document.getElementById('f-data-contatto').value = c.data_contatto ? new Date(c.data_contatto).toISOString().slice(0,16) : '';
+  } else {
+    ['f-nome','f-cognome','f-email','f-telefono','f-note','f-data-contatto'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('f-strutture').value = 0;
+    document.getElementById('f-canale').value = 'whatsapp';
+    document.getElementById('f-stato').value = 'da_contattare';
+  }
+  document.getElementById('contact-modal').style.display = 'flex';
+}
+
+function closeModal(){
+  document.getElementById('contact-modal').style.display = 'none';
+  editingId = null;
+}
+
+async function saveContact(){
+  const nome = document.getElementById('f-nome').value.trim();
+  if(!nome){ showToast('Il nome è obbligatorio', 'error'); return; }
+  const data = {
+    nome,
+    cognome: document.getElementById('f-cognome').value.trim()||null,
+    email: document.getElementById('f-email').value.trim()||null,
+    telefono: document.getElementById('f-telefono').value.trim()||null,
+    strutture: parseInt(document.getElementById('f-strutture').value)||0,
+    canale: document.getElementById('f-canale').value,
+    stato: document.getElementById('f-stato').value,
+    note: document.getElementById('f-note').value.trim()||null,
+    data_contatto: document.getElementById('f-data-contatto').value ? new Date(document.getElementById('f-data-contatto').value).toISOString() : null,
+  };
+
+  if(editingId){
+    await fetch(`${SUPABASE_URL}/rest/v1/gg_contacts?id=eq.${editingId}`, {
+      method:'PATCH',
+      headers:{'Authorization':`Bearer ${SUPABASE_ANON_KEY}`,'apikey':SUPABASE_ANON_KEY,'Content-Type':'application/json'},
+      body: JSON.stringify(data)
+    });
+    showToast('Contatto aggiornato', 'success');
+  } else {
+    await fetch(`${SUPABASE_URL}/rest/v1/gg_contacts`, {
+      method:'POST',
+      headers:{'Authorization':`Bearer ${SUPABASE_ANON_KEY}`,'apikey':SUPABASE_ANON_KEY,'Content-Type':'application/json','Prefer':'return=representation'},
+      body: JSON.stringify(data)
+    });
+    showToast('Contatto aggiunto', 'success');
+  }
+  closeModal();
+  loadContacts();
+}
+
+async function deleteContact(id, nome){
+  if(!confirm(`Eliminare ${nome}?`)) return;
+  await fetch(`${SUPABASE_URL}/rest/v1/gg_contacts?id=eq.${id}`, {
+    method:'DELETE',
+    headers:{'Authorization':`Bearer ${SUPABASE_ANON_KEY}`,'apikey':SUPABASE_ANON_KEY}
+  });
+  showToast('Contatto eliminato', 'success');
+  loadContacts();
+}
+
+// ===== CALENDARIO =====
+function initCalendar(){
+  const now = new Date();
+  calYear = now.getFullYear();
+  calMonth = now.getMonth();
+  renderCalendar();
+}
+
+function calPrev(){ calMonth--; if(calMonth<0){calMonth=11;calYear--;} renderCalendar(); }
+function calNext(){ calMonth++; if(calMonth>11){calMonth=0;calYear++;} renderCalendar(); }
+function calToday(){ const n=new Date(); calYear=n.getFullYear(); calMonth=n.getMonth(); renderCalendar(); }
+
+function renderCalendar(){
+  const months = ['Gennaio','Febbraio','Marzo','Aprile','Maggio','Giugno','Luglio','Agosto','Settembre','Ottobre','Novembre','Dicembre'];
+  document.getElementById('cal-title').textContent = `${months[calMonth]} ${calYear}`;
+  const grid = document.getElementById('cal-grid');
+  const days = ['Lun','Mar','Mer','Gio','Ven','Sab','Dom'];
+  const today = new Date();
+
+  let html = days.map(d=>`<div class="cal-day-label">${d}</div>`).join('');
+
+  const firstDay = new Date(calYear, calMonth, 1);
+  let startDow = firstDay.getDay(); // 0=dom
+  startDow = startDow === 0 ? 6 : startDow - 1; // converti a lun=0
+
+  const daysInMonth = new Date(calYear, calMonth+1, 0).getDate();
+  const daysInPrev = new Date(calYear, calMonth, 0).getDate();
+
+  // Giorni mese precedente
+  for(let i=startDow-1; i>=0; i--){
+    html += `<div class="cal-day other-month"><div class="cal-day-num">${daysInPrev-i}</div></div>`;
+  }
+
+  // Giorni mese corrente
+  for(let d=1; d<=daysInMonth; d++){
+    const date = new Date(calYear, calMonth, d);
+    const isToday = date.toDateString() === today.toDateString();
+    const contacts = allContacts.filter(c => {
+      if(!c.data_contatto) return false;
+      const cd = new Date(c.data_contatto);
+      return cd.getFullYear()===calYear && cd.getMonth()===calMonth && cd.getDate()===d;
+    });
+    const dots = contacts.map(c => {
+      const dotClass = c.stato==='cliente'?'cal-dot-green':c.stato==='interessato'?'cal-dot-blue':'cal-dot-yellow';
+      return `<span class="cal-dot ${dotClass}" title="${c.nome} ${c.cognome||''}"></span>`;
+    }).join('');
+    html += `<div class="cal-day${isToday?' today':''}" onclick="showDayAppointments(${d})">
+      <div class="cal-day-num">${d}</div>
+      <div>${dots}</div>
+    </div>`;
+  }
+
+  // Giorni mese successivo
+  const totalCells = startDow + daysInMonth;
+  const remaining = totalCells % 7 === 0 ? 0 : 7 - (totalCells % 7);
+  for(let d=1; d<=remaining; d++){
+    html += `<div class="cal-day other-month"><div class="cal-day-num">${d}</div></div>`;
+  }
+
+  grid.innerHTML = html;
+}
+
+function showDayAppointments(day){
+  const contacts = allContacts.filter(c => {
+    if(!c.data_contatto) return false;
+    const cd = new Date(c.data_contatto);
+    return cd.getFullYear()===calYear && cd.getMonth()===calMonth && cd.getDate()===day;
+  });
+  const section = document.getElementById('day-appointments');
+  if(!contacts.length){ section.style.display='none'; return; }
+  section.style.display = 'block';
+  document.getElementById('day-appointments-title').textContent = `Appuntamenti del ${day}/${calMonth+1}/${calYear}`;
+  document.getElementById('appointment-list').innerHTML = contacts.map(c => {
+    const time = new Date(c.data_contatto).toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'});
+    return `<div class="appointment-item">
+      <div class="appointment-info">
+        <div class="appointment-name">${c.nome} ${c.cognome||''}</div>
+        <div class="appointment-time">🕐 ${time} · ${CANALE_LABEL[c.canale]||c.canale} · ${c.telefono||c.email||''}</div>
+      </div>
+      <div style="display:flex;gap:6px;">
+        ${STATO_BADGE[c.stato]||''}
+        <button class="btn btn-sm btn-outline" onclick="openModal('${c.id}')">✏</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ===== TOAST =====
+function showToast(msg, type=''){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show '+(type||'');
+  setTimeout(()=>t.className='toast', 2800);
+}
+</script>
+</body>
+</html>

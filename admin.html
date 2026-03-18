@@ -205,6 +205,9 @@ select.inp{appearance:none;cursor:pointer;}
     <div class="nav-item" onclick="showTab('payments')">
       <span class="nav-icon">💳</span><span>Pagamenti</span>
     </div>
+    <div class="nav-item" onclick="showTab('contacts')">
+      <span class="nav-icon">👥</span><span>Contatti</span>
+    </div>
     <div style="margin-top:auto;padding:20px;">
       <div style="font-size:11px;color:var(--text3);">Versione 1.0</div>
     </div>
@@ -401,6 +404,11 @@ select.inp{appearance:none;cursor:pointer;}
   </div>
 </div>
 
+ <!-- TAB: CONTATTI -->
+    <div id="tab-contacts" style="display:none">
+      <iframe src="contacts.html" style="width:100%;height:calc(100vh - 64px);border:none;border-radius:10px;" id="contacts-iframe"></iframe>
+    </div>
+
   </div>
 </div>
 
@@ -448,11 +456,11 @@ document.getElementById('admin-pw').addEventListener('keydown', e => { if(e.key=
 
 // ===== TABS =====
 function showTab(tab){
-  ['licenses','create','guides','payments'].forEach(t => {
+  ['licenses','create','guides','payments','contacts'].forEach(t => {
     document.getElementById('tab-'+t).style.display = t===tab?'block':'none';
   });
   document.querySelectorAll('.nav-item').forEach((el,i) => {
-    el.classList.toggle('active', ['licenses','create','guides','payments'][i]===tab);
+    el.classList.toggle('active', ['licenses','create','guides','payments','contacts'][i]===tab);
   });
   if(tab==='guides') loadGuides();
   if(tab==='payments') loadPayments();
