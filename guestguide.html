@@ -785,6 +785,30 @@ function saveCurrentSlot(){
   const slots = getSlots(currentLicenseCode);
   slots[currentSlot] = captureState();
   localStorage.setItem(licenseKey(currentLicenseCode), JSON.stringify(slots));
+  saveSlotToSupabase(currentSlot, slots[currentSlot]);
+}
+
+async function saveSlotToSupabase(slotIndex, state){
+  try {
+    await fetch(`${SUPABASE_URL}/functions/v1/save-slot`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` },
+      body: JSON.stringify({ licenseCode: currentLicenseCode, slotIndex, state })
+    });
+  } catch(e) { /* fallback silenzioso */ }
+}
+
+async function loadSlotsFromSupabase(code){
+  try {
+    const res = await fetch(`${SUPABASE_URL}/functions/v1/load-slot`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` },
+      body: JSON.stringify({ licenseCode: code })
+    });
+    const data = await res.json();
+    if(data.success && data.slotsData) return data.slotsData;
+  } catch(e) { /* fallback silenzioso */ }
+  return null;
 }
 
 function captureState(){
@@ -909,7 +933,7 @@ async function activateLicense(){
         localStorage.setItem(licenseKey(input), JSON.stringify(Array.from({length: currentSlotsTotal}, () => ({}))));
       }
       err.style.display = 'none';
-      showSetup();
+      await showSetup();
     } else {
       err.style.display = 'block';
       err.textContent = 'Codice non valido. Controlla e riprova.';
@@ -930,11 +954,31 @@ async function activateLicense(){
   btn.disabled = false;
 }
 
-function showSetup(){
+async function showSetup(){
   document.getElementById('license-gate').style.display = 'none';
   document.getElementById('setup-mode').style.display = 'block';
   currentSlot = 0;
-  const slots = getSlots(currentLicenseCode);
+
+  // 1. Prova a caricare da Supabase
+  let slotsData = await loadSlotsFromSupabase(currentLicenseCode);
+
+  // 2. Se Supabase non ha dati, controlla localStorage (migrazione vecchi utenti)
+  if(!slotsData || !slotsData.some(s => s && s.name)) {
+    const local = getSlots(currentLicenseCode);
+    if(local && local.some(s => s && s.name)) {
+      slotsData = local;
+      // Migra su Supabase
+      local.forEach((s, i) => { if(s && s.name) saveSlotToSupabase(i, s); });
+    }
+  }
+
+  // 3. Aggiorna localStorage con i dati da Supabase
+  if(slotsData) {
+    localStorage.setItem(licenseKey(currentLicenseCode), JSON.stringify(slotsData));
+  }
+
+  const slots = slotsData || getSlots(currentLicenseCode);
+
   if(slots[0] && slots[0].name){
     restoreState(slots[0]);
   } else {
@@ -956,7 +1000,7 @@ function showSetup(){
   livePreview();
 }
 
-function checkLicense(){
+async function checkLicense(){
   const stored = localStorage.getItem('gg_license_code');
   if(stored){
     currentLicenseCode = stored;
@@ -964,7 +1008,7 @@ function checkLicense(){
     if(!localStorage.getItem(licenseKey(stored))){
       localStorage.setItem(licenseKey(stored), JSON.stringify(Array.from({length: currentSlotsTotal}, () => ({}))));
     }
-    showSetup();
+    await showSetup();
   }
   // else rimane sulla schermata di attivazione
 }
@@ -972,7 +1016,8 @@ function checkLicense(){
 // ===== INIT =====
 window.onload = () => {
   checkLicense();
-  setInterval(() => { if(currentLicenseCode) saveCurrentSlot(); }, 3000);
+  // Autosave su eventi chiave invece che ogni 3 secondi
+  window.addEventListener('beforeunload', () => { if(currentLicenseCode) saveCurrentSlot(); });
 };
 
 // ===== COLORS =====
