@@ -180,7 +180,10 @@ select.inp{appearance:none;cursor:pointer;}
     <div class="login-logo">GuestGuide</div>
     <div class="login-title">Admin Panel</div>
     <div class="login-sub">Accedi per gestire le licenze</div>
-    <input class="inp" type="password" id="admin-pw" placeholder="Password" onkeydown="if(event.key==='Enter')doLogin()">
+    <div style="position:relative;">
+  <input class="inp" type="password" id="admin-pw" placeholder="Password" onkeydown="if(event.key==='Enter')doLogin()" style="padding-right:40px;">
+  <span onclick="toggleAdminPw()" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);cursor:pointer;font-size:16px;color:#aaa;" id="admin-pw-eye">👁</span>
+</div>
     <div id="login-error">Password errata.</div>
     <button class="btn-primary" onclick="doLogin()">Accedi</button>
   </div>
@@ -1168,6 +1171,13 @@ function editSlots(id, current){
 function togglePw(){
   const inp = document.getElementById('p-password');
   const eye = document.getElementById('pw-eye');
+  if(inp.type==='password'){ inp.type='text'; eye.textContent='🙈'; }
+  else { inp.type='password'; eye.textContent='👁'; }
+}
+
+function toggleAdminPw(){
+  const inp = document.getElementById('admin-pw');
+  const eye = document.getElementById('admin-pw-eye');
   if(inp.type==='password'){ inp.type='text'; eye.textContent='🙈'; }
   else { inp.type='password'; eye.textContent='👁'; }
 }
