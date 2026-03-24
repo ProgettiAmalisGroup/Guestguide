@@ -437,7 +437,7 @@ async function doLogin(){
     btn.textContent='Accedi'; btn.disabled=false;
     return;
   }
-  await loadPartnerData(data.user.id);
+  // loadPartnerData viene chiamato da onAuthStateChange
 }
 
 async function loadPartnerData(userId){
@@ -766,7 +766,7 @@ function showToast(msg, type=''){
 
 // ===== AUTO LOGIN =====
 sb.auth.onAuthStateChange(async (event, session) => {
-  if(event === 'SIGNED_IN' && session && !partnerData){
+  if((event === 'SIGNED_IN' || event === 'INITIAL_SESSION') && session && !partnerData){
     await loadPartnerData(session.user.id);
   } else if(event === 'SIGNED_OUT'){
     partnerData = null;
@@ -774,12 +774,6 @@ sb.auth.onAuthStateChange(async (event, session) => {
     document.getElementById('login-screen').style.display='flex';
   }
 });
-
-// Controlla sessione esistente al caricamento pagina
-(async () => {
-  const { data: { session } } = await sb.auth.getSession();
-  if(session) await loadPartnerData(session.user.id);
-})();
 
 function togglePartnerPw(){
   const inp = document.getElementById('login-password');
