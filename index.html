@@ -693,6 +693,9 @@ function reviewsPrev(){ reviewsGo((window._reviewsIdx - 1 + window._reviewsTotal
   }, {threshold:.1});
   document.querySelectorAll('.rv').forEach(el => io.observe(el));
   setTimeout(() => document.querySelectorAll('.hero .rv').forEach(el => el.classList.add('ok')), 80);
+// Leggi ref dall'URL e salvalo per dopo
+const urlRef = new URLSearchParams(window.location.search).get('ref');
+if(urlRef) localStorage.setItem('gg_ref', urlRef.toUpperCase());
 </script>
 </body>
 </html>

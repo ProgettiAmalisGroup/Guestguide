@@ -934,6 +934,20 @@ async function activateLicense(){
         localStorage.setItem(licenseKey(input), JSON.stringify(Array.from({length: currentSlotsTotal}, () => ({}))));
       }
       err.style.display = 'none';
+      // Associa partner se presente
+      const ref = localStorage.getItem('gg_ref');
+      if(ref){
+        await fetch(`${SUPABASE_URL}/rest/v1/gg_licenses?code=eq.${input}`, {
+          method: 'PATCH',
+          headers: {
+            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+            'apikey': SUPABASE_ANON_KEY,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ partner_code: ref })
+        });
+        localStorage.removeItem('gg_ref');
+      }
       await showSetup();
     } else {
       err.style.display = 'block';
@@ -1016,6 +1030,9 @@ async function checkLicense(){
 
 // ===== INIT =====
 window.onload = () => {
+  // Leggi ref dall'URL e salvalo
+  const urlRef = new URLSearchParams(window.location.search).get('ref');
+  if(urlRef) localStorage.setItem('gg_ref', urlRef.toUpperCase());
   checkLicense();
   // Autosave su eventi chiave invece che ogni 3 secondi
   window.addEventListener('beforeunload', () => { if(currentLicenseCode) saveCurrentSlot(); });
