@@ -211,6 +211,9 @@ select.inp{appearance:none;cursor:pointer;}
     <div class="nav-item" onclick="showTab('reviews')">
       <span class="nav-icon">⭐</span><span>Recensioni</span>
     </div>
+    <div class="nav-item" onclick="showTab('partners')">
+      <span class="nav-icon">🤝</span><span>Partner</span>
+    </div>
     <div style="margin-top:auto;padding:20px;">
       <div style="font-size:11px;color:var(--text3);">Versione 1.0</div>
     </div>
@@ -437,6 +440,65 @@ select.inp{appearance:none;cursor:pointer;}
       <iframe src="contacts.html" style="width:100%;height:calc(100vh - 64px);border:none;border-radius:10px;" id="contacts-iframe"></iframe>
     </div>
 
+    <!-- TAB: PARTNER -->
+    <div id="tab-partners" style="display:none">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+        <div class="page-title">Partner</div>
+        <button class="btn btn-primary" onclick="showPartnerForm()">+ Nuovo partner</button>
+      </div>
+
+      <!-- FORM NUOVO PARTNER -->
+      <div id="partner-form" style="display:none;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:24px;margin-bottom:24px;">
+        <div style="font-size:15px;font-weight:600;margin-bottom:16px;">Nuovo partner</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+          <div>
+            <label style="font-size:11px;color:var(--text2);display:block;margin-bottom:4px;">Nome *</label>
+            <input class="inp" id="p-name" placeholder="Es. Marco Rossi">
+          </div>
+          <div>
+            <label style="font-size:11px;color:var(--text2);display:block;margin-bottom:4px;">Email</label>
+            <input class="inp" id="p-email" type="email" placeholder="marco@email.com">
+          </div>
+          <div>
+            <label style="font-size:11px;color:var(--text2);display:block;margin-bottom:4px;">Codice referral *</label>
+            <input class="inp" id="p-code" placeholder="Es. MARCO" oninput="this.value=this.value.toUpperCase().replace(/[^A-Z0-9-]/g,'')">
+          </div>
+          <div>
+            <label style="font-size:11px;color:var(--text2);display:block;margin-bottom:4px;">Commissione %</label>
+            <input class="inp" id="p-commission" type="number" value="20" min="0" max="100">
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;">
+          <button class="btn btn-primary" onclick="createPartner()">Crea partner</button>
+          <button class="btn btn-outline" onclick="hidePartnerForm()">Annulla</button>
+        </div>
+        <div id="partner-form-msg" style="font-size:12px;margin-top:8px;display:none;"></div>
+      </div>
+
+      <!-- TABELLA PARTNER -->
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;">
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Nome</th>
+                <th>Email</th>
+                <th>Codice referral</th>
+                <th>Commissione</th>
+                <th>Licenze generate</th>
+                <th>Link referral</th>
+                <th>Stato</th>
+                <th>Azioni</th>
+              </tr>
+            </thead>
+            <tbody id="partners-tbody">
+              <tr><td colspan="8" class="empty">Caricamento...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -484,15 +546,16 @@ document.getElementById('admin-pw').addEventListener('keydown', e => { if(e.key=
 
 // ===== TABS =====
 function showTab(tab){
-  ['licenses','create','guides','payments','contacts','reviews'].forEach(t => {
+  ['licenses','create','guides','payments','contacts','reviews','partners'].forEach(t => {
     document.getElementById('tab-'+t).style.display = t===tab?'block':'none';
   });
   document.querySelectorAll('.nav-item').forEach((el,i) => {
-    el.classList.toggle('active', ['licenses','create','guides','payments','contacts','reviews'][i]===tab);
+    el.classList.toggle('active', ['licenses','create','guides','payments','contacts','reviews','partners'][i]===tab);
   });
   if(tab==='guides') loadGuides();
   if(tab==='payments') loadPayments();
   if(tab==='reviews') loadReviews();
+  if(tab==='partners') loadPartners();
 }
 
 // ===== LOAD LICENSES =====
@@ -891,6 +954,95 @@ function showToast(msg, type=''){
   t.className = 'toast show '+(type||'');
   setTimeout(()=>t.className='toast', 2800);
 }
+
+// ===== PARTNERS =====
+async function loadPartners(){
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/gg_partners?select=*,gg_licenses(count)&order=created_at.desc`, {
+    headers: { 'Authorization': `Bearer ${SUPABASE_ANON_KEY}`, 'apikey': SUPABASE_ANON_KEY }
+  });
+  const partners = await res.json();
+  renderPartners(partners);
+}
+
+function renderPartners(partners){
+  const tbody = document.getElementById('partners-tbody');
+  if(!partners.length){ tbody.innerHTML='<tr><td colspan="8" class="empty">Nessun partner ancora</td></tr>'; return; }
+  tbody.innerHTML = partners.map(p => {
+    const refLink = `https://guestguide.coomunity.it?ref=${p.code}`;
+    return `<tr>
+      <td><span style="font-weight:500;">${p.name}</span></td>
+      <td style="color:var(--text2)">${p.email||'—'}</td>
+      <td><span class="mono" style="background:var(--accent-soft);color:var(--accent);padding:3px 8px;border-radius:4px;">${p.code}</span></td>
+      <td>${p.commission_pct}%</td>
+      <td style="color:var(--accent);font-weight:500;">${p.gg_licenses?.[0]?.count||0}</td>
+      <td>
+        <button class="btn btn-sm btn-outline" onclick="copyPartnerLink('${refLink}')">📋 Copia link</button>
+      </td>
+      <td>${p.is_active ? '<span class="badge badge-green">Attivo</span>' : '<span class="badge badge-red">Inattivo</span>'}</td>
+      <td>
+        <div style="display:flex;gap:6px;">
+          ${p.is_active
+            ? `<button class="btn btn-sm btn-danger" onclick="togglePartner('${p.id}',false)">Disattiva</button>`
+            : `<button class="btn btn-sm btn-success" onclick="togglePartner('${p.id}',true)">Attiva</button>`
+          }
+          <button class="btn btn-sm btn-outline" onclick="deletePartner('${p.id}','${p.name}')">🗑</button>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function showPartnerForm(){ document.getElementById('partner-form').style.display='block'; }
+function hidePartnerForm(){ document.getElementById('partner-form').style.display='none'; }
+
+async function createPartner(){
+  const name = document.getElementById('p-name').value.trim();
+  const email = document.getElementById('p-email').value.trim();
+  const code = document.getElementById('p-code').value.trim();
+  const commission = parseInt(document.getElementById('p-commission').value)||20;
+  const msg = document.getElementById('partner-form-msg');
+  if(!name || !code){ msg.style.display='block'; msg.style.color='var(--red)'; msg.textContent='Nome e codice sono obbligatori.'; return; }
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/gg_partners`, {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${SUPABASE_ANON_KEY}`, 'apikey': SUPABASE_ANON_KEY, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+    body: JSON.stringify({ name, email: email||null, code, commission_pct: commission, is_active: true })
+  });
+  if(res.ok){
+    msg.style.display='block'; msg.style.color='var(--green)'; msg.textContent='✓ Partner creato!';
+    setTimeout(()=>{ hidePartnerForm(); loadPartners(); }, 1000);
+    document.getElementById('p-name').value=''; document.getElementById('p-email').value='';
+    document.getElementById('p-code').value=''; document.getElementById('p-commission').value='20';
+  } else {
+    const err = await res.json();
+    msg.style.display='block'; msg.style.color='var(--red)';
+    msg.textContent = err.message?.includes('unique') ? 'Codice già esistente.' : 'Errore durante la creazione.';
+  }
+}
+
+function copyPartnerLink(link){
+  navigator.clipboard.writeText(link).then(()=>showToast('Link copiato!','success'));
+}
+
+async function togglePartner(id, active){
+  await fetch(`${SUPABASE_URL}/rest/v1/gg_partners?id=eq.${id}`, {
+    method:'PATCH',
+    headers:{ 'Authorization':`Bearer ${SUPABASE_ANON_KEY}`, 'apikey':SUPABASE_ANON_KEY, 'Content-Type':'application/json' },
+    body: JSON.stringify({is_active: active})
+  });
+  showToast(active ? 'Partner attivato' : 'Partner disattivato', active?'success':'');
+  loadPartners();
+}
+
+async function deletePartner(id, name){
+  if(!confirm(`Eliminare il partner "${name}"?`)) return;
+  await fetch(`${SUPABASE_URL}/rest/v1/gg_partners?id=eq.${id}`, {
+    method:'DELETE',
+    headers:{ 'Authorization':`Bearer ${SUPABASE_ANON_KEY}`, 'apikey':SUPABASE_ANON_KEY }
+  });
+  showToast('Partner eliminato');
+  loadPartners();
+}
+
 </script>
 </body>
 </html>
