@@ -710,12 +710,7 @@ function updateLangButtons(){
     sw.innerHTML = '<button class="lang-btn active" onclick="setLang(\'it\')">IT</button>' +
     checked.map(l => '<button class="lang-btn" onclick="setLang(\'' + l + '\')">' + l.toUpperCase() + '</button>').join('');
   }
-  if(state.activeLangs) {
-    document.querySelectorAll('#lang-checkboxes input').forEach(inp => {
-      inp.checked = state.activeLangs.includes(inp.value);
-    });
-    updateLangButtons();
-  }
+
   livePreview();
 }
 
@@ -842,6 +837,12 @@ function restoreState(state){
   // restore color swatches selection
   document.querySelectorAll('#bg-swatches .swatch:not(.custom)').forEach(s => s.classList.toggle('selected', s.dataset.color === bgColor));
   document.querySelectorAll('#accent-swatches .swatch:not(.custom)').forEach(s => s.classList.toggle('selected', s.dataset.color === accentColor));
+  if(state.activeLangs) {
+    document.querySelectorAll('#lang-checkboxes input').forEach(inp => {
+      inp.checked = state.activeLangs.includes(inp.value);
+    });
+    updateLangButtons();
+  }
   livePreview();
 }
 
