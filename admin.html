@@ -478,7 +478,10 @@ select.inp{appearance:none;cursor:pointer;}
           </div>
           <div>
             <label style="font-size:11px;color:var(--text2);display:block;margin-bottom:4px;">Password accesso partner *</label>
-            <input class="inp" id="p-password" type="password" placeholder="Min. 8 caratteri">
+            <div style="position:relative;">
+  <input class="inp" id="p-password" type="password" placeholder="Min. 8 caratteri" style="padding-right:40px;">
+  <span onclick="togglePw()" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);cursor:pointer;font-size:16px;color:var(--text3);" id="pw-eye">👁</span>
+</div>
           </div>
         </div>
         <div style="font-size:11px;color:var(--text2);margin-bottom:12px;background:var(--surface2);border-radius:8px;padding:10px 12px;">
@@ -538,7 +541,7 @@ const ADMIN_PASSWORD = '@1Letizia1969@1';
 const SUPABASE_URL = 'https://foavmbrrlrpehshvjxfk.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZvYXZtYnJybHJwZWhzaHZqeGZrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMwNzM2NjMsImV4cCI6MjA4ODY0OTY2M30.-PxTvs4uA9U88QMGrjaJxh_6h3ELxGFGGu3iHsBUvuA';
 // ATTENZIONE: service role key — non esporre mai in produzione pubblico
-const SUPABASE_SERVICE_ROLE_KEY = 'INSERISCI_QUI_SERVICE_ROLE_KEY';
+const SUPABASE_SERVICE_ROLE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZvYXZtYnJybHJwZWhzaHZqeGZrIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MzA3MzY2MywiZXhwIjoyMDg4NjQ5NjYzfQ.M-aokcGdgdLvDupPVgJXifweAGRZYj5kKkya6uMOfRc';
 const PRICE_TIERS = {
   'price_1TBuFRIRaakVCbEdQMZgm5tf': { slots: 1, name: 'Basic' },
   'price_1TBkOhIRaakVCbEd3uT0MfFs': { slots: 2, name: 'Standard' },
@@ -1153,6 +1156,12 @@ function editSlots(id, current){
   });
 }
 
+function togglePw(){
+  const inp = document.getElementById('p-password');
+  const eye = document.getElementById('pw-eye');
+  if(inp.type==='password'){ inp.type='text'; eye.textContent='🙈'; }
+  else { inp.type='password'; eye.textContent='👁'; }
+}
 </script>
 </body>
 </html>
