@@ -286,11 +286,16 @@ select.inp{appearance:none;cursor:pointer;}
             </div>
             <div class="form-group">
               <div class="form-label">Piano</div>
-              <select class="inp" id="new-plan">
+              <select class="inp" id="new-plan" onchange="toggleCustomSlots()">
                 <option value="price_1TBuFRIRaakVCbEdQMZgm5tf">Basic — 1 struttura (€25)</option>
                 <option value="price_1TBkOhIRaakVCbEd3uT0MfFs">Standard — 2 strutture (€35)</option>
                 <option value="price_1TBuGTIRaakVCbEdZdcF3Hpo">Pro — 3 strutture (€45)</option>
+                <option value="enterprise">Enterprise — slot custom (prezzo manuale)</option>
               </select>
+              <div id="custom-slots-wrap" style="display:none;margin-top:8px;">
+                <input class="inp" type="number" id="new-custom-slots" placeholder="Es. 40" min="4" max="9999" style="width:100%;">
+                <div style="font-size:11px;color:var(--text2);margin-top:4px;">Numero di strutture per questa licenza</div>
+              </div>
             </div>
             <div class="form-group">
   <div class="form-label">Scadenza (opzionale — per prova gratuita)</div>
@@ -629,6 +634,7 @@ function renderLicenses(licenses){
             : `<button class="btn btn-sm btn-success" onclick="toggleLicense('${l.id}',true)">Attiva</button>`
           }
           <button class="btn btn-sm btn-outline" onclick="setExpiry('${l.id}','${l.expires_at||''}')">Scadenza</button>
+          <button class="btn btn-sm btn-outline" onclick="editSlots('${l.id}',${l.slots_total})" title="Modifica slot">⚙ Slot</button>
           <button class="btn btn-sm btn-outline" onclick="copyRenewalLink('${l.code}','${l.slots_total}')" title="Copia link rinnovo">🔗</button>
           <button class="btn btn-sm btn-outline" onclick="prefillResend('${l.code}','${l.slots_total}')">✉</button>
           <button class="btn btn-sm btn-outline" onclick="editEmail('${l.id}','${l.email}')" title="Modifica email">✏</button>
@@ -706,7 +712,7 @@ async function createLicense(){
       },
       body: JSON.stringify({
         code, email, customer_name: name,
-        slots_total: tier.slots,
+        slots_total: plan === 'enterprise' ? (parseInt(document.getElementById('new-custom-slots').value)||4) : tier.slots,
         slots_used: 0,
         is_active: true,
         expires_at: expires ? new Date(expires).toISOString() : null
@@ -1046,6 +1052,32 @@ async function deletePartner(id, name){
   });
   showToast('Partner eliminato');
   loadPartners();
+}
+
+
+// ===== CUSTOM SLOTS =====
+function toggleCustomSlots(){
+  const plan = document.getElementById('new-plan').value;
+  document.getElementById('custom-slots-wrap').style.display = plan === 'enterprise' ? 'block' : 'none';
+}
+
+function editSlots(id, current){
+  const val = prompt(`Modifica numero strutture (attuale: ${current}):`, current);
+  if(val === null) return;
+  const slots = parseInt(val);
+  if(!slots || slots < 1){ alert('Numero non valido.'); return; }
+  fetch(`${SUPABASE_URL}/rest/v1/gg_licenses?id=eq.${id}`, {
+    method: 'PATCH',
+    headers: {
+      'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+      'apikey': SUPABASE_ANON_KEY,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ slots_total: slots })
+  }).then(() => {
+    showToast(`Slot aggiornati a ${slots}`, 'success');
+    loadLicenses();
+  });
 }
 
 </script>
