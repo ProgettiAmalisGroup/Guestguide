@@ -555,6 +555,7 @@ let modalCallback = null;
 function doLogin(){
   const pw = document.getElementById('admin-pw').value;
   if(pw === ADMIN_PASSWORD){
+    sessionStorage.setItem('gg_admin_auth', '1');
     document.getElementById('login-screen').style.display = 'none';
     document.getElementById('admin-screen').style.display = 'block';
     loadLicenses();
@@ -564,6 +565,14 @@ function doLogin(){
   }
 }
 document.getElementById('admin-pw').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
+
+window.onload = () => {
+  if(sessionStorage.getItem('gg_admin_auth') === '1'){
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('admin-screen').style.display = 'block';
+    loadLicenses();
+  }
+};
 
 // ===== TABS =====
 function showTab(tab){

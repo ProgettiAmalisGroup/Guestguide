@@ -765,6 +765,17 @@ function showToast(msg, type=''){
 sb.auth.onAuthStateChange(async (event, session) => {
   if(session && !partnerData){
     await loadPartnerData(session.user.id);
+  } else if(!session && partnerData){
+    partnerData = null;
+    document.getElementById('partner-screen').style.display='none';
+    document.getElementById('login-screen').style.display='flex';
+  }
+});
+
+// Controlla sessione esistente al caricamento
+sb.auth.getSession().then(async ({ data: { session } }) => {
+  if(session && !partnerData){
+    await loadPartnerData(session.user.id);
   }
 });
 </script>
