@@ -785,20 +785,20 @@ function saveCurrentSlot(){
 
 async function saveSlotToSupabase(slotIndex, state){
   try {
-    await fetch(`${SUPABASE_URL}/functions/v1/save-slot`, {
+    await fetch(`${SUPABASE_URL}/functions/v1/publish-guide`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` },
-      body: JSON.stringify({ licenseCode: currentLicenseCode, slotIndex, state })
+      body: JSON.stringify({ action: 'save', licenseCode: currentLicenseCode, slotIndex, state })
     });
   } catch(e) { /* fallback silenzioso */ }
 }
 
 async function loadSlotsFromSupabase(code){
   try {
-    const res = await fetch(`${SUPABASE_URL}/functions/v1/load-slot`, {
+    const res = await fetch(`${SUPABASE_URL}/functions/v1/publish-guide`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` },
-      body: JSON.stringify({ licenseCode: code })
+      body: JSON.stringify({ action: 'load', licenseCode: code })
     });
     const data = await res.json();
     if(data.success && data.slotsData) return data.slotsData;
