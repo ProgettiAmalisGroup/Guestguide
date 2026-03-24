@@ -476,6 +476,13 @@ select.inp{appearance:none;cursor:pointer;}
             <label style="font-size:11px;color:var(--text2);display:block;margin-bottom:4px;">Commissione %</label>
             <input class="inp" id="p-commission" type="number" value="20" min="0" max="100">
           </div>
+          <div>
+            <label style="font-size:11px;color:var(--text2);display:block;margin-bottom:4px;">Password accesso partner *</label>
+            <input class="inp" id="p-password" type="password" placeholder="Min. 8 caratteri">
+          </div>
+        </div>
+        <div style="font-size:11px;color:var(--text2);margin-bottom:12px;background:var(--surface2);border-radius:8px;padding:10px 12px;">
+          ℹ️ Verrà creato un account Supabase Auth per il partner con email e password inseriti. Il partner potrà accedere a <strong>guestguide.coomunity.it/partner</strong>
         </div>
         <div style="display:flex;gap:8px;">
           <button class="btn btn-primary" onclick="createPartner()">Crea partner</button>
@@ -530,6 +537,8 @@ select.inp{appearance:none;cursor:pointer;}
 const ADMIN_PASSWORD = '@1Letizia1969@1';
 const SUPABASE_URL = 'https://foavmbrrlrpehshvjxfk.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZvYXZtYnJybHJwZWhzaHZqeGZrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMwNzM2NjMsImV4cCI6MjA4ODY0OTY2M30.-PxTvs4uA9U88QMGrjaJxh_6h3ELxGFGGu3iHsBUvuA';
+// ATTENZIONE: service role key — non esporre mai in produzione pubblico
+const SUPABASE_SERVICE_ROLE_KEY = 'INSERISCI_QUI_SERVICE_ROLE_KEY';
 const PRICE_TIERS = {
   'price_1TBuFRIRaakVCbEdQMZgm5tf': { slots: 1, name: 'Basic' },
   'price_1TBkOhIRaakVCbEd3uT0MfFs': { slots: 2, name: 'Standard' },
@@ -995,7 +1004,8 @@ function renderPartners(partners){
             ? `<button class="btn btn-sm btn-danger" onclick="togglePartner('${p.id}',false)">Disattiva</button>`
             : `<button class="btn btn-sm btn-success" onclick="togglePartner('${p.id}',true)">Attiva</button>`
           }
-          <button class="btn btn-sm btn-outline" onclick="deletePartner('${p.id}','${p.name}')">🗑</button>
+          <button class="btn btn-sm btn-outline" onclick="resetPartnerPassword('${p.email}')" title="Reset password">🔑</button>
+          <button class="btn btn-sm btn-outline" onclick="deletePartner('${p.id}','${p.name}','${p.user_id||''}')">🗑</button>
         </div>
       </td>
     </tr>`;
@@ -1010,23 +1020,56 @@ async function createPartner(){
   const email = document.getElementById('p-email').value.trim();
   const code = document.getElementById('p-code').value.trim();
   const commission = parseInt(document.getElementById('p-commission').value)||20;
-  const msg = document.getElementById('partner-form-msg');
-  if(!name || !code){ msg.style.display='block'; msg.style.color='var(--red)'; msg.textContent='Nome e codice sono obbligatori.'; return; }
   const phone = document.getElementById('p-phone').value.trim();
-  const res = await fetch(`${SUPABASE_URL}/rest/v1/gg_partners`, {
-    method: 'POST',
-    headers: { 'Authorization': `Bearer ${SUPABASE_ANON_KEY}`, 'apikey': SUPABASE_ANON_KEY, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
-    body: JSON.stringify({ name, email: email||null, phone: phone||null, code, commission_pct: commission, is_active: true })
-  });
-  if(res.ok){
-    msg.style.display='block'; msg.style.color='var(--green)'; msg.textContent='✓ Partner creato!';
-    setTimeout(()=>{ hidePartnerForm(); loadPartners(); }, 1000);
-    document.getElementById('p-name').value=''; document.getElementById('p-email').value='';
-    document.getElementById('p-code').value=''; document.getElementById('p-commission').value='20';
-  } else {
-    const err = await res.json();
-    msg.style.display='block'; msg.style.color='var(--red)';
-    msg.textContent = err.message?.includes('unique') ? 'Codice già esistente.' : 'Errore durante la creazione.';
+  const password = document.getElementById('p-password').value;
+  const msg = document.getElementById('partner-form-msg');
+
+  if(!name || !code){ msg.style.display='block'; msg.style.color='var(--red)'; msg.textContent='Nome e codice sono obbligatori.'; return; }
+  if(!email){ msg.style.display='block'; msg.style.color='var(--red)'; msg.textContent='Email obbligatoria per creare account partner.'; return; }
+  if(!password || password.length < 8){ msg.style.display='block'; msg.style.color='var(--red)'; msg.textContent='Password obbligatoria (min. 8 caratteri).'; return; }
+
+  msg.style.display='block'; msg.style.color='var(--text2)'; msg.textContent='Creazione account in corso...';
+
+  try {
+    // 1. Crea utente Supabase Auth via Admin API
+    const authRes = await fetch(`${SUPABASE_URL}/auth/v1/admin/users`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
+        'apikey': SUPABASE_SERVICE_ROLE_KEY,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ email, password, email_confirm: true })
+    });
+    const authData = await authRes.json();
+    if(!authRes.ok) throw new Error(authData.message || authData.msg || 'Errore creazione account');
+    const userId = authData.id;
+
+    // 2. Crea partner con user_id
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/gg_partners`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${SUPABASE_ANON_KEY}`, 'apikey': SUPABASE_ANON_KEY, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+      body: JSON.stringify({ name, email, phone: phone||null, code, commission_pct: commission, is_active: true, user_id: userId })
+    });
+
+    if(!res.ok){
+      // Rollback: elimina utente auth se partner creation fallisce
+      await fetch(`${SUPABASE_URL}/auth/v1/admin/users/${userId}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`, 'apikey': SUPABASE_SERVICE_ROLE_KEY }
+      });
+      const err = await res.json();
+      throw new Error(err.message?.includes('unique') ? 'Codice già esistente.' : 'Errore durante la creazione.');
+    }
+
+    msg.style.display='block'; msg.style.color='var(--green)';
+    msg.textContent=`✓ Partner creato! Account: ${email}`;
+    setTimeout(()=>{ hidePartnerForm(); loadPartners(); }, 1500);
+    ['p-name','p-email','p-phone','p-code','p-password'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('p-commission').value='20';
+
+  } catch(e) {
+    msg.style.display='block'; msg.style.color='var(--red)'; msg.textContent = e.message;
   }
 }
 
@@ -1044,12 +1087,42 @@ async function togglePartner(id, active){
   loadPartners();
 }
 
-async function deletePartner(id, name){
-  if(!confirm(`Eliminare il partner "${name}"?`)) return;
+async function resetPartnerPassword(email){
+  if(!email){ showToast('Email non trovata'); return; }
+  const newPw = prompt(`Inserisci la nuova password per ${email}:`);
+  if(!newPw || newPw.length < 8){ alert('Password troppo corta (min. 8 caratteri)'); return; }
+  // Trova user_id
+  const { data } = await fetchJSON(`${SUPABASE_URL}/rest/v1/gg_partners?email=eq.${encodeURIComponent(email)}&select=user_id`);
+  const userId = data?.[0]?.user_id;
+  if(!userId){ showToast('Account non trovato'); return; }
+  const res = await fetch(`${SUPABASE_URL}/auth/v1/admin/users/${userId}`, {
+    method: 'PUT',
+    headers: { 'Authorization': `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`, 'apikey': SUPABASE_SERVICE_ROLE_KEY, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ password: newPw })
+  });
+  if(res.ok) showToast('Password aggiornata!', 'success');
+  else showToast('Errore aggiornamento password');
+}
+
+async function fetchJSON(url){
+  const res = await fetch(url, { headers: { 'Authorization': `Bearer ${SUPABASE_ANON_KEY}`, 'apikey': SUPABASE_ANON_KEY } });
+  return { data: await res.json(), ok: res.ok };
+}
+
+async function deletePartner(id, name, userId){
+  if(!confirm(`Eliminare il partner "${name}"? Verrà eliminato anche l'account di accesso.`)) return;
+  // Elimina partner
   await fetch(`${SUPABASE_URL}/rest/v1/gg_partners?id=eq.${id}`, {
     method:'DELETE',
     headers:{ 'Authorization':`Bearer ${SUPABASE_ANON_KEY}`, 'apikey':SUPABASE_ANON_KEY }
   });
+  // Elimina account auth se presente
+  if(userId){
+    await fetch(`${SUPABASE_URL}/auth/v1/admin/users/${userId}`, {
+      method: 'DELETE',
+      headers: { 'Authorization': `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`, 'apikey': SUPABASE_SERVICE_ROLE_KEY }
+    });
+  }
   showToast('Partner eliminato');
   loadPartners();
 }

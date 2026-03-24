@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GuestGuide — Area Partner</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --bg:#F4F4F0;--surface:#FFFFFF;--surface2:#F9F9F7;
+  --border:#E8E8E4;--border2:#DDDDD9;
+  --text:#1A1A1A;--text2:#666660;--text3:#AAAAAA;
+  --accent:#4F6EF7;--accent-soft:rgba(79,110,247,0.12);
+  --green:#16A34A;--green-soft:rgba(22,163,74,0.1);
+  --red:#DC2626;--red-soft:rgba(220,38,38,0.1);
+  --yellow:#D97706;--yellow-soft:rgba(217,119,6,0.1);
+  --radius:10px;
+}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:14px;}
+
+/* LOGIN */
+#login-screen{display:flex;align-items:center;justify-content:center;min-height:100vh;background:radial-gradient(ellipse at 50% 0%,rgba(79,110,247,0.08) 0%,transparent 60%);}
+.login-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:40px;width:100%;max-width:360px;}
+.login-logo{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--text3);margin-bottom:6px;}
+.login-title{font-size:22px;font-weight:600;margin-bottom:4px;}
+.login-sub{font-size:13px;color:var(--text2);margin-bottom:28px;}
+.inp{width:100%;padding:10px 14px;background:var(--bg);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;outline:none;transition:border-color .15s;}
+.inp:focus{border-color:var(--accent);}
+.inp::placeholder{color:var(--text3);}
+.form-group{margin-bottom:16px;}
+.form-label{font-size:12px;font-weight:500;color:var(--text2);margin-bottom:6px;display:block;}
+.btn-primary{width:100%;padding:11px;background:var(--accent);color:#fff;border:none;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;cursor:pointer;transition:opacity .2s;}
+.btn-primary:hover{opacity:.9;}
+
+/* LAYOUT */
+#partner-screen{display:none;min-height:100vh;}
+.sidebar{position:fixed;left:0;top:0;bottom:0;width:220px;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;z-index:100;}
+.sidebar-logo{padding:20px 20px 16px;border-bottom:1px solid var(--border);}
+.sidebar-logo-brand{font-size:16px;font-weight:600;}
+.sidebar-logo-sub{font-size:11px;color:var(--text3);margin-top:2px;}
+.sidebar-partner{padding:12px 16px;border-bottom:1px solid var(--border);background:var(--surface2);}
+.sidebar-partner-name{font-size:13px;font-weight:500;}
+.sidebar-partner-code{font-size:11px;color:var(--accent);font-family:'DM Mono',monospace;margin-top:2px;}
+.sidebar-nav{flex:1;padding:8px 0;overflow-y:auto;}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 16px;cursor:pointer;color:var(--text2);font-size:13px;border-left:3px solid transparent;transition:all .15s;}
+.nav-item:hover{color:var(--text);background:rgba(0,0,0,0.02);}
+.nav-item.active{color:var(--text);border-left-color:var(--accent);background:var(--accent-soft);}
+.nav-icon{font-size:16px;width:20px;text-align:center;}
+.sidebar-footer{padding:12px 16px;border-top:1px solid var(--border);}
+.btn-logout{width:100%;padding:8px;background:transparent;border:1px solid var(--border2);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:12px;color:var(--text2);cursor:pointer;}
+.btn-logout:hover{background:var(--red-soft);color:var(--red);border-color:var(--red);}
+
+.main{margin-left:220px;padding:28px 32px;min-height:100vh;}
+.page-title{font-size:20px;font-weight:600;margin-bottom:20px;}
+
+/* CARDS */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px;}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px 20px;}
+.stat-label{font-size:12px;color:var(--text2);margin-bottom:6px;}
+.stat-val{font-size:24px;font-weight:600;}
+.stat-sub{font-size:11px;color:var(--text3);margin-top:4px;}
+
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:20px;}
+.card-title{font-size:14px;font-weight:600;margin-bottom:16px;}
+
+/* REFERRAL */
+.referral-box{background:var(--accent-soft);border:1px solid rgba(79,110,247,0.2);border-radius:var(--radius);padding:16px 20px;display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:16px;}
+.referral-url{font-family:'DM Mono',monospace;font-size:13px;color:var(--accent);word-break:break-all;}
+.btn-copy{padding:8px 16px;background:var(--accent);color:#fff;border:none;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:12px;cursor:pointer;white-space:nowrap;transition:opacity .2s;}
+.btn-copy:hover{opacity:.9;}
+.share-btns{display:flex;gap:8px;flex-wrap:wrap;}
+.share-btn{padding:8px 16px;background:transparent;border:1px solid var(--border2);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:12px;color:var(--text2);cursor:pointer;display:flex;align-items:center;gap:6px;transition:all .15s;}
+.share-btn:hover{border-color:var(--text2);color:var(--text);}
+
+/* TABLE */
+.table-wrap{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;}
+th{text-align:left;font-size:11px;font-weight:500;color:var(--text2);letter-spacing:.05em;text-transform:uppercase;padding:10px 14px;border-bottom:1px solid var(--border);}
+td{padding:11px 14px;border-bottom:1px solid var(--border);font-size:13px;vertical-align:middle;}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:var(--surface2);}
+.empty{text-align:center;color:var(--text3);padding:32px;font-size:13px;}
+.mono{font-family:'DM Mono',monospace;font-size:12px;}
+
+/* BADGE */
+.badge{display:inline-flex;align-items:center;padding:3px 8px;border-radius:20px;font-size:11px;font-weight:500;}
+.badge-green{background:var(--green-soft);color:var(--green);}
+.badge-yellow{background:var(--yellow-soft);color:var(--yellow);}
+.badge-red{background:var(--red-soft);color:var(--red);}
+.badge-blue{background:var(--accent-soft);color:var(--accent);}
+.badge-gray{background:#f0f0ec;color:var(--text2);}
+
+/* TABS */
+.tabs{display:flex;gap:2px;background:var(--bg);border-radius:8px;padding:3px;margin-bottom:20px;width:fit-content;}
+.tab{padding:7px 16px;border-radius:6px;font-size:13px;cursor:pointer;color:var(--text2);transition:all .15s;}
+.tab.active{background:var(--surface);color:var(--text);box-shadow:0 1px 3px rgba(0,0,0,0.08);}
+
+/* FORM */
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;}
+.form-row.three{grid-template-columns:1fr 1fr 1fr;}
+.btn{padding:8px 16px;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer;transition:all .15s;}
+.btn-outline{background:transparent;border:1px solid var(--border2);color:var(--text2);}
+.btn-outline:hover{border-color:var(--text2);color:var(--text);}
+.btn-accent{background:var(--accent);color:#fff;border:none;}
+.btn-accent:hover{opacity:.9;}
+.btn-sm{padding:5px 10px;font-size:12px;}
+.btn-danger{background:transparent;border:1px solid var(--red-soft);color:var(--red);}
+.btn-danger:hover{background:var(--red-soft);}
+.btn-success{background:transparent;border:1px solid var(--green-soft);color:var(--green);}
+
+/* CHART AREA */
+.chart-wrap{height:180px;display:flex;align-items:flex-end;gap:6px;padding:10px 0;}
+.chart-bar-wrap{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;}
+.chart-bar{width:100%;border-radius:4px 4px 0 0;background:var(--accent);opacity:.8;transition:height .3s;min-height:2px;}
+.chart-label{font-size:10px;color:var(--text3);}
+.chart-val{font-size:10px;color:var(--text2);font-weight:500;}
+
+/* TOAST */
+.toast{position:fixed;bottom:24px;right:24px;background:#1a1a1a;color:#fff;padding:10px 18px;border-radius:8px;font-size:13px;z-index:9999;display:none;animation:fadeIn .2s;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:500;display:flex;align-items:center;justify-content:center;padding:20px;}
+.modal{background:var(--surface);border-radius:16px;padding:28px;max-width:480px;width:100%;}
+.modal-title{font-size:18px;font-weight:600;margin-bottom:6px;}
+.modal-sub{font-size:13px;color:var(--text2);margin-bottom:24px;}
+.modal-btns{display:flex;gap:8px;justify-content:flex-end;margin-top:20px;}
+
+@media(max-width:768px){
+  .sidebar{display:none;}
+  .main{margin-left:0;padding:16px;}
+  .stats-grid{grid-template-columns:1fr 1fr;}
+  .form-row{grid-template-columns:1fr;}
+  .form-row.three{grid-template-columns:1fr;}
+}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="login-card">
+    <div class="login-logo">GuestGuide</div>
+    <div class="login-title">Area Partner</div>
+    <div class="login-sub">Accedi con le tue credenziali</div>
+    <div class="form-group">
+      <label class="form-label">Email</label>
+      <input class="inp" type="email" id="login-email" placeholder="partner@email.com" onkeydown="if(event.key==='Enter')doLogin()">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Password</label>
+      <input class="inp" type="password" id="login-password" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()">
+    </div>
+    <div id="login-error" style="display:none;font-size:12px;color:var(--red);margin-bottom:12px;"></div>
+    <button class="btn-primary" id="login-btn" onclick="doLogin()">Accedi</button>
+    <div style="margin-top:16px;text-align:center;">
+      <button onclick="showForgotPassword()" style="background:none;border:none;font-size:12px;color:var(--text3);cursor:pointer;">Password dimenticata?</button>
+    </div>
+  </div>
+</div>
+
+<!-- PARTNER SCREEN -->
+<div id="partner-screen">
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="sidebar-logo">
+      <div class="sidebar-logo-brand">GuestGuide</div>
+      <div class="sidebar-logo-sub">Area Partner</div>
+    </div>
+    <div class="sidebar-partner">
+      <div class="sidebar-partner-name" id="sidebar-name">—</div>
+      <div class="sidebar-partner-code" id="sidebar-code">—</div>
+    </div>
+    <div class="sidebar-nav">
+      <div class="nav-item active" onclick="showTab('dashboard')"><span class="nav-icon">📊</span>Dashboard</div>
+      <div class="nav-item" onclick="showTab('referral')"><span class="nav-icon">🔗</span>Link Referral</div>
+      <div class="nav-item" onclick="showTab('contacts')"><span class="nav-icon">👥</span>Contatti</div>
+      <div class="nav-item" onclick="showTab('sales')"><span class="nav-icon">🗝</span>Vendite</div>
+      <div class="nav-item" onclick="showTab('payments')"><span class="nav-icon">💶</span>Pagamenti</div>
+    </div>
+    <div class="sidebar-footer">
+      <button class="btn-logout" onclick="doLogout()">Esci</button>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main">
+
+    <!-- DASHBOARD -->
+    <div id="tab-dashboard">
+      <div class="page-title">Dashboard</div>
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-label">Licenze generate</div>
+          <div class="stat-val" id="stat-licenses">—</div>
+          <div class="stat-sub">totale</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Commissioni totali</div>
+          <div class="stat-val" id="stat-commissions">—</div>
+          <div class="stat-sub">maturate</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Pagamenti ricevuti</div>
+          <div class="stat-val" id="stat-paid">—</div>
+          <div class="stat-sub">totale</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Da ricevere</div>
+          <div class="stat-val" id="stat-pending">—</div>
+          <div class="stat-sub">in attesa</div>
+        </div>
+      </div>
+
+      <!-- GRAFICO VENDITE -->
+      <div class="card">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+          <div class="card-title" style="margin:0;">Vendite nel tempo</div>
+          <div class="tabs" style="margin:0;">
+            <div class="tab active" onclick="switchChartPeriod('week',this)">Settimana</div>
+            <div class="tab" onclick="switchChartPeriod('month',this)">Mese</div>
+            <div class="tab" onclick="switchChartPeriod('year',this)">Anno</div>
+          </div>
+        </div>
+        <div class="chart-wrap" id="chart-wrap"></div>
+      </div>
+
+      <!-- ULTIME VENDITE -->
+      <div class="card">
+        <div class="card-title">Ultime vendite</div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Codice</th><th>Piano</th><th>Data</th><th>Commissione</th></tr></thead>
+            <tbody id="recent-sales-tbody"><tr><td colspan="4" class="empty">Caricamento...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- REFERRAL -->
+    <div id="tab-referral" style="display:none;">
+      <div class="page-title">Link Referral</div>
+      <div class="card">
+        <div class="card-title">Il tuo link personale</div>
+        <div class="referral-box">
+          <div class="referral-url" id="referral-url">—</div>
+          <button class="btn-copy" onclick="copyReferralLink()">📋 Copia</button>
+        </div>
+        <div style="font-size:12px;color:var(--text2);margin-bottom:16px;">Condividi questo link con i tuoi clienti. Ogni acquisto tramite questo link verrà automaticamente associato al tuo account.</div>
+        <div class="share-btns">
+          <button class="share-btn" onclick="shareWhatsApp()">💬 WhatsApp</button>
+          <button class="share-btn" onclick="shareEmail()">✉ Email</button>
+          <button class="share-btn" onclick="shareTelegram()">✈ Telegram</button>
+          <button class="share-btn" onclick="copyReferralLink()">🔗 Copia link</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Statistiche referral</div>
+        <div class="stats-grid" style="grid-template-columns:repeat(3,1fr);">
+          <div class="stat-card">
+            <div class="stat-label">Click sul link</div>
+            <div class="stat-val">—</div>
+            <div class="stat-sub">prossimamente</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Conversioni</div>
+            <div class="stat-val" id="ref-conversions">—</div>
+            <div class="stat-sub">acquisti completati</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Tasso conv.</div>
+            <div class="stat-val">—</div>
+            <div class="stat-sub">prossimamente</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CONTATTI -->
+    <div id="tab-contacts" style="display:none;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+        <div class="page-title" style="margin:0;">Contatti</div>
+        <button class="btn btn-accent" onclick="showContactModal()">+ Nuovo contatto</button>
+      </div>
+
+      <div class="card" style="padding:12px 16px;margin-bottom:16px;">
+        <input class="inp" type="text" placeholder="Cerca contatto..." id="contact-search" oninput="filterContacts(this.value)" style="background:transparent;border:none;padding:4px 0;font-size:14px;">
+      </div>
+
+      <div class="card" style="padding:0;">
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Nome</th><th>Struttura</th><th>Città</th><th>Telefono</th><th>Stato</th><th>Note</th><th>Azioni</th></tr></thead>
+            <tbody id="contacts-tbody"><tr><td colspan="7" class="empty">Caricamento...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- VENDITE -->
+    <div id="tab-sales" style="display:none;">
+      <div class="page-title">Vendite</div>
+      <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;">
+        <button class="btn btn-outline btn-sm" onclick="filterSalesPeriod('all',this)" style="border-color:var(--accent);color:var(--accent);">Tutte</button>
+        <button class="btn btn-outline btn-sm" onclick="filterSalesPeriod('today',this)">Oggi</button>
+        <button class="btn btn-outline btn-sm" onclick="filterSalesPeriod('week',this)">Settimana</button>
+        <button class="btn btn-outline btn-sm" onclick="filterSalesPeriod('month',this)">Mese</button>
+        <button class="btn btn-outline btn-sm" onclick="filterSalesPeriod('year',this)">Anno</button>
+      </div>
+      <div class="card" style="padding:0;">
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Codice licenza</th><th>Cliente</th><th>Piano</th><th>Data acquisto</th><th>Prezzo</th><th>Commissione</th></tr></thead>
+            <tbody id="sales-tbody"><tr><td colspan="6" class="empty">Caricamento...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- PAGAMENTI -->
+    <div id="tab-payments" style="display:none;">
+      <div class="page-title">Pagamenti ricevuti</div>
+      <div class="stats-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:24px;">
+        <div class="stat-card">
+          <div class="stat-label">Totale ricevuto</div>
+          <div class="stat-val" id="pay-total">—</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Commissioni maturate</div>
+          <div class="stat-val" id="pay-earned">—</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">In attesa</div>
+          <div class="stat-val" id="pay-pending-val">—</div>
+        </div>
+      </div>
+      <div class="card" style="padding:0;">
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Data</th><th>Importo</th><th>Descrizione</th></tr></thead>
+            <tbody id="payments-tbody"><tr><td colspan="3" class="empty">Nessun pagamento ancora</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- MODAL CONTATTO -->
+<div id="contact-modal" style="display:none;" class="modal-overlay">
+  <div class="modal">
+    <div class="modal-title" id="contact-modal-title">Nuovo contatto</div>
+    <div class="modal-sub">Aggiungi un potenziale cliente da seguire</div>
+    <input type="hidden" id="contact-id">
+    <div class="form-row">
+      <div class="form-group" style="margin:0;">
+        <label class="form-label">Nome *</label>
+        <input class="inp" id="c-name" placeholder="Nome e cognome">
+      </div>
+      <div class="form-group" style="margin:0;">
+        <label class="form-label">Telefono</label>
+        <input class="inp" id="c-phone" type="tel" placeholder="+39 333 123 4567">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group" style="margin:0;">
+        <label class="form-label">Email</label>
+        <input class="inp" id="c-email" type="email" placeholder="email@esempio.com">
+      </div>
+      <div class="form-group" style="margin:0;">
+        <label class="form-label">Nome struttura</label>
+        <input class="inp" id="c-struttura" placeholder="Es. Villa Rossi">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group" style="margin:0;">
+        <label class="form-label">Città</label>
+        <input class="inp" id="c-citta" placeholder="Es. Roma">
+      </div>
+      <div class="form-group" style="margin:0;">
+        <label class="form-label">Stato</label>
+        <select class="inp" id="c-status">
+          <option value="da_contattare">Da contattare</option>
+          <option value="contattato">Contattato</option>
+          <option value="interessato">Interessato</option>
+          <option value="acquistato">Acquistato</option>
+          <option value="non_interessato">Non interessato</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Note</label>
+      <textarea class="inp" id="c-notes" rows="2" placeholder="Note aggiuntive..." style="resize:vertical;"></textarea>
+    </div>
+    <div class="modal-btns">
+      <button class="btn btn-outline" onclick="closeContactModal()">Annulla</button>
+      <button class="btn btn-accent" onclick="saveContact()">Salva</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPABASE_URL = 'https://foavmbrrlrpehshvjxfk.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZvYXZtYnJybHJwZWhzaHZqeGZrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMwNzM2NjMsImV4cCI6MjA4ODY0OTY2M30.-PxTvs4uA9U88QMGrjaJxh_6h3ELxGFGGu3iHsBUvuA';
+const { createClient } = supabase;
+const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+const PLAN_PRICES = {1: 25, 2: 35, 3: 45};
+
+let partnerData = null;
+let allLicenses = [];
+let allContacts = [];
+let allPayments = [];
+let chartPeriod = 'week';
+
+// ===== LOGIN =====
+async function doLogin(){
+  const email = document.getElementById('login-email').value.trim();
+  const password = document.getElementById('login-password').value;
+  const err = document.getElementById('login-error');
+  const btn = document.getElementById('login-btn');
+  if(!email || !password){ err.style.display='block'; err.textContent='Inserisci email e password.'; return; }
+  btn.textContent = 'Accesso...'; btn.disabled = true;
+  const { data, error } = await sb.auth.signInWithPassword({ email, password });
+  if(error){
+    err.style.display='block';
+    err.textContent = error.message.includes('Invalid') ? 'Email o password non corretti.' : error.message;
+    btn.textContent='Accedi'; btn.disabled=false;
+    return;
+  }
+  await loadPartnerData(data.user.id);
+}
+
+async function loadPartnerData(userId){
+  const { data, error } = await sb.from('gg_partners').select('*').eq('user_id', userId).single();
+  if(error || !data){
+    document.getElementById('login-error').style.display='block';
+    document.getElementById('login-error').textContent = 'Account partner non trovato. Contatta l\'amministratore.';
+    document.getElementById('login-btn').textContent='Accedi';
+    document.getElementById('login-btn').disabled=false;
+    await sb.auth.signOut();
+    return;
+  }
+  partnerData = data;
+  initPartnerScreen();
+}
+
+function initPartnerScreen(){
+  document.getElementById('login-screen').style.display='none';
+  document.getElementById('partner-screen').style.display='block';
+  document.getElementById('sidebar-name').textContent = partnerData.name;
+  document.getElementById('sidebar-code').textContent = partnerData.code;
+  document.getElementById('referral-url').textContent = `https://guestguide.coomunity.it?ref=${partnerData.code}`;
+  loadDashboard();
+}
+
+async function doLogout(){
+  await sb.auth.signOut();
+  partnerData = null;
+  document.getElementById('partner-screen').style.display='none';
+  document.getElementById('login-screen').style.display='flex';
+  document.getElementById('login-email').value='';
+  document.getElementById('login-password').value='';
+}
+
+// ===== TABS =====
+function showTab(tab){
+  ['dashboard','referral','contacts','sales','payments'].forEach(t => {
+    document.getElementById('tab-'+t).style.display = t===tab?'block':'none';
+  });
+  document.querySelectorAll('.nav-item').forEach((el,i) => {
+    el.classList.toggle('active', ['dashboard','referral','contacts','sales','payments'][i]===tab);
+  });
+  if(tab==='contacts') loadContacts();
+  if(tab==='sales') loadSales();
+  if(tab==='payments') loadPayments();
+}
+
+// ===== DASHBOARD =====
+async function loadDashboard(){
+  const { data: licenses } = await sb.from('gg_licenses')
+    .select('*').eq('partner_code', partnerData.code);
+  allLicenses = licenses || [];
+
+  const { data: payments } = await sb.from('gg_partner_payments')
+    .select('*').eq('partner_code', partnerData.code).order('paid_at', {ascending:false});
+  allPayments = payments || [];
+
+  const commRate = (partnerData.commission_pct || 20) / 100;
+  const totalComm = allLicenses.reduce((acc,l) => acc + (PLAN_PRICES[l.slots_total]||0) * commRate, 0);
+  const totalPaid = allPayments.reduce((acc,p) => acc + (p.amount||0), 0);
+  const pending = Math.max(0, totalComm - totalPaid);
+
+  document.getElementById('stat-licenses').textContent = allLicenses.length;
+  document.getElementById('stat-commissions').textContent = '€' + totalComm.toFixed(2);
+  document.getElementById('stat-paid').textContent = '€' + totalPaid.toFixed(2);
+  document.getElementById('stat-pending').textContent = '€' + pending.toFixed(2);
+  document.getElementById('ref-conversions').textContent = allLicenses.length;
+  document.getElementById('pay-total').textContent = '€' + totalPaid.toFixed(2);
+  document.getElementById('pay-earned').textContent = '€' + totalComm.toFixed(2);
+  document.getElementById('pay-pending-val').textContent = '€' + pending.toFixed(2);
+
+  renderChart('week');
+  renderRecentSales();
+}
+
+function renderRecentSales(){
+  const tbody = document.getElementById('recent-sales-tbody');
+  const commRate = (partnerData.commission_pct || 20) / 100;
+  const recent = allLicenses.slice(0,5);
+  if(!recent.length){ tbody.innerHTML='<tr><td colspan="4" class="empty">Nessuna vendita ancora</td></tr>'; return; }
+  tbody.innerHTML = recent.map(l => {
+    const price = PLAN_PRICES[l.slots_total]||0;
+    const comm = (price * commRate).toFixed(2);
+    const planName = l.slots_total===1?'Basic':l.slots_total===2?'Standard':l.slots_total>3?'Enterprise':'Pro';
+    return `<tr>
+      <td><span class="mono">${l.code}</span></td>
+      <td><span class="badge badge-blue">${planName} · ${l.slots_total}x</span></td>
+      <td>${l.created_at ? new Date(l.created_at).toLocaleDateString('it-IT') : '—'}</td>
+      <td style="color:var(--green);font-weight:500;">€${comm}</td>
+    </tr>`;
+  }).join('');
+}
+
+function switchChartPeriod(period, el){
+  chartPeriod = period;
+  document.querySelectorAll('.tabs .tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  renderChart(period);
+}
+
+function renderChart(period){
+  const wrap = document.getElementById('chart-wrap');
+  const now = new Date();
+  let labels = [], counts = [];
+
+  if(period === 'week'){
+    for(let i=6;i>=0;i--){
+      const d = new Date(now); d.setDate(d.getDate()-i);
+      labels.push(d.toLocaleDateString('it-IT',{weekday:'short'}));
+      counts.push(allLicenses.filter(l => {
+        if(!l.created_at) return false;
+        const ld = new Date(l.created_at);
+        return ld.toDateString() === d.toDateString();
+      }).length);
+    }
+  } else if(period === 'month'){
+    for(let i=29;i>=0;i-=3){
+      const d = new Date(now); d.setDate(d.getDate()-i);
+      labels.push(d.getDate()+'/'+(d.getMonth()+1));
+      const start = new Date(now); start.setDate(start.getDate()-i-1);
+      const end = new Date(now); end.setDate(end.getDate()-i+2);
+      counts.push(allLicenses.filter(l => l.created_at && new Date(l.created_at) >= start && new Date(l.created_at) <= end).length);
+    }
+  } else {
+    for(let i=11;i>=0;i--){
+      const d = new Date(now); d.setMonth(d.getMonth()-i);
+      labels.push(d.toLocaleDateString('it-IT',{month:'short'}));
+      counts.push(allLicenses.filter(l => {
+        if(!l.created_at) return false;
+        const ld = new Date(l.created_at);
+        return ld.getMonth()===d.getMonth() && ld.getFullYear()===d.getFullYear();
+      }).length);
+    }
+  }
+
+  const maxVal = Math.max(...counts, 1);
+  wrap.innerHTML = labels.map((l,i) => `
+    <div class="chart-bar-wrap">
+      <div class="chart-val">${counts[i]||''}</div>
+      <div class="chart-bar" style="height:${Math.round((counts[i]/maxVal)*140)}px;"></div>
+      <div class="chart-label">${l}</div>
+    </div>`).join('');
+}
+
+// ===== CONTACTS =====
+async function loadContacts(){
+  const { data } = await sb.from('gg_partner_contacts')
+    .select('*').eq('partner_code', partnerData.code).order('created_at',{ascending:false});
+  allContacts = data || [];
+  renderContacts(allContacts);
+}
+
+function renderContacts(contacts){
+  const tbody = document.getElementById('contacts-tbody');
+  if(!contacts.length){ tbody.innerHTML='<tr><td colspan="7" class="empty">Nessun contatto ancora — aggiungi il tuo primo potenziale cliente</td></tr>'; return; }
+  const statusMap = {
+    da_contattare:'<span class="badge badge-gray">Da contattare</span>',
+    contattato:'<span class="badge badge-blue">Contattato</span>',
+    interessato:'<span class="badge badge-yellow">Interessato</span>',
+    acquistato:'<span class="badge badge-green">Acquistato</span>',
+    non_interessato:'<span class="badge badge-red">Non interessato</span>'
+  };
+  tbody.innerHTML = contacts.map(c => `<tr>
+    <td><div style="font-weight:500;">${c.name}</div>${c.email?`<div style="font-size:11px;color:var(--text3);">${c.email}</div>`:''}</td>
+    <td>${c.struttura||'—'}</td>
+    <td>${c.citta||'—'}</td>
+    <td>${c.phone||'—'}</td>
+    <td>${statusMap[c.status]||c.status}</td>
+    <td style="max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--text2);">${c.notes||'—'}</td>
+    <td>
+      <div style="display:flex;gap:6px;">
+        <button class="btn btn-outline btn-sm" onclick="editContact('${c.id}')">✏</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteContact('${c.id}')">🗑</button>
+      </div>
+    </td>
+  </tr>`).join('');
+}
+
+function filterContacts(q){
+  const filtered = allContacts.filter(c =>
+    (c.name||'').toLowerCase().includes(q.toLowerCase()) ||
+    (c.struttura||'').toLowerCase().includes(q.toLowerCase()) ||
+    (c.citta||'').toLowerCase().includes(q.toLowerCase())
+  );
+  renderContacts(filtered);
+}
+
+function showContactModal(){
+  document.getElementById('contact-id').value='';
+  document.getElementById('contact-modal-title').textContent='Nuovo contatto';
+  ['c-name','c-phone','c-email','c-struttura','c-citta','c-notes'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('c-status').value='da_contattare';
+  document.getElementById('contact-modal').style.display='flex';
+}
+
+function editContact(id){
+  const c = allContacts.find(x=>x.id===id);
+  if(!c) return;
+  document.getElementById('contact-id').value=c.id;
+  document.getElementById('contact-modal-title').textContent='Modifica contatto';
+  document.getElementById('c-name').value=c.name||'';
+  document.getElementById('c-phone').value=c.phone||'';
+  document.getElementById('c-email').value=c.email||'';
+  document.getElementById('c-struttura').value=c.struttura||'';
+  document.getElementById('c-citta').value=c.citta||'';
+  document.getElementById('c-status').value=c.status||'da_contattare';
+  document.getElementById('c-notes').value=c.notes||'';
+  document.getElementById('contact-modal').style.display='flex';
+}
+
+function closeContactModal(){ document.getElementById('contact-modal').style.display='none'; }
+
+async function saveContact(){
+  const id = document.getElementById('contact-id').value;
+  const name = document.getElementById('c-name').value.trim();
+  if(!name){ showToast('Il nome è obbligatorio'); return; }
+  const payload = {
+    partner_code: partnerData.code,
+    name,
+    phone: document.getElementById('c-phone').value.trim()||null,
+    email: document.getElementById('c-email').value.trim()||null,
+    struttura: document.getElementById('c-struttura').value.trim()||null,
+    citta: document.getElementById('c-citta').value.trim()||null,
+    status: document.getElementById('c-status').value,
+    notes: document.getElementById('c-notes').value.trim()||null,
+    updated_at: new Date().toISOString()
+  };
+  if(id){
+    await sb.from('gg_partner_contacts').update(payload).eq('id',id);
+    showToast('Contatto aggiornato','success');
+  } else {
+    await sb.from('gg_partner_contacts').insert(payload);
+    showToast('Contatto aggiunto','success');
+  }
+  closeContactModal();
+  loadContacts();
+}
+
+async function deleteContact(id){
+  if(!confirm('Eliminare questo contatto?')) return;
+  await sb.from('gg_partner_contacts').delete().eq('id',id);
+  showToast('Contatto eliminato');
+  loadContacts();
+}
+
+// ===== SALES =====
+async function loadSales(){ renderSales(allLicenses); }
+
+function filterSalesPeriod(period, el){
+  document.querySelectorAll('#tab-sales .btn').forEach(b=>{b.style.borderColor='';b.style.color='';});
+  el.style.borderColor='var(--accent)'; el.style.color='var(--accent)';
+  const now = new Date();
+  let filtered = allLicenses;
+  if(period==='today') filtered=allLicenses.filter(l=>l.created_at&&new Date(l.created_at).toDateString()===now.toDateString());
+  else if(period==='week'){ const w=new Date(now);w.setDate(w.getDate()-7);filtered=allLicenses.filter(l=>l.created_at&&new Date(l.created_at)>=w); }
+  else if(period==='month'){ const m=new Date(now);m.setMonth(m.getMonth()-1);filtered=allLicenses.filter(l=>l.created_at&&new Date(l.created_at)>=m); }
+  else if(period==='year'){ const y=new Date(now);y.setFullYear(y.getFullYear()-1);filtered=allLicenses.filter(l=>l.created_at&&new Date(l.created_at)>=y); }
+  renderSales(filtered);
+}
+
+function renderSales(licenses){
+  const tbody = document.getElementById('sales-tbody');
+  const commRate = (partnerData.commission_pct||20)/100;
+  if(!licenses.length){ tbody.innerHTML='<tr><td colspan="6" class="empty">Nessuna vendita in questo periodo</td></tr>'; return; }
+  tbody.innerHTML = licenses.map(l => {
+    const price = PLAN_PRICES[l.slots_total]||0;
+    const comm = (price*commRate).toFixed(2);
+    const planName = l.slots_total===1?'Basic':l.slots_total===2?'Standard':l.slots_total>3?'Enterprise':'Pro';
+    return `<tr>
+      <td><span class="mono">${l.code}</span></td>
+      <td>${l.customer_name||'—'}</td>
+      <td><span class="badge badge-blue">${planName} · ${l.slots_total}x</span></td>
+      <td>${l.created_at?new Date(l.created_at).toLocaleDateString('it-IT'):'—'}</td>
+      <td>€${price}</td>
+      <td style="color:var(--green);font-weight:500;">€${comm}</td>
+    </tr>`;
+  }).join('');
+}
+
+// ===== PAYMENTS =====
+async function loadPayments(){
+  const tbody = document.getElementById('payments-tbody');
+  if(!allPayments.length){ tbody.innerHTML='<tr><td colspan="3" class="empty">Nessun pagamento ancora</td></tr>'; return; }
+  tbody.innerHTML = allPayments.map(p => `<tr>
+    <td>${p.paid_at?new Date(p.paid_at).toLocaleDateString('it-IT'):'—'}</td>
+    <td style="color:var(--green);font-weight:500;">€${parseFloat(p.amount).toFixed(2)}</td>
+    <td style="color:var(--text2);">${p.description||'—'}</td>
+  </tr>`).join('');
+}
+
+// ===== REFERRAL SHARE =====
+function copyReferralLink(){
+  const url = document.getElementById('referral-url').textContent;
+  navigator.clipboard.writeText(url).then(()=>showToast('Link copiato!','success'));
+}
+function shareWhatsApp(){
+  const url = document.getElementById('referral-url').textContent;
+  window.open(`https://wa.me/?text=${encodeURIComponent('Crea la guida digitale per i tuoi ospiti con GuestGuide: '+url)}`);
+}
+function shareEmail(){
+  const url = document.getElementById('referral-url').textContent;
+  window.open(`mailto:?subject=GuestGuide%20-%20Guida%20digitale&body=${encodeURIComponent('Crea la guida digitale per i tuoi ospiti: '+url)}`);
+}
+function shareTelegram(){
+  const url = document.getElementById('referral-url').textContent;
+  window.open(`https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent('GuestGuide - Guida digitale per ospiti')}`);
+}
+
+// ===== FORGOT PASSWORD =====
+async function showForgotPassword(){
+  const email = prompt('Inserisci la tua email per ricevere il link di reset:');
+  if(!email) return;
+  const { error } = await sb.auth.resetPasswordForEmail(email);
+  if(!error) alert('Email inviata! Controlla la tua casella di posta.');
+  else alert('Errore: '+error.message);
+}
+
+// ===== TOAST =====
+function showToast(msg, type=''){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.style.background = type==='success'?'#16a34a':'#1a1a1a';
+  t.style.display='block';
+  setTimeout(()=>t.style.display='none', 2500);
+}
+
+// ===== AUTO LOGIN =====
+sb.auth.onAuthStateChange(async (event, session) => {
+  if(session && !partnerData){
+    await loadPartnerData(session.user.id);
+  }
+});
+</script>
+</body>
+</html>
