@@ -441,7 +441,7 @@ body{font-family:'Jost',sans-serif;background:#f4f4f0;color:#1a1a1a;min-height:1
       <!-- Lingue -->
       <div class="s-section">
         <div class="s-section-label">Lingue attive · Active languages</div>
-        <div style="font-size:11px;color:#aaa;margin-bottom:8px;">Max 6 lingue · Seleziona quelle dei tuoi ospiti</div>
+        <div style="font-size:11px;color:#aaa;margin-bottom:8px;">Seleziona le lingue dei tuoi ospiti</div>
         <div id="lang-checkboxes" style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;">
           <label class="lang-pill"><input type="checkbox" value="en" checked onchange="updateLangButtons()"><span>🇬🇧 EN</span></label>
           <label class="lang-pill"><input type="checkbox" value="fr" onchange="updateLangButtons()"><span>🇫🇷 FR</span></label>
@@ -698,15 +698,8 @@ function downloadUpdatedFile(){
 const DEEPL_KEY = '795fe226-048c-44ed-bae5-76f06fb692f8:fx';
 
 function updateLangButtons(){
-  const allChecked = document.querySelectorAll('#lang-checkboxes input:checked');
   const warn = document.getElementById('lang-limit-warn');
-  if(allChecked.length > 6){
-    event?.target?.checked !== undefined && (event.target.checked = false);
-    if(warn) warn.style.display = 'block';
-    setTimeout(()=>{ if(warn) warn.style.display='none'; }, 2000);
-  } else {
-    if(warn) warn.style.display = 'none';
-  }
+  if(warn) warn.style.display = 'none';
   const checked = Array.from(document.querySelectorAll('#lang-checkboxes input:checked')).map(i=>i.value);
   ['en','fr','es','de','pt','nl','pl','ru','zh','ja','ko','ar'].forEach(l => {
     const field = document.getElementById('field-'+l);
@@ -715,7 +708,13 @@ function updateLangButtons(){
   const sw = document.getElementById('guide-lang-switch');
   if(sw){
     sw.innerHTML = '<button class="lang-btn active" onclick="setLang(\'it\')">IT</button>' +
-  checked.map(l => '<button class="lang-btn" onclick="setLang(\'' + l + '\')">' + l.toUpperCase() + '</button>').join('');
+    checked.map(l => '<button class="lang-btn" onclick="setLang(\'' + l + '\')">' + l.toUpperCase() + '</button>').join('');
+  }
+  if(state.activeLangs) {
+    document.querySelectorAll('#lang-checkboxes input').forEach(inp => {
+      inp.checked = state.activeLangs.includes(inp.value);
+    });
+    updateLangButtons();
   }
   livePreview();
 }
@@ -790,13 +789,14 @@ function saveCurrentSlot(){
 
 function captureState(){
   const g = id => document.getElementById(id)?.value || '';
+  const activeLangs = Array.from(document.querySelectorAll('#lang-checkboxes input:checked')).map(i=>i.value);
   return {
     name: g('s-name'), type: g('s-type'), location: g('s-location'),
     address: g('s-address'), checkin: g('s-checkin'), checkout: g('s-checkout'),
     access: g('s-access'), host: g('s-host'), phone: g('s-phone'), email: g('s-email'),
     wifiname: g('s-wifiname'), wifipw: g('s-wifipw'),
     welcome: g('s-welcome'), welcomeEn: g('s-welcome-en'),
-    bgColor, accentColor, rules, instructions, poiData, logoData
+    bgColor, accentColor, rules, instructions, poiData, logoData, activeLangs
   };
 }
 
