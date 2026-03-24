@@ -1080,13 +1080,27 @@ async function checkLicense(){
   const stored = localStorage.getItem('gg_license_code');
   if(stored){
     currentLicenseCode = stored;
-    currentSlotsTotal = parseInt(localStorage.getItem('gg_slots_total_' + stored)) || 3;
+    // Verifica sempre da Supabase per avere slots_total aggiornato
+    try {
+      const res = await fetch(`${SUPABASE_URL}/functions/v1/verify-license`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` },
+        body: JSON.stringify({ code: stored })
+      });
+      const data = await res.json();
+      if(data.valid){
+        currentSlotsTotal = data.slots_total || 3;
+        localStorage.setItem('gg_slots_total_' + stored, currentSlotsTotal);
+      }
+    } catch(e) {
+      // fallback localStorage
+      currentSlotsTotal = parseInt(localStorage.getItem('gg_slots_total_' + stored)) || 3;
+    }
     if(!localStorage.getItem(licenseKey(stored))){
       localStorage.setItem(licenseKey(stored), JSON.stringify(Array.from({length: currentSlotsTotal}, () => ({}))));
     }
     await showSetup();
   }
-  // else rimane sulla schermata di attivazione
 }
 
 // ===== INIT =====
