@@ -460,6 +460,10 @@ select.inp{appearance:none;cursor:pointer;}
             <input class="inp" id="p-email" type="email" placeholder="marco@email.com">
           </div>
           <div>
+            <label style="font-size:11px;color:var(--text2);display:block;margin-bottom:4px;">Telefono</label>
+            <input class="inp" id="p-phone" type="tel" placeholder="+39 333 123 4567">
+          </div>
+          <div>
             <label style="font-size:11px;color:var(--text2);display:block;margin-bottom:4px;">Codice referral *</label>
             <input class="inp" id="p-code" placeholder="Es. MARCO" oninput="this.value=this.value.toUpperCase().replace(/[^A-Z0-9-]/g,'')">
           </div>
@@ -1002,10 +1006,11 @@ async function createPartner(){
   const commission = parseInt(document.getElementById('p-commission').value)||20;
   const msg = document.getElementById('partner-form-msg');
   if(!name || !code){ msg.style.display='block'; msg.style.color='var(--red)'; msg.textContent='Nome e codice sono obbligatori.'; return; }
+  const phone = document.getElementById('p-phone').value.trim();
   const res = await fetch(`${SUPABASE_URL}/rest/v1/gg_partners`, {
     method: 'POST',
     headers: { 'Authorization': `Bearer ${SUPABASE_ANON_KEY}`, 'apikey': SUPABASE_ANON_KEY, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
-    body: JSON.stringify({ name, email: email||null, code, commission_pct: commission, is_active: true })
+    body: JSON.stringify({ name, email: email||null, phone: phone||null, code, commission_pct: commission, is_active: true })
   });
   if(res.ok){
     msg.style.display='block'; msg.style.color='var(--green)'; msg.textContent='✓ Partner creato!';
