@@ -934,13 +934,29 @@ function showSetup(){
   document.getElementById('license-gate').style.display = 'none';
   document.getElementById('setup-mode').style.display = 'block';
   currentSlot = 0;
+  bgColor = '#0D1F2D';
+  accentColor = '#E8A44A';
+  logoData = null;
+  rules = [
+    {it:'Silenzio dalle 22:00 alle 08:00', en:'Quiet hours from 10 PM to 8 AM'},
+    {it:'Vietato fumare in ambienti chiusi', en:'No smoking indoors'},
+    {it:'Animali ammessi, segnalare al check-in', en:'Pets allowed, notify at check-in'},
+    {it:'Lasciare la casa in ordine alla partenza', en:'Leave the home tidy on departure'}
+  ];
+  instructions = [];
+  poiData = {restaurant:[], pharmacy:[], supermarket:[], attraction:[]};
+  ['s-name','s-type','s-location','s-address','s-checkin','s-checkout',
+   's-access','s-host','s-phone','s-email','s-wifiname','s-wifipw',
+   's-welcome','s-welcome-en'].forEach(id => {
+    const el = document.getElementById(id);
+    if(el) el.value = '';
+  });
   const slots = getSlots(currentLicenseCode);
   if(slots[0] && slots[0].name) restoreState(slots[0]);
   else { renderRules(); renderInstructions(); }
   renderSlotPicker(currentLicenseCode);
   livePreview();
 }
-
 function checkLicense(){
   const stored = localStorage.getItem('gg_license_code');
   if(stored){
