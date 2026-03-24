@@ -1001,8 +1001,8 @@ function switchSlot(i){
     document.getElementById('s-checkin').value = '15:00';
     document.getElementById('s-checkout').value = '10:00';
     document.getElementById('s-access').value = '';
-    document.getElementById('s-welcome').value = '';
-    document.getElementById('s-welcome-en').value = '';
+    const sw = document.getElementById('s-welcome'); if(sw) sw.value = '';
+    const swe = document.getElementById('s-welcome-en'); if(swe) swe.value = '';
     const p = document.getElementById('logo-preview-setup'); if(p){ p.style.display='none'; document.getElementById('logo-setup-label').style.display='block'; }
     document.querySelectorAll('#bg-swatches .swatch:not(.custom)').forEach((s,idx) => s.classList.toggle('selected', idx===0));
     document.querySelectorAll('#accent-swatches .swatch:not(.custom)').forEach((s,idx) => s.classList.toggle('selected', idx===0));
