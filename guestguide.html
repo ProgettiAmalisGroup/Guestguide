@@ -287,7 +287,7 @@ body{font-family:'Jost',sans-serif;background:#f4f4f0;color:#1a1a1a;min-height:1
         <div class="s-section-label">Identità · Identity</div>
         <div class="field">
           <label>Nome struttura · Property name</label>
-          <input type="text" id="s-name" value="Villa Aurelia" oninput="livePreview()">
+          <input type="text" id="s-name" value="" oninput="livePreview()">
         </div>
         <div class="field">
           <label>Tipo struttura · Property type</label>
@@ -306,11 +306,11 @@ body{font-family:'Jost',sans-serif;background:#f4f4f0;color:#1a1a1a;min-height:1
         </div>
         <div class="field">
           <label>Luogo · Location</label>
-          <input type="text" id="s-location" value="Catania, Sicilia" oninput="livePreview()">
+          <input type="text" id="s-location" value="" oninput="livePreview()">
         </div>
         <div class="field">
           <label>Indirizzo completo (per ricerca POI) · Full address</label>
-          <input type="text" id="s-address" value="Via Etnea 142, Catania" oninput="livePreview()">
+          <input type="text" id="s-address" value="" oninput="livePreview()">
         </div>
         <div class="field">
           <label>Logo (opzionale)</label>
@@ -360,23 +360,23 @@ body{font-family:'Jost',sans-serif;background:#f4f4f0;color:#1a1a1a;min-height:1
         </div>
         <div class="field">
           <label>Come accedere · How to access</label>
-          <textarea id="s-access" oninput="livePreview()">Cassetta chiavi codice 4821 · Scala B, Interno 3</textarea>
+          <textarea id="s-access" oninput="livePreview()"></textarea>
         </div>
       </div>
 
       <!-- Contatti -->
       <div class="s-section">
         <div class="s-section-label">Contatti · Contacts</div>
-        <div class="field"><label>Nome host · Host name</label><input type="text" id="s-host" value="Marco Russo" oninput="livePreview()"></div>
-        <div class="field"><label>Telefono / WhatsApp</label><input type="tel" id="s-phone" value="+39 333 456 7890" oninput="livePreview()"></div>
+        <div class="field"><label>Nome host · Host name</label><input type="text" id="s-host" value="" oninput="livePreview()"></div>
+        <div class="field"><label>Telefono / WhatsApp</label><input type="tel" id="s-phone" value="" oninput="livePreview()"></div>
         <div class="field"><label>Email (opzionale)</label><input type="text" id="s-email" value="" oninput="livePreview()"></div>
       </div>
 
       <!-- WiFi -->
       <div class="s-section">
         <div class="s-section-label">WiFi</div>
-        <div class="field"><label>Nome rete · Network name</label><input type="text" id="s-wifiname" value="VillaAurelia_5G" oninput="livePreview()"></div>
-        <div class="field"><label>Password</label><input type="text" id="s-wifipw" value="sicilia2024!" oninput="livePreview()"></div>
+        <div class="field"><label>Nome rete · Network name</label><input type="text" id="s-wifiname" value="" oninput="livePreview()"></div>
+        <div class="field"><label>Password</label><input type="text" id="s-wifipw" value="" oninput="livePreview()"></div>
       </div>
 
       <!-- Istruzioni casa -->
@@ -464,7 +464,7 @@ body{font-family:'Jost',sans-serif;background:#f4f4f0;color:#1a1a1a;min-height:1
         <div class="s-section-label">Messaggio di benvenuto · Welcome message</div>
         <div class="field">
           <label>Italiano (IT)</label>
-          <textarea id="s-welcome" rows="3" oninput="livePreview()">Benvenuti nella nostra casa! Siamo felici di avervi qui. Non esitate a contattarci per qualsiasi necessità.</textarea>
+          <textarea id="s-welcome" rows="3" oninput="livePreview()"></textarea>
         </div>
       </div>
 
@@ -972,6 +972,7 @@ function checkLicense(){
 // ===== INIT =====
 window.onload = () => {
   checkLicense();
+  setInterval(() => { if(currentLicenseCode) saveCurrentSlot(); }, 3000);
 };
 
 // ===== COLORS =====
