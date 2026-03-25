@@ -511,6 +511,7 @@ select.inp{appearance:none;cursor:pointer;}
                 <th>Codice referral</th>
                 <th>Commissione</th>
                 <th>Licenze generate</th>
+                <th>Telefono</th><th>IBAN</th><th>P.IVA</th>
                 <th>Link referral</th>
                 <th>Stato</th>
                 <th>Azioni</th>
@@ -1061,6 +1062,9 @@ function renderPartners(partners){
       <td><span class="mono" style="background:var(--accent-soft);color:var(--accent);padding:3px 8px;border-radius:4px;">${p.code}</span></td>
       <td>${p.commission_pct}%</td>
       <td style="color:var(--accent);font-weight:500;">${p.gg_licenses?.[0]?.count||0}</td>
+      <td style="color:var(--text2);">${p.phone||'—'}</td>
+      <td style="font-family:'DM Mono',monospace;font-size:12px;">${p.iban||'—'}</td>
+      <td style="font-family:'DM Mono',monospace;font-size:12px;">${p.partita_iva||'—'}</td>
       <td>
         <button class="btn btn-sm btn-outline" onclick="copyPartnerLink('${refLink}')">📋 Copia link</button>
       </td>
