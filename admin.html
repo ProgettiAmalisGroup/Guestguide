@@ -217,6 +217,9 @@ select.inp{appearance:none;cursor:pointer;}
     <div class="nav-item" onclick="showTab('partners')">
       <span class="nav-icon">🤝</span><span>Partner</span>
     </div>
+    <div class="nav-item" onclick="showTab('materials')">
+      <span class="nav-icon">📄</span><span>Materiali</span>
+    </div>
     <div style="margin-top:auto;padding:20px;">
       <div style="font-size:11px;color:var(--text3);">Versione 1.0</div>
     </div>
@@ -524,6 +527,56 @@ select.inp{appearance:none;cursor:pointer;}
   </div>
 </div>
 
+    <!-- TAB: MATERIALI -->
+    <div id="tab-materials" style="display:none">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+        <div class="page-title">Materiali di vendita</div>
+        <button class="btn btn-primary" onclick="showMaterialForm()">+ Carica materiale</button>
+      </div>
+
+      <!-- FORM UPLOAD -->
+      <div id="material-form" style="display:none;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:24px;margin-bottom:24px;">
+        <div style="font-size:15px;font-weight:600;margin-bottom:16px;">Carica nuovo materiale</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+          <div>
+            <label style="font-size:11px;color:var(--text2);display:block;margin-bottom:4px;">Nome *</label>
+            <input class="inp" id="m-name" placeholder="Es. Presentazione GuestGuide">
+          </div>
+          <div>
+            <label style="font-size:11px;color:var(--text2);display:block;margin-bottom:4px;">File PDF *</label>
+            <input type="file" id="m-file" accept=".pdf,.doc,.docx,.ppt,.pptx" class="inp" style="padding:6px 10px;">
+          </div>
+        </div>
+        <div style="margin-bottom:12px;">
+          <label style="font-size:11px;color:var(--text2);display:block;margin-bottom:4px;">Descrizione</label>
+          <textarea class="inp" id="m-description" rows="2" placeholder="Breve descrizione del materiale..." style="resize:vertical;"></textarea>
+        </div>
+        <div id="m-upload-progress" style="display:none;margin-bottom:12px;">
+          <div style="font-size:12px;color:var(--text2);margin-bottom:4px;">Caricamento in corso...</div>
+          <div style="width:100%;height:4px;background:var(--border);border-radius:2px;overflow:hidden;">
+            <div id="m-progress-bar" style="height:100%;background:var(--accent);width:0%;transition:width .3s;"></div>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;">
+          <button class="btn btn-primary" onclick="uploadMaterial()">Carica</button>
+          <button class="btn btn-outline" onclick="hideMaterialForm()">Annulla</button>
+        </div>
+        <div id="m-form-msg" style="font-size:12px;margin-top:8px;display:none;"></div>
+      </div>
+
+      <!-- LISTA MATERIALI -->
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;">
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Nome</th><th>Descrizione</th><th>Dimensione</th><th>Data</th><th>Azioni</th></tr></thead>
+            <tbody id="materials-tbody"><tr><td colspan="5" class="empty">Caricamento...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+</div>
+
 <!-- MODAL CONFERMA -->
 <div id="confirm-modal" style="display:none" class="modal-overlay">
   <div class="modal">
@@ -579,16 +632,17 @@ window.onload = () => {
 
 // ===== TABS =====
 function showTab(tab){
-  ['licenses','create','guides','payments','contacts','reviews','partners'].forEach(t => {
+  ['licenses','create','guides','payments','contacts','reviews','partners','materials'].forEach(t => {
     document.getElementById('tab-'+t).style.display = t===tab?'block':'none';
   });
   document.querySelectorAll('.nav-item').forEach((el,i) => {
-    el.classList.toggle('active', ['licenses','create','guides','payments','contacts','reviews','partners'][i]===tab);
+    el.classList.toggle('active', ['licenses','create','guides','payments','contacts','reviews','partners','materials'][i]===tab);
   });
   if(tab==='guides') loadGuides();
   if(tab==='payments') loadPayments();
   if(tab==='reviews') loadReviews();
   if(tab==='partners') loadPartners();
+  if(tab==='materials') loadMaterials();
 }
 
 // ===== LOAD LICENSES =====
@@ -1181,6 +1235,99 @@ function toggleAdminPw(){
   if(inp.type==='password'){ inp.type='text'; eye.textContent='🙈'; }
   else { inp.type='password'; eye.textContent='👁'; }
 }
+
+// ===== MATERIALI =====
+function showMaterialForm(){ document.getElementById('material-form').style.display='block'; }
+function hideMaterialForm(){ document.getElementById('material-form').style.display='none'; }
+
+async function loadMaterials(){
+  const tbody = document.getElementById('materials-tbody');
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/gg_materials?order=created_at.desc`, {
+    headers: { 'Authorization': `Bearer ${SUPABASE_ANON_KEY}`, 'apikey': SUPABASE_ANON_KEY }
+  });
+  const data = await res.json();
+  if(!data.length){ tbody.innerHTML='<tr><td colspan="5" class="empty">Nessun materiale caricato</td></tr>'; return; }
+  tbody.innerHTML = data.map(m => `<tr>
+    <td><div style="font-weight:500;">📄 ${m.name}</div></td>
+    <td style="color:var(--text2);max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${m.description||'—'}</td>
+    <td style="color:var(--text3);">${m.file_size||'—'}</td>
+    <td style="color:var(--text3);">${m.created_at?new Date(m.created_at).toLocaleDateString('it-IT'):'—'}</td>
+    <td>
+      <div style="display:flex;gap:6px;">
+        <a href="${m.file_url}" target="_blank" class="btn btn-sm btn-outline">↓ Apri</a>
+        <button class="btn btn-sm btn-danger" onclick="deleteMaterial('${m.id}','${m.name}')">🗑</button>
+      </div>
+    </td>
+  </tr>`).join('');
+}
+
+async function uploadMaterial(){
+  const name = document.getElementById('m-name').value.trim();
+  const file = document.getElementById('m-file').files[0];
+  const description = document.getElementById('m-description').value.trim();
+  const msg = document.getElementById('m-form-msg');
+
+  if(!name){ msg.style.display='block'; msg.style.color='var(--red)'; msg.textContent='Nome obbligatorio.'; return; }
+  if(!file){ msg.style.display='block'; msg.style.color='var(--red)'; msg.textContent='Seleziona un file.'; return; }
+
+  const progress = document.getElementById('m-upload-progress');
+  const bar = document.getElementById('m-progress-bar');
+  progress.style.display='block';
+  bar.style.width='30%';
+
+  const ext = file.name.split('.').pop();
+  const fileName = `${Date.now()}-${name.toLowerCase().replace(/\s+/g,'-')}.${ext}`;
+  const fileSizeKB = (file.size/1024).toFixed(0);
+  const fileSize = fileSizeKB > 1024 ? `${(fileSizeKB/1024).toFixed(1)} MB` : `${fileSizeKB} KB`;
+
+  // Upload su Storage
+  const uploadRes = await fetch(`${SUPABASE_URL}/storage/v1/object/gg-materials/${fileName}`, {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${SUPABASE_ANON_KEY}`, 'apikey': SUPABASE_ANON_KEY, 'Content-Type': file.type },
+    body: file
+  });
+
+  bar.style.width='70%';
+
+  if(!uploadRes.ok){ 
+    progress.style.display='none';
+    msg.style.display='block'; msg.style.color='var(--red)'; msg.textContent='Errore upload file.'; 
+    return; 
+  }
+
+  const fileUrl = `${SUPABASE_URL}/storage/v1/object/public/gg-materials/${fileName}`;
+
+  // Salva in DB
+  const dbRes = await fetch(`${SUPABASE_URL}/rest/v1/gg_materials`, {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${SUPABASE_ANON_KEY}`, 'apikey': SUPABASE_ANON_KEY, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+    body: JSON.stringify({ name, description: description||null, file_url: fileUrl, file_size: fileSize })
+  });
+
+  bar.style.width='100%';
+  setTimeout(()=>{ progress.style.display='none'; bar.style.width='0%'; }, 500);
+
+  if(dbRes.ok){
+    msg.style.display='block'; msg.style.color='var(--green)'; msg.textContent='✓ Materiale caricato!';
+    setTimeout(()=>{ hideMaterialForm(); loadMaterials(); msg.style.display='none'; }, 1000);
+    document.getElementById('m-name').value='';
+    document.getElementById('m-file').value='';
+    document.getElementById('m-description').value='';
+  } else {
+    msg.style.display='block'; msg.style.color='var(--red)'; msg.textContent='Errore salvataggio.';
+  }
+}
+
+async function deleteMaterial(id, name){
+  if(!confirm(`Eliminare "${name}"?`)) return;
+  await fetch(`${SUPABASE_URL}/rest/v1/gg_materials?id=eq.${id}`, {
+    method:'DELETE',
+    headers:{ 'Authorization':`Bearer ${SUPABASE_ANON_KEY}`, 'apikey':SUPABASE_ANON_KEY }
+  });
+  showToast('Materiale eliminato');
+  loadMaterials();
+}
+
 </script>
 </body>
 </html>

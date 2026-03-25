@@ -181,6 +181,7 @@ tr:hover td{background:var(--surface2);}
       <div class="nav-item" onclick="showTab('contacts')"><span class="nav-icon">👥</span>Contatti</div>
       <div class="nav-item" onclick="showTab('sales')"><span class="nav-icon">🗝</span>Vendite</div>
       <div class="nav-item" onclick="showTab('payments')"><span class="nav-icon">💶</span>Pagamenti</div>
+      <div class="nav-item" onclick="showTab('materials')"><span class="nav-icon">📄</span>Materiali</div>
     </div>
     <div class="sidebar-footer">
       <button class="btn-logout" onclick="doLogout()">Esci</button>
@@ -348,6 +349,15 @@ tr:hover td{background:var(--surface2);}
       </div>
     </div>
 
+    <!-- TAB MATERIALI -->
+    <div id="tab-materials" style="display:none;">
+      <div class="page-title">Materiali di vendita</div>
+      <div style="font-size:13px;color:var(--text2);margin-bottom:20px;">Scarica e condividi i materiali per presentare GuestGuide ai tuoi clienti.</div>
+      <div id="materials-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;">
+        <div style="text-align:center;padding:40px;color:var(--text3);font-size:13px;" id="materials-empty">Caricamento...</div>
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -407,7 +417,45 @@ tr:hover td{background:var(--surface2);}
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2">
+// ===== MATERIALI =====
+async function loadMaterials(){
+  const grid = document.getElementById('materials-grid');
+  const { data, error } = await sb.from('gg_materials').select('*').order('created_at', {ascending:false});
+  if(error || !data?.length){
+    grid.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text3);font-size:13px;">Nessun materiale disponibile al momento.</div>';
+    return;
+  }
+  grid.innerHTML = data.map(m => `
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;display:flex;flex-direction:column;gap:12px;">
+      <div style="display:flex;align-items:flex-start;gap:12px;">
+        <div style="width:44px;height:44px;background:var(--red-soft);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;">📄</div>
+        <div style="flex:1;">
+          <div style="font-weight:500;font-size:14px;">${m.name}</div>
+          ${m.description?`<div style="font-size:12px;color:var(--text2);margin-top:3px;line-height:1.4;">${m.description}</div>`:''}
+          ${m.file_size?`<div style="font-size:11px;color:var(--text3);margin-top:4px;">${m.file_size}</div>`:''}
+        </div>
+      </div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;border-top:1px solid var(--border);padding-top:12px;">
+        <a href="${m.file_url}" target="_blank" download style="flex:1;min-width:80px;padding:7px 10px;background:var(--accent);color:#fff;border:none;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;cursor:pointer;text-align:center;text-decoration:none;">↓ Scarica</a>
+        <button onclick="shareMaterialWA('${m.file_url}','${m.name}')" style="padding:7px 10px;background:transparent;border:1px solid var(--border2);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:12px;cursor:pointer;color:var(--text2);">💬 WA</button>
+        <button onclick="shareMaterialEmail('${m.file_url}','${m.name}')" style="padding:7px 10px;background:transparent;border:1px solid var(--border2);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:12px;cursor:pointer;color:var(--text2);">✉ Email</button>
+        <button onclick="copyMaterialLink('${m.file_url}')" style="padding:7px 10px;background:transparent;border:1px solid var(--border2);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:12px;cursor:pointer;color:var(--text2);">🔗 Copia</button>
+      </div>
+    </div>`).join('');
+}
+
+function shareMaterialWA(url, name){
+  window.open(`https://wa.me/?text=${encodeURIComponent(name+': '+url)}`);
+}
+function shareMaterialEmail(url, name){
+  window.open(`mailto:?subject=${encodeURIComponent('GuestGuide - '+name)}&body=${encodeURIComponent('Ecco il materiale: '+url)}`);
+}
+function copyMaterialLink(url){
+  navigator.clipboard.writeText(url).then(()=>showToast('Link copiato!','success'));
+}
+
+</script>
 <script>
 const SUPABASE_URL = 'https://foavmbrrlrpehshvjxfk.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZvYXZtYnJybHJwZWhzaHZqeGZrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMwNzM2NjMsImV4cCI6MjA4ODY0OTY2M30.-PxTvs4uA9U88QMGrjaJxh_6h3ELxGFGGu3iHsBUvuA';
@@ -474,15 +522,16 @@ async function doLogout(){
 
 // ===== TABS =====
 function showTab(tab){
-  ['dashboard','referral','contacts','sales','payments'].forEach(t => {
+  ['dashboard','referral','contacts','sales','payments','materials'].forEach(t => {
     document.getElementById('tab-'+t).style.display = t===tab?'block':'none';
   });
   document.querySelectorAll('.nav-item').forEach((el,i) => {
-    el.classList.toggle('active', ['dashboard','referral','contacts','sales','payments'][i]===tab);
+    el.classList.toggle('active', ['dashboard','referral','contacts','sales','payments','materials'][i]===tab);
   });
   if(tab==='contacts') loadContacts();
   if(tab==='sales') loadSales();
   if(tab==='payments') loadPayments();
+  if(tab==='materials') loadMaterials();
 }
 
 // ===== DASHBOARD =====
@@ -781,6 +830,44 @@ function togglePartnerPw(){
   if(inp.type==='password'){ inp.type='text'; eye.textContent='🙈'; }
   else { inp.type='password'; eye.textContent='👁'; }
 }
+
+// ===== MATERIALI =====
+async function loadMaterials(){
+  const grid = document.getElementById('materials-grid');
+  const { data, error } = await sb.from('gg_materials').select('*').order('created_at', {ascending:false});
+  if(error || !data?.length){
+    grid.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text3);font-size:13px;">Nessun materiale disponibile al momento.</div>';
+    return;
+  }
+  grid.innerHTML = data.map(m => `
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;display:flex;flex-direction:column;gap:12px;">
+      <div style="display:flex;align-items:flex-start;gap:12px;">
+        <div style="width:44px;height:44px;background:var(--red-soft);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;">📄</div>
+        <div style="flex:1;">
+          <div style="font-weight:500;font-size:14px;">${m.name}</div>
+          ${m.description?`<div style="font-size:12px;color:var(--text2);margin-top:3px;line-height:1.4;">${m.description}</div>`:''}
+          ${m.file_size?`<div style="font-size:11px;color:var(--text3);margin-top:4px;">${m.file_size}</div>`:''}
+        </div>
+      </div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;border-top:1px solid var(--border);padding-top:12px;">
+        <a href="${m.file_url}" target="_blank" download style="flex:1;min-width:80px;padding:7px 10px;background:var(--accent);color:#fff;border:none;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;cursor:pointer;text-align:center;text-decoration:none;">↓ Scarica</a>
+        <button onclick="shareMaterialWA('${m.file_url}','${m.name}')" style="padding:7px 10px;background:transparent;border:1px solid var(--border2);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:12px;cursor:pointer;color:var(--text2);">💬 WA</button>
+        <button onclick="shareMaterialEmail('${m.file_url}','${m.name}')" style="padding:7px 10px;background:transparent;border:1px solid var(--border2);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:12px;cursor:pointer;color:var(--text2);">✉ Email</button>
+        <button onclick="copyMaterialLink('${m.file_url}')" style="padding:7px 10px;background:transparent;border:1px solid var(--border2);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:12px;cursor:pointer;color:var(--text2);">🔗 Copia</button>
+      </div>
+    </div>`).join('');
+}
+
+function shareMaterialWA(url, name){
+  window.open(`https://wa.me/?text=${encodeURIComponent(name+': '+url)}`);
+}
+function shareMaterialEmail(url, name){
+  window.open(`mailto:?subject=${encodeURIComponent('GuestGuide - '+name)}&body=${encodeURIComponent('Ecco il materiale: '+url)}`);
+}
+function copyMaterialLink(url){
+  navigator.clipboard.writeText(url).then(()=>showToast('Link copiato!','success'));
+}
+
 </script>
 </body>
 </html>
