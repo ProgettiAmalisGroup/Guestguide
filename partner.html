@@ -570,8 +570,6 @@ async function saveProfile(){
   }
 }
 
-</script>
-<script>
 const SUPABASE_URL = 'https://foavmbrrlrpehshvjxfk.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZvYXZtYnJybHJwZWhzaHZqeGZrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMwNzM2NjMsImV4cCI6MjA4ODY0OTY2M30.-PxTvs4uA9U88QMGrjaJxh_6h3ELxGFGGu3iHsBUvuA';
 const { createClient } = supabase;
@@ -600,7 +598,7 @@ async function doLogin(){
     btn.textContent='Accedi'; btn.disabled=false;
     return;
   }
-  // loadPartnerData viene chiamato da onAuthStateChange
+  await loadPartnerData(data.user.id);
 }
 
 async function loadPartnerData(userId){
