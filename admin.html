@@ -1129,8 +1129,15 @@ async function createPartner(){
       throw new Error(err.message?.includes('unique') ? 'Codice già esistente.' : 'Errore durante la creazione.');
     }
 
+    // Invia email di benvenuto
+    fetch(`${SUPABASE_URL}/functions/v1/create-partner`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` },
+      body: JSON.stringify({ email, name, code, password, commission_pct: commission })
+    });
+
     msg.style.display='block'; msg.style.color='var(--green)';
-    msg.textContent=`✓ Partner creato! Account: ${email}`;
+    msg.textContent=`✓ Partner creato! Email di benvenuto inviata a ${email}`;
     setTimeout(()=>{ hidePartnerForm(); loadPartners(); }, 1500);
     ['p-name','p-email','p-phone','p-code','p-password'].forEach(id=>document.getElementById(id).value='');
     document.getElementById('p-commission').value='20';
