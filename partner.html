@@ -598,7 +598,7 @@ async function doLogin(){
     btn.textContent='Accedi'; btn.disabled=false;
     return;
   }
-  await loadPartnerData(data.user.id);
+  // loadPartnerData viene chiamato da onAuthStateChange
 }
 
 async function loadPartnerData(userId){
