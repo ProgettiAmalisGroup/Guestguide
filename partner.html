@@ -182,6 +182,7 @@ tr:hover td{background:var(--surface2);}
       <div class="nav-item" onclick="showTab('sales')"><span class="nav-icon">🗝</span>Vendite</div>
       <div class="nav-item" onclick="showTab('payments')"><span class="nav-icon">💶</span>Pagamenti</div>
       <div class="nav-item" onclick="showTab('materials')"><span class="nav-icon">📄</span>Materiali</div>
+      <div class="nav-item" onclick="showTab('profile')"><span class="nav-icon">👤</span>Profilo</div>
     </div>
     <div class="sidebar-footer">
       <button class="btn-logout" onclick="doLogout()">Esci</button>
@@ -358,6 +359,80 @@ tr:hover td{background:var(--surface2);}
       </div>
     </div>
 
+    <!-- TAB PROFILO -->
+    <div id="tab-profile" style="display:none;">
+      <div class="page-title">Profilo</div>
+
+      <!-- DATI PERSONALI -->
+      <div class="card" style="margin-bottom:20px;">
+        <div class="card-title">Dati personali</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">
+          <div>
+            <label class="form-label">Nome</label>
+            <input class="inp" id="prof-name" placeholder="Nome e cognome">
+          </div>
+          <div>
+            <label class="form-label">Email</label>
+            <input class="inp" id="prof-email" type="email" disabled style="opacity:.6;cursor:not-allowed;">
+          </div>
+          <div>
+            <label class="form-label">Telefono</label>
+            <input class="inp" id="prof-phone" type="tel" placeholder="+39 333 123 4567">
+          </div>
+          <div>
+            <label class="form-label">IBAN</label>
+            <input class="inp" id="prof-iban" placeholder="IT00 A000 0000 0000 0000 0000 000">
+          </div>
+        </div>
+        <button class="btn btn-accent" onclick="saveProfile()">Salva dati personali</button>
+        <div id="prof-msg" style="font-size:12px;margin-top:8px;display:none;"></div>
+      </div>
+
+      <!-- DATI FATTURAZIONE -->
+      <div class="card" style="margin-bottom:20px;">
+        <div class="card-title">Dati fatturazione (opzionale — solo per titolari P.IVA)</div>
+        <div style="font-size:12px;color:var(--text2);margin-bottom:16px;">Compila questi dati se hai una P.IVA e devi emettere fattura per ricevere i pagamenti delle commissioni.</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">
+          <div>
+            <label class="form-label">Ragione sociale</label>
+            <input class="inp" id="prof-ragione" placeholder="Es. Mario Rossi o Rossi Srl">
+          </div>
+          <div>
+            <label class="form-label">Partita IVA</label>
+            <input class="inp" id="prof-piva" placeholder="Es. 01234567890">
+          </div>
+          <div>
+            <label class="form-label">Indirizzo</label>
+            <input class="inp" id="prof-indirizzo" placeholder="Via, numero, CAP, Città">
+          </div>
+          <div>
+            <label class="form-label">PEC</label>
+            <input class="inp" id="prof-pec" type="email" placeholder="tuapec@pec.it">
+          </div>
+          <div>
+            <label class="form-label">Codice SDI</label>
+            <input class="inp" id="prof-sdi" placeholder="Es. XXXXXXX">
+          </div>
+        </div>
+        <button class="btn btn-accent" onclick="saveProfile()">Salva dati fatturazione</button>
+      </div>
+
+      <!-- DATI AMALIS GROUP -->
+      <div class="card" style="background:var(--surface2);">
+        <div class="card-title">Intestazione fattura — Amalis Group Srl</div>
+        <div style="font-size:12px;color:var(--text2);margin-bottom:16px;">Emetti la fattura delle commissioni maturate intestandola a:</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:13px;">
+          <div><span style="color:var(--text2);">Ragione sociale</span><div style="font-weight:500;margin-top:2px;">Amalis Group Srl</div></div>
+          <div><span style="color:var(--text2);">P.IVA</span><div style="font-weight:500;margin-top:2px;">06169160873</div></div>
+          <div><span style="color:var(--text2);">Indirizzo</span><div style="font-weight:500;margin-top:2px;">Via San Nicola snc, 95040 Camporotondo Etneo (CT)</div></div>
+          <div><span style="color:var(--text2);">PEC</span><div style="font-weight:500;margin-top:2px;">amalisgroup@pec.it</div></div>
+        </div>
+        <div style="margin-top:16px;padding:12px;background:var(--accent-soft);border-radius:8px;font-size:12px;color:var(--accent);">
+          ℹ️ Invia la fattura via email a <strong>info@amalisgroup.it</strong> o via PEC a <strong>amalisgroup@pec.it</strong>
+        </div>
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -455,6 +530,45 @@ function copyMaterialLink(url){
   navigator.clipboard.writeText(url).then(()=>showToast('Link copiato!','success'));
 }
 
+
+// ===== PROFILO =====
+async function loadProfile(){
+  if(!partnerData) return;
+  document.getElementById('prof-name').value = partnerData.name || '';
+  document.getElementById('prof-email').value = partnerData.email || '';
+  document.getElementById('prof-phone').value = partnerData.phone || '';
+  document.getElementById('prof-iban').value = partnerData.iban || '';
+  document.getElementById('prof-ragione').value = partnerData.ragione_sociale || '';
+  document.getElementById('prof-piva').value = partnerData.partita_iva || '';
+  document.getElementById('prof-indirizzo').value = partnerData.indirizzo || '';
+  document.getElementById('prof-pec').value = partnerData.pec || '';
+  document.getElementById('prof-sdi').value = partnerData.codice_sdi || '';
+}
+
+async function saveProfile(){
+  const msg = document.getElementById('prof-msg');
+  const payload = {
+    name: document.getElementById('prof-name').value.trim(),
+    phone: document.getElementById('prof-phone').value.trim() || null,
+    iban: document.getElementById('prof-iban').value.trim() || null,
+    ragione_sociale: document.getElementById('prof-ragione').value.trim() || null,
+    partita_iva: document.getElementById('prof-piva').value.trim() || null,
+    indirizzo: document.getElementById('prof-indirizzo').value.trim() || null,
+    pec: document.getElementById('prof-pec').value.trim() || null,
+    codice_sdi: document.getElementById('prof-sdi').value.trim() || null,
+  };
+  const { error } = await sb.from('gg_partners').update(payload).eq('code', partnerData.code);
+  if(!error){
+    partnerData = { ...partnerData, ...payload };
+    document.getElementById('sidebar-name').textContent = partnerData.name;
+    msg.style.display='block'; msg.style.color='var(--green)'; msg.textContent='✓ Dati salvati!';
+    setTimeout(()=>msg.style.display='none', 2500);
+    showToast('Profilo aggiornato', 'success');
+  } else {
+    msg.style.display='block'; msg.style.color='var(--red)'; msg.textContent='Errore salvataggio.';
+  }
+}
+
 </script>
 <script>
 const SUPABASE_URL = 'https://foavmbrrlrpehshvjxfk.supabase.co';
@@ -522,16 +636,17 @@ async function doLogout(){
 
 // ===== TABS =====
 function showTab(tab){
-  ['dashboard','referral','contacts','sales','payments','materials'].forEach(t => {
+  ['dashboard','referral','contacts','sales','payments','materials','profile'].forEach(t => {
     document.getElementById('tab-'+t).style.display = t===tab?'block':'none';
   });
   document.querySelectorAll('.nav-item').forEach((el,i) => {
-    el.classList.toggle('active', ['dashboard','referral','contacts','sales','payments','materials'][i]===tab);
+    el.classList.toggle('active', ['dashboard','referral','contacts','sales','payments','materials','profile'][i]===tab);
   });
   if(tab==='contacts') loadContacts();
   if(tab==='sales') loadSales();
   if(tab==='payments') loadPayments();
   if(tab==='materials') loadMaterials();
+  if(tab==='profile') loadProfile();
 }
 
 // ===== DASHBOARD =====
@@ -866,6 +981,45 @@ function shareMaterialEmail(url, name){
 }
 function copyMaterialLink(url){
   navigator.clipboard.writeText(url).then(()=>showToast('Link copiato!','success'));
+}
+
+
+// ===== PROFILO =====
+async function loadProfile(){
+  if(!partnerData) return;
+  document.getElementById('prof-name').value = partnerData.name || '';
+  document.getElementById('prof-email').value = partnerData.email || '';
+  document.getElementById('prof-phone').value = partnerData.phone || '';
+  document.getElementById('prof-iban').value = partnerData.iban || '';
+  document.getElementById('prof-ragione').value = partnerData.ragione_sociale || '';
+  document.getElementById('prof-piva').value = partnerData.partita_iva || '';
+  document.getElementById('prof-indirizzo').value = partnerData.indirizzo || '';
+  document.getElementById('prof-pec').value = partnerData.pec || '';
+  document.getElementById('prof-sdi').value = partnerData.codice_sdi || '';
+}
+
+async function saveProfile(){
+  const msg = document.getElementById('prof-msg');
+  const payload = {
+    name: document.getElementById('prof-name').value.trim(),
+    phone: document.getElementById('prof-phone').value.trim() || null,
+    iban: document.getElementById('prof-iban').value.trim() || null,
+    ragione_sociale: document.getElementById('prof-ragione').value.trim() || null,
+    partita_iva: document.getElementById('prof-piva').value.trim() || null,
+    indirizzo: document.getElementById('prof-indirizzo').value.trim() || null,
+    pec: document.getElementById('prof-pec').value.trim() || null,
+    codice_sdi: document.getElementById('prof-sdi').value.trim() || null,
+  };
+  const { error } = await sb.from('gg_partners').update(payload).eq('code', partnerData.code);
+  if(!error){
+    partnerData = { ...partnerData, ...payload };
+    document.getElementById('sidebar-name').textContent = partnerData.name;
+    msg.style.display='block'; msg.style.color='var(--green)'; msg.textContent='✓ Dati salvati!';
+    setTimeout(()=>msg.style.display='none', 2500);
+    showToast('Profilo aggiornato', 'success');
+  } else {
+    msg.style.display='block'; msg.style.color='var(--red)'; msg.textContent='Errore salvataggio.';
+  }
 }
 
 </script>
