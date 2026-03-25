@@ -602,14 +602,14 @@ function reviewsPrev(){ reviewsGo((window._reviewsIdx - 1 + window._reviewsTotal
       </ul>
       <div class="plan-divider"></div>
       <div class="plan-extra">Ideale per chi gestisce un solo appartamento o casa vacanze</div>
-      <a href="https://buy.stripe.com/3cI14o2d4bXp3iDgCj4Rq01" class="btn-plan light">Inizia subito (pagamento unico) →</a>
+      <button onclick="goToCheckout(1)" class="btn-plan light" style="border:none;cursor:pointer;width:100%;">Inizia subito (pagamento unico) →</button>
     </div>
 
     <!-- STANDARD (featured) -->
     <div class="plan featured rv d1">
       <div class="plan-badge">Più scelto</div>
       <div class="plan-name">Standard</div>
-      <div class="plan-price"><sup>€</sup>35</div>
+      <div class="plan-price"><sup>€</sup>40</div>
       <div class="plan-iva">IVA inclusa</div>
       <div class="plan-strutture">2 strutture</div>
       <ul class="plan-feats">
@@ -621,13 +621,13 @@ function reviewsPrev(){ reviewsGo((window._reviewsIdx - 1 + window._reviewsTotal
       </ul>
       <div class="plan-divider"></div>
       <div class="plan-extra">Perfetto per chi ha due proprietà — città e mare, o due camere in affitto breve</div>
-      <a href="https://buy.stripe.com/28EeVeg3UaTl1avbhZ4Rq00" class="btn-plan dark">Inizia subito (pagamento unico) →</a>
+      <button onclick="goToCheckout(2)" class="btn-plan dark" style="border:none;cursor:pointer;width:100%;">Inizia subito (pagamento unico) →</button>
     </div>
 
     <!-- PRO -->
     <div class="plan rv d2">
       <div class="plan-name">Pro</div>
-      <div class="plan-price"><sup>€</sup>45</div>
+      <div class="plan-price"><sup>€</sup>55</div>
       <div class="plan-iva">IVA inclusa</div>
       <div class="plan-strutture">3 strutture</div>
       <ul class="plan-feats">
@@ -644,7 +644,7 @@ function reviewsPrev(){ reviewsGo((window._reviewsIdx - 1 + window._reviewsTotal
 
   </div>
 
-  <div class="pricing-note rv">Tutti i piani includono <strong>aggiornamenti futuri</strong>, supporto via email e <strong>nessuna scadenza</strong>.<br>Hai bisogno di più di 3 strutture? Scrivi a <a href="mailto:guestguide@coomunity.it" style="color:var(--teal);text-decoration:none;">guestguide@coomunity.it</a></div>
+  <div class="pricing-note rv">Tutti i piani includono <strong>aggiornamenti futuri</strong>, supporto via email e <strong>nessuna scadenza</strong>.<br>Gestisci più di 3 strutture? <a href="mailto:guestguide@coomunity.it" style="color:var(--teal);text-decoration:none;">Contattaci per un preventivo su misura →</a></div>
 </section>
 
 <!-- FAQ -->
@@ -697,5 +697,28 @@ function reviewsPrev(){ reviewsGo((window._reviewsIdx - 1 + window._reviewsTotal
 const urlRef = new URLSearchParams(window.location.search).get('ref');
 if(urlRef) localStorage.setItem('gg_ref', urlRef.toUpperCase());
 </script>
+
+<script>
+async function goToCheckout(strutture){
+  var btn = event.currentTarget;
+  var orig = btn.textContent;
+  btn.textContent = 'Reindirizzamento...';
+  btn.disabled = true;
+  try {
+    var ref = localStorage.getItem('gg_ref') || '';
+    var res = await fetch('https://foavmbrrlrpehshvjxfk.supabase.co/functions/v1/create-checkout', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({strutture: strutture, partner_code: ref})
+    });
+    var data = await res.json();
+    if(data.url) window.location.href = data.url;
+    else { btn.textContent = orig; btn.disabled = false; }
+  } catch(e) {
+    btn.textContent = orig; btn.disabled = false;
+  }
+}
+</script>
+
 </body>
 </html>
