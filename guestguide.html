@@ -1373,7 +1373,25 @@ function renderPOISetup(type){
   poiData[type].forEach((p,i)=>{
     const div=document.createElement('div');
     div.className='poi-item';
-    div.innerHTML=`<input type="text" value="${p.name.replace(/"/g,'&quot;')}" onchange="poiData['${type}'][${i}].name=this.value;livePreview()"><button class="poi-remove" onclick="poiData['${type}'].splice(${i},1);renderPOISetup('${type}');livePreview()">×</button>`;
+    div.innerHTML=`
+      <div style="display:flex;gap:6px;align-items:center;margin-bottom:4px;">
+        <input type="text" value="${p.name.replace(/"/g,'&quot;')}" placeholder="Nome" onchange="poiData['${type}'][${i}].name=this.value;livePreview()" style="flex:2;">
+        <input type="text" value="${(p.subtype||'').replace(/"/g,'&quot;')}" placeholder="Tipo (es. pizza, museo)" onchange="poiData['${type}'][${i}].subtype=this.value;livePreview()" style="flex:1;">
+        <button class="poi-remove" onclick="poiData['${type}'].splice(${i},1);renderPOISetup('${type}');livePreview()">×</button>
+      </div>
+      <div style="display:flex;gap:6px;margin-bottom:4px;">
+        <input type="text" value="${(p.hours||'').replace(/"/g,'&quot;')}" placeholder="Orari (es. 12:00-23:00)" onchange="poiData['${type}'][${i}].hours=this.value;livePreview()" style="flex:1;">
+        <input type="text" value="${(p.phone||'').replace(/"/g,'&quot;')}" placeholder="Telefono" onchange="poiData['${type}'][${i}].phone=this.value;livePreview()" style="flex:1;">
+      </div>
+      <div style="display:flex;gap:6px;">
+        <input type="text" value="${(p.website||'').replace(/"/g,'&quot;')}" placeholder="Sito web o link prenotazione" onchange="poiData['${type}'][${i}].website=this.value;livePreview()" style="flex:2;">
+        <select onchange="poiData['${type}'][${i}].price=this.value;livePreview()" style="flex:1;">
+          <option value="">Prezzo</option>
+          <option value="€" ${p.price==='€'?'selected':''}>€</option>
+          <option value="€€" ${p.price==='€€'?'selected':''}>€€</option>
+          <option value="€€€" ${p.price==='€€€'?'selected':''}>€€€</option>
+        </select>
+      </div>`;
     el.appendChild(div);
   });
 }
@@ -1554,7 +1572,9 @@ function publishGuide(){
         <div class="g-poi" data-url="${link.replace(/"/g,'&quot;')}" onclick="window.open(this.closest('[data-url]').dataset.url,'_blank')">
           <div>
             <div class="g-poi-name">${p.name}</div>
-            <div class="g-poi-type">${p.type||''}</div>
+            <div class="g-poi-type">${[p.subtype, p.hours, p.phone].filter(Boolean).join(' · ')}</div>
+            ${p.price?`<div class="g-poi-type">${p.price}</div>`:''}
+            ${p.website?`<div style="font-size:10px;margin-top:2px;"><a href="${p.website}" target="_blank" onclick="event.stopPropagation()" style="color:var(--accent);">Prenota ↗</a></div>`:''}
           </div>
           <div class="g-poi-right">
             ${p.dist?`<div class="g-poi-dist">${p.dist}m</div>`:''}
