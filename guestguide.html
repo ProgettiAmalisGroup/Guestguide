@@ -1348,7 +1348,16 @@ async function fetchPOI(type, btn){
         if (!name) return null;
         const d = Math.round(Math.sqrt(Math.pow((elat-lat)*111320,2)+Math.pow((elon-lon)*111320*Math.cos(lat*Math.PI/180),2)));
         const mapsUrl = `https://www.google.com/maps/search/${encodeURIComponent(name)}/@${elat},${elon},17z`;
-        return { name, type: e.tags?.amenity||e.tags?.shop||e.tags?.tourism||e.tags?.historic||'', dist:d, url:mapsUrl, lat:elat, lon:elon };
+        return { 
+          name, 
+          type: e.tags?.amenity||e.tags?.shop||e.tags?.tourism||e.tags?.historic||'',
+          subtype: e.tags?.cuisine||e.tags?.sport||e.tags?.historic||'',
+          hours: e.tags?.['opening_hours']||'',
+          phone: e.tags?.phone||e.tags?.['contact:phone']||'',
+          website: e.tags?.website||e.tags?.['contact:website']||'',
+          price: '',
+          dist:d, url:mapsUrl, lat:elat, lon:elon 
+        };
       })
       .filter(Boolean)
       .filter((e,i,arr) => arr.findIndex(x=>x.name===e.name)===i)
@@ -1376,22 +1385,14 @@ function renderPOISetup(type){
     div.innerHTML=`
       <div style="display:flex;gap:6px;align-items:center;margin-bottom:4px;">
         <input type="text" value="${p.name.replace(/"/g,'&quot;')}" placeholder="Nome" onchange="poiData['${type}'][${i}].name=this.value;livePreview()" style="flex:2;">
-        <input type="text" value="${(p.subtype||'').replace(/"/g,'&quot;')}" placeholder="Tipo (es. pizza, museo)" onchange="poiData['${type}'][${i}].subtype=this.value;livePreview()" style="flex:1;">
         <button class="poi-remove" onclick="poiData['${type}'].splice(${i},1);renderPOISetup('${type}');livePreview()">×</button>
       </div>
-      <div style="display:flex;gap:6px;margin-bottom:4px;">
-        <input type="text" value="${(p.hours||'').replace(/"/g,'&quot;')}" placeholder="Orari (es. 12:00-23:00)" onchange="poiData['${type}'][${i}].hours=this.value;livePreview()" style="flex:1;">
-        <input type="text" value="${(p.phone||'').replace(/"/g,'&quot;')}" placeholder="Telefono" onchange="poiData['${type}'][${i}].phone=this.value;livePreview()" style="flex:1;">
-      </div>
-      <div style="display:flex;gap:6px;">
-        <input type="text" value="${(p.website||'').replace(/"/g,'&quot;')}" placeholder="Sito web o link prenotazione" onchange="poiData['${type}'][${i}].website=this.value;livePreview()" style="flex:2;">
-        <select onchange="poiData['${type}'][${i}].price=this.value;livePreview()" style="flex:1;">
-          <option value="">Prezzo</option>
-          <option value="€" ${p.price==='€'?'selected':''}>€</option>
-          <option value="€€" ${p.price==='€€'?'selected':''}>€€</option>
-          <option value="€€€" ${p.price==='€€€'?'selected':''}>€€€</option>
-        </select>
-      </div>`;
+      ${p.subtype||p.hours||p.phone||p.website?`<div style="font-size:11px;color:#888;padding:2px 0;display:flex;flex-wrap:wrap;gap:10px;">
+        ${p.subtype?`<span style="display:flex;align-items:center;gap:3px;"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#aaa" stroke-width="2"><path d="M12 2C8 2 5 5 5 9c0 5 7 13 7 13s7-8 7-13c0-4-3-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>${p.subtype}</span>`:''}
+        ${p.hours?`<span style="display:flex;align-items:center;gap:3px;"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#aaa" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>${p.hours}</span>`:''}
+        ${p.phone?`<span style="display:flex;align-items:center;gap:3px;"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#aaa" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.8 19.79 19.79 0 01.01 1.18 2 2 0 012 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>${p.phone}</span>`:''}
+        ${p.website?`<span style="display:flex;align-items:center;gap:3px;"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#aaa" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>${p.website}</span>`:''}
+      </div>`:''}`;
     el.appendChild(div);
   });
 }
@@ -1645,7 +1646,12 @@ function exportGuide(){
         ? `https://www.google.com/maps/search/${encodeURIComponent(p.name)}/@${p.lat},${p.lon},17z`
         : `https://www.google.com/maps/search/${encodeURIComponent(p.name+' '+addr)}`;
       return `<div class="g-poi" data-url="${link.replace(/"/g,'&quot;')}" onclick="window.open(this.closest('[data-url]').dataset.url,'_blank')">
-        <div><div class="g-poi-name">${p.name}</div><div class="g-poi-type">${p.type||''}</div></div>
+        <div>
+          <div class="g-poi-name">${p.name}</div>
+          <div class="g-poi-type">${[p.subtype,p.hours,p.phone].filter(Boolean).join(' · ')}</div>
+          ${p.price?`<div class="g-poi-type">${p.price}</div>`:''}
+          ${p.website?`<div style="font-size:10px;margin-top:2px;"><a href="${p.website}" target="_blank" onclick="event.stopPropagation()" style="color:var(--accent);">Prenota &#8599;</a></div>`:''}
+        </div>
         <div class="g-poi-right">${p.dist?`<div class="g-poi-dist">${p.dist}m</div>`:''}<div class="g-poi-link">Maps &#8599;</div></div>
       </div>`;
     }).join('')}`;
