@@ -1075,6 +1075,7 @@ function renderPartners(partners){
             ? `<button class="btn btn-sm btn-danger" onclick="togglePartner('${p.id}',false)">Disattiva</button>`
             : `<button class="btn btn-sm btn-success" onclick="togglePartner('${p.id}',true)">Attiva</button>`
           }
+            <button class="btn btn-sm btn-outline" onclick="resendPartnerWelcome('${p.email}','${p.name}','${p.code}',${p.commission_pct||20})" title="Rinvia email benvenuto">✉</button>
           <button class="btn btn-sm btn-outline" onclick="resetPartnerPassword('${p.email}')" title="Reset password">🔑</button>
           <button class="btn btn-sm btn-outline" onclick="deletePartner('${p.id}','${p.name}','${p.user_id||''}')">🗑</button>
         </div>
@@ -1337,6 +1338,16 @@ async function deleteMaterial(id, name){
   loadMaterials();
 }
 
+async function resendPartnerWelcome(email, name, code, commission){
+  if(!confirm(`Rinviare email di benvenuto a ${email}?`)) return;
+  const res = await fetch(`${SUPABASE_URL}/functions/v1/create-partner`, {
+    method:'POST',
+    headers:{'Content-Type':'application/json','Authorization':`Bearer ${SUPABASE_ANON_KEY}`},
+    body: JSON.stringify({email, name, code, password:'(vedi credenziali originali)', commission_pct: commission})
+  });
+  if(res.ok) showToast('Email inviata!','success');
+  else showToast('Errore invio email');
+}
 </script>
 </body>
 </html>
