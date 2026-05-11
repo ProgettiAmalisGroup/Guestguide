@@ -1106,8 +1106,6 @@ async function createPartner(){
     const authRes = await fetch(`${SUPABASE_URL}/auth/v1/admin/users`, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
-        'apikey': SUPABASE_SERVICE_ROLE_KEY,
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({ email, password, email_confirm: true })
@@ -1127,7 +1125,7 @@ async function createPartner(){
       // Rollback: elimina utente auth se partner creation fallisce
       await fetch(`${SUPABASE_URL}/auth/v1/admin/users/${userId}`, {
         method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`, 'apikey': SUPABASE_SERVICE_ROLE_KEY }
+        headers: {}
       });
       const err = await res.json();
       throw new Error(err.message?.includes('unique') ? 'Codice già esistente.' : 'Errore durante la creazione.');
@@ -1175,7 +1173,7 @@ async function resetPartnerPassword(email){
   if(!userId){ showToast('Account non trovato'); return; }
   const res = await fetch(`${SUPABASE_URL}/auth/v1/admin/users/${userId}`, {
     method: 'PUT',
-    headers: { 'Authorization': `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`, 'apikey': SUPABASE_SERVICE_ROLE_KEY, 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ password: newPw })
   });
   if(res.ok) showToast('Password aggiornata!', 'success');
@@ -1198,7 +1196,7 @@ async function deletePartner(id, name, userId){
   if(userId){
     await fetch(`${SUPABASE_URL}/auth/v1/admin/users/${userId}`, {
       method: 'DELETE',
-      headers: { 'Authorization': `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`, 'apikey': SUPABASE_SERVICE_ROLE_KEY }
+      headers: {}
     });
   }
   showToast('Partner eliminato');
