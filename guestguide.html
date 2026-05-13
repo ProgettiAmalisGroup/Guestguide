@@ -309,9 +309,19 @@ body{font-family:'Jost',sans-serif;background:#f4f4f0;color:#1a1a1a;min-height:1
           <input type="text" id="s-location" value="" oninput="livePreview()">
         </div>
         <div class="field">
-          <label>Indirizzo completo (per ricerca POI) · Full address</label>
-          <input type="text" id="s-address" value="" oninput="livePreview()">
-        </div>
+  <label>Indirizzo completo per trovare i dintorni · Full address for nearby places</label>
+  <input 
+    type="text" 
+    id="s-address" 
+    value="" 
+    placeholder="Es. Via Gelsi Mori 17, Otranto, Lecce, Puglia, Italia"
+    oninput="livePreview()"
+  >
+  <div style="font-size:10px;color:#999;margin-top:4px;line-height:1.4;">
+    Inserisci l’indirizzo completo: via, numero civico, città, provincia/regione e nazione.<br>
+    Esempio: Via Roma 10, Milano, Lombardia, Italia
+  </div>
+</div>
         <div class="field">
           <label>Logo (opzionale)</label>
           <div class="logo-upload">
@@ -1288,25 +1298,19 @@ function renderInstructions(){
 }
 
 // ===== POI =====
+// ===== POI =====
 async function fetchPOI(type, btn){
   const address = document.getElementById('s-address').value.trim();
-  const location = document.getElementById('s-location').value.trim();
-  const searchAddress = [address, location, 'Italia'].filter(Boolean).join(', ');
-
   const radiusEl = document.getElementById('s-radius');
   const radius = parseInt(radiusEl ? radiusEl.value : 600) || 600;
-
-  if(!address && !location){
-    alert('Inserisci prima un indirizzo o una località.');
-    return;
-  }
+  if(!address){ alert('Inserisci prima un indirizzo completo.'); return; }
 
   btn.textContent = 'Ricerca...';
   btn.disabled = true;
 
   try {
     // Step 1: geocode
-    const geoRes = await fetch(`https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(searchAddress)}`, { headers: { 'Accept-Language': 'it' } });
+    const geoRes = await fetch(`https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(address)}`, { headers: { 'Accept-Language': 'it' } });
     const geoData = await geoRes.json();
     if (!geoData.length) { alert('Indirizzo non trovato.'); btn.textContent='Cerca con OSM'; btn.disabled=false; return; }
     const lat = parseFloat(geoData[0].lat), lon = parseFloat(geoData[0].lon);
