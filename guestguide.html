@@ -1290,16 +1290,23 @@ function renderInstructions(){
 // ===== POI =====
 async function fetchPOI(type, btn){
   const address = document.getElementById('s-address').value.trim();
+  const location = document.getElementById('s-location').value.trim();
+  const searchAddress = [address, location, 'Italia'].filter(Boolean).join(', ');
+
   const radiusEl = document.getElementById('s-radius');
   const radius = parseInt(radiusEl ? radiusEl.value : 600) || 600;
-  if(!address){ alert('Inserisci prima un indirizzo completo.'); return; }
+
+  if(!address && !location){
+    alert('Inserisci prima un indirizzo o una località.');
+    return;
+  }
 
   btn.textContent = 'Ricerca...';
   btn.disabled = true;
 
   try {
     // Step 1: geocode
-    const geoRes = await fetch(`https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(address)}`, { headers: { 'Accept-Language': 'it' } });
+    const geoRes = await fetch(`https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(searchAddress)}`, { headers: { 'Accept-Language': 'it' } });
     const geoData = await geoRes.json();
     if (!geoData.length) { alert('Indirizzo non trovato.'); btn.textContent='Cerca con OSM'; btn.disabled=false; return; }
     const lat = parseFloat(geoData[0].lat), lon = parseFloat(geoData[0].lon);
