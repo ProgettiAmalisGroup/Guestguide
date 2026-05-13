@@ -276,12 +276,15 @@ body{font-family:'Jost',sans-serif;background:#f4f4f0;color:#1a1a1a;min-height:1
     <h1>GuestGuide</h1>
     <p>Configura la tua guida per gli ospiti · Set up your guest guide</p>
     <div id="slot-bar" style="display:flex;flex-direction:column;align-items:center;gap:8px;margin-top:1.25rem;width:100%;"></div>
-    <button 
-  onclick="logoutLicense()" 
-  style="margin-top:10px;background:transparent;border:0.5px solid #ddd;border-radius:20px;padding:6px 14px;font-family:'Jost',sans-serif;font-size:11px;color:#888;cursor:pointer;"
->
-  Esci / Cambia licenza
-</button>
+    <div style="width:100%;display:flex;justify-content:center;margin-top:18px;margin-bottom:34px;">
+  <button 
+    type="button"
+    onclick="logoutLicense()" 
+    style="background:#fff;border:0.5px solid #ddd;border-radius:20px;padding:7px 16px;font-family:'Jost',sans-serif;font-size:11px;color:#888;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,0.04);"
+  >
+    Esci / Cambia licenza
+  </button>
+</div>
 
   <div class="setup-grid">
     <!-- LEFT: form -->
@@ -1034,23 +1037,36 @@ function switchSlot(i){
 }
 
 function logoutLicense(){
-  saveCurrentSlot();
+  try {
+    if(currentLicenseCode){
+      saveCurrentSlot();
+    }
+  } catch(e) {
+    console.warn('Errore durante il salvataggio prima del logout:', e);
+  }
 
   localStorage.removeItem('gg_license_code');
 
   currentLicenseCode = null;
   currentSlot = 0;
 
-  document.getElementById('setup-mode').style.display = 'none';
-  document.getElementById('guide-mode').style.display = 'none';
-  document.getElementById('admin-panel').style.display = 'none';
-  document.getElementById('license-gate').style.display = 'flex';
+  const setupMode = document.getElementById('setup-mode');
+  const guideMode = document.getElementById('guide-mode');
+  const adminPanel = document.getElementById('admin-panel');
+  const licenseGate = document.getElementById('license-gate');
+
+  if(setupMode) setupMode.style.display = 'none';
+  if(guideMode) guideMode.style.display = 'none';
+  if(adminPanel) adminPanel.style.display = 'none';
+  if(licenseGate) licenseGate.style.display = 'flex';
 
   const input = document.getElementById('license-input');
   if(input) input.value = '';
 
   const err = document.getElementById('license-error');
   if(err) err.style.display = 'none';
+
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 async function activateLicense(){
