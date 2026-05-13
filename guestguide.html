@@ -320,7 +320,7 @@ body{font-family:'Jost',sans-serif;background:#f4f4f0;color:#1a1a1a;min-height:1
     type="text" 
     id="s-address" 
     value="" 
-    placeholder="Es. Via Gelsi Mori 17, Otranto, Lecce, Puglia, Italia"
+    placeholder="Es: Via Roma 10, Milano, Lombardia, Italia"
     oninput="livePreview()"
   >
   <div style="font-size:10px;color:#999;margin-top:4px;line-height:1.4;">
@@ -1031,6 +1031,26 @@ function switchSlot(i){
   }
   renderSlotPicker(currentLicenseCode);
   livePreview();
+}
+
+function logoutLicense(){
+  saveCurrentSlot();
+
+  localStorage.removeItem('gg_license_code');
+
+  currentLicenseCode = null;
+  currentSlot = 0;
+
+  document.getElementById('setup-mode').style.display = 'none';
+  document.getElementById('guide-mode').style.display = 'none';
+  document.getElementById('admin-panel').style.display = 'none';
+  document.getElementById('license-gate').style.display = 'flex';
+
+  const input = document.getElementById('license-input');
+  if(input) input.value = '';
+
+  const err = document.getElementById('license-error');
+  if(err) err.style.display = 'none';
 }
 
 async function activateLicense(){
