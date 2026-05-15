@@ -192,7 +192,17 @@
   .reviews-section h2{color:var(--white);text-align:center;margin:0 auto 56px;}
   .reviews-carousel{position:relative;overflow:hidden;}
   .reviews-track{display:flex;transition:transform .5s cubic-bezier(.4,0,.2,1);}
-  .review-card{min-width:380px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:20px;padding:32px;margin:0 10px;flex-shrink:0;}
+  .review-card{
+  min-width:380px;
+  max-width:380px;
+  background:rgba(255,255,255,0.06);
+  border:1px solid rgba(255,255,255,0.1);
+  border-radius:20px;
+  padding:32px;
+  margin:0 10px;
+  flex-shrink:0;
+  overflow:hidden;
+}
   .review-stars{color:#F6C90E;font-size:18px;margin-bottom:16px;letter-spacing:2px;}
   .review-text{
   font-size:15px;
