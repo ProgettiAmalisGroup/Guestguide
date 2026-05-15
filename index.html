@@ -657,7 +657,7 @@ window.addEventListener('DOMContentLoaded', ()=>{
 
 async function loadReviews(){
   const SUPABASE_URL = 'https://foavmbrrlrpehshvjxfk.supabase.co';
-  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmRybHJwZWhzaHZqeGZrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMwNzM2NjMsImV4cCI6MjA4ODY0OTY2M30.-PxTvs4uA9U88QMGrjaJxh_6h3ELxGFGGu3iHsBUvuA';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZvYXZtYnJybHJwZWhzaHZqeGZrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMwNzM2NjMsImV4cCI6MjA4ODY0OTY2M30.-PxTvs4uA9U88QMGrjaJxh_6h3ELxGFGGu3iHsBUvuA';
 
   try {
     const res = await fetch(`${SUPABASE_URL}/rest/v1/gg_reviews?approved=eq.true&order=created_at.desc`, {
@@ -701,7 +701,7 @@ async function loadReviews(){
 
     window.addEventListener('resize', updateReviewsMode);
 
-    if(window._reviewsTotal > 1){
+    if(reviews.length > 1){
       setInterval(() => {
         const track = document.getElementById('reviews-track');
         if(track && !track.classList.contains('no-carousel')){
@@ -711,7 +711,7 @@ async function loadReviews(){
     }
 
   } catch(e){
-    console.error(e);
+    console.error('Errore caricamento recensioni:', e);
   }
 }
 
