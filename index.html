@@ -186,25 +186,61 @@
   .pricing-note{margin-top:36px;font-size:13px;color:var(--text-soft);}
   .pricing-note strong{color:var(--blue-deep);}
 
-  /* RECENSIONI */
-  .reviews-section{padding:100px 80px;background:var(--blue-deep);display:none;}
-  .reviews-section .sec-tag{color:var(--teal-light);justify-content:center;}
-  .reviews-section h2{color:var(--white);text-align:center;margin:0 auto 56px;}
-  .reviews-carousel{position:relative;overflow:hidden;}
-  .reviews-track{display:flex;transition:transform .5s cubic-bezier(.4,0,.2,1);}
-  .review-card{
-  min-width:380px;
-  max-width:380px;
+/* RECENSIONI */
+.reviews-section{
+  padding:100px 80px;
+  background:var(--blue-deep);
+  display:none;
+}
+
+.reviews-section .sec-tag{
+  color:var(--teal-light);
+  justify-content:center;
+}
+
+.reviews-section h2{
+  color:var(--white);
+  text-align:center;
+  margin:0 auto 56px;
+}
+
+.reviews-carousel{
+  position:relative;
+  overflow:hidden;
+}
+
+.reviews-track{
+  display:flex;
+  transition:transform .5s cubic-bezier(.4,0,.2,1);
+}
+
+/* Quando le recensioni entrano tutte nello spazio disponibile */
+.reviews-track.no-carousel{
+  justify-content:center;
+  transform:none!important;
+}
+
+.review-card{
+  width:260px;
+  min-width:260px;
+  max-width:260px;
   background:rgba(255,255,255,0.06);
   border:1px solid rgba(255,255,255,0.1);
   border-radius:20px;
-  padding:32px;
+  padding:28px;
   margin:0 10px;
   flex-shrink:0;
   overflow:hidden;
 }
-  .review-stars{color:#F6C90E;font-size:18px;margin-bottom:16px;letter-spacing:2px;}
-  .review-text{
+
+.review-stars{
+  color:#F6C90E;
+  font-size:18px;
+  margin-bottom:16px;
+  letter-spacing:2px;
+}
+
+.review-text{
   font-size:15px;
   line-height:1.75;
   color:rgba(255,255,255,0.85);
@@ -215,18 +251,102 @@
   word-break:normal;
   max-width:100%;
 }
-  .review-author{display:flex;align-items:center;gap:14px;}
-  .review-avatar{width:48px;height:48px;border-radius:50%;object-fit:cover;border:2px solid var(--teal);}
-  .review-avatar-placeholder{width:48px;height:48px;border-radius:50%;background:var(--teal);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;color:var(--white);flex-shrink:0;}
-  .review-name{font-size:14px;font-weight:600;color:var(--white);}
-  .review-role{font-size:12px;color:var(--teal-light);}
-  .reviews-nav{display:flex;align-items:center;justify-content:center;gap:16px;margin-top:36px;}
-  .reviews-nav button{width:40px;height:40px;border-radius:50%;border:1px solid rgba(255,255,255,0.2);background:transparent;color:var(--white);font-size:16px;cursor:pointer;transition:all .2s;}
-  .reviews-nav button:hover{background:rgba(255,255,255,0.1);}
-  .reviews-dots{display:flex;gap:8px;}
-  .reviews-dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,0.25);cursor:pointer;transition:all .2s;}
-  .reviews-dot.active{background:var(--teal);width:24px;border-radius:4px;}
-  @media(max-width:768px){.reviews-section{padding:72px 24px;}.review-card{min-width:300px;}}
+
+.review-author{
+  display:flex;
+  align-items:center;
+  gap:14px;
+}
+
+.review-avatar{
+  width:48px;
+  height:48px;
+  border-radius:50%;
+  object-fit:cover;
+  border:2px solid var(--teal);
+}
+
+.review-avatar-placeholder{
+  width:48px;
+  height:48px;
+  border-radius:50%;
+  background:var(--teal);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:18px;
+  font-weight:700;
+  color:var(--white);
+  flex-shrink:0;
+}
+
+.review-name{
+  font-size:14px;
+  font-weight:600;
+  color:var(--white);
+}
+
+.review-role{
+  font-size:12px;
+  color:var(--teal-light);
+}
+
+.reviews-nav{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:16px;
+  margin-top:36px;
+}
+
+.reviews-nav button{
+  width:40px;
+  height:40px;
+  border-radius:50%;
+  border:1px solid rgba(255,255,255,0.2);
+  background:transparent;
+  color:var(--white);
+  font-size:16px;
+  cursor:pointer;
+  transition:all .2s;
+}
+
+.reviews-nav button:hover{
+  background:rgba(255,255,255,0.1);
+}
+
+.reviews-dots{
+  display:flex;
+  gap:8px;
+}
+
+.reviews-dot{
+  width:8px;
+  height:8px;
+  border-radius:50%;
+  background:rgba(255,255,255,0.25);
+  cursor:pointer;
+  transition:all .2s;
+}
+
+.reviews-dot.active{
+  background:var(--teal);
+  width:24px;
+  border-radius:4px;
+}
+
+@media(max-width:768px){
+  .reviews-section{
+    padding:72px 24px;
+  }
+
+  .review-card{
+    width:300px;
+    min-width:300px;
+    max-width:300px;
+    padding:28px;
+  }
+}
 
   /* FAQ */
   section.faq{padding:100px 80px;max-width:760px;margin:0 auto;}
@@ -538,21 +658,30 @@ window.addEventListener('DOMContentLoaded', ()=>{
 
 async function loadReviews(){
   const SUPABASE_URL = 'https://foavmbrrlrpehshvjxfk.supabase.co';
-  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZvYXZtYnJybHJwZWhzaHZqeGZrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMwNzM2NjMsImV4cCI6MjA4ODY0OTY2M30.-PxTvs4uA9U88QMGrjaJxh_6h3ELxGFGGu3iHsBUvuA';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmRybHJwZWhzaHZqeGZrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMwNzM2NjMsImV4cCI6MjA4ODY0OTY2M30.-PxTvs4uA9U88QMGrjaJxh_6h3ELxGFGGu3iHsBUvuA';
+
   try {
     const res = await fetch(`${SUPABASE_URL}/rest/v1/gg_reviews?approved=eq.true&order=created_at.desc`, {
-      headers:{'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}`}
+      headers:{
+        'apikey': SUPABASE_ANON_KEY,
+        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+      }
     });
+
     const reviews = await res.json();
     if(!reviews.length) return;
+
     document.getElementById('reviews-section').style.display = 'block';
+
     const track = document.getElementById('reviews-track');
     const dots = document.getElementById('reviews-dots');
+
     track.innerHTML = reviews.map(r => {
       const stelle = '★'.repeat(r.stelle) + '☆'.repeat(5-r.stelle);
       const avatar = r.foto_url
         ? `<img class="review-avatar" src="${r.foto_url}" alt="${r.nome}">`
         : `<div class="review-avatar-placeholder">${r.nome.charAt(0)}</div>`;
+
       return `<div class="review-card">
         <div class="review-stars">${stelle}</div>
         <div class="review-text">"${r.testo}"</div>
@@ -565,21 +694,114 @@ async function loadReviews(){
         </div>
       </div>`;
     }).join('');
-    dots.innerHTML = reviews.map((_,i) => `<div class="reviews-dot${i===0?' active':''}" onclick="reviewsGo(${i})"></div>`).join('');
+
     window._reviewsTotal = reviews.length;
     window._reviewsIdx = 0;
-    if(reviews.length > 1) setInterval(()=>reviewsNext(), 5000);
-  } catch(e){ console.error(e); }
+
+    updateReviewsMode();
+
+    window.addEventListener('resize', updateReviewsMode);
+
+    if(window._reviewsTotal > 1){
+      setInterval(() => {
+        const track = document.getElementById('reviews-track');
+        if(track && !track.classList.contains('no-carousel')){
+          reviewsNext();
+        }
+      }, 5000);
+    }
+
+  } catch(e){
+    console.error(e);
+  }
+}
+
+function updateReviewsMode(){
+  const carousel = document.querySelector('.reviews-carousel');
+  const track = document.getElementById('reviews-track');
+  const dots = document.getElementById('reviews-dots');
+  const nav = document.querySelector('.reviews-nav');
+  const cards = document.querySelectorAll('.review-card');
+
+  if(!carousel || !track || !cards.length) return;
+
+  const firstCard = cards[0];
+  const style = window.getComputedStyle(firstCard);
+  const marginLeft = parseFloat(style.marginLeft) || 0;
+  const marginRight = parseFloat(style.marginRight) || 0;
+  const cardW = firstCard.offsetWidth + marginLeft + marginRight;
+
+  const carouselW = carousel.offsetWidth;
+  const visibleCards = Math.max(1, Math.floor(carouselW / cardW));
+  const maxIdx = Math.max(0, cards.length - visibleCards);
+
+  window._reviewsMaxIdx = maxIdx;
+
+  if(maxIdx === 0){
+    track.classList.add('no-carousel');
+    track.style.transform = 'translateX(0)';
+    if(nav) nav.style.display = 'none';
+    if(dots) dots.innerHTML = '';
+    window._reviewsIdx = 0;
+    return;
+  }
+
+  track.classList.remove('no-carousel');
+  if(nav) nav.style.display = 'flex';
+
+  if(window._reviewsIdx > maxIdx){
+    window._reviewsIdx = maxIdx;
+  }
+
+  if(dots){
+    dots.innerHTML = Array.from({length:maxIdx + 1}).map((_,i) => 
+      `<div class="reviews-dot${i===window._reviewsIdx?' active':''}" onclick="reviewsGo(${i})"></div>`
+    ).join('');
+  }
+
+  reviewsGo(window._reviewsIdx);
 }
 
 function reviewsGo(idx){
-  window._reviewsIdx = idx;
-  const cardW = 400;
-  document.getElementById('reviews-track').style.transform = `translateX(-${idx * cardW}px)`;
-  document.querySelectorAll('.reviews-dot').forEach((d,i) => d.classList.toggle('active', i===idx));
+  const track = document.getElementById('reviews-track');
+  if(!track) return;
+
+  if(track.classList.contains('no-carousel')) return;
+
+  const cards = document.querySelectorAll('.review-card');
+  if(!cards.length) return;
+
+  const firstCard = cards[0];
+  const style = window.getComputedStyle(firstCard);
+  const marginLeft = parseFloat(style.marginLeft) || 0;
+  const marginRight = parseFloat(style.marginRight) || 0;
+  const cardW = firstCard.offsetWidth + marginLeft + marginRight;
+
+  const maxIdx = window._reviewsMaxIdx || 0;
+  window._reviewsIdx = Math.max(0, Math.min(idx, maxIdx));
+
+  track.style.transform = `translateX(-${window._reviewsIdx * cardW}px)`;
+
+  document.querySelectorAll('.reviews-dot').forEach((d,i) => {
+    d.classList.toggle('active', i === window._reviewsIdx);
+  });
 }
-function reviewsNext(){ reviewsGo((window._reviewsIdx + 1) % window._reviewsTotal); }
-function reviewsPrev(){ reviewsGo((window._reviewsIdx - 1 + window._reviewsTotal) % window._reviewsTotal); }
+
+function reviewsNext(){
+  const maxIdx = window._reviewsMaxIdx || 0;
+  if(maxIdx === 0) return;
+
+  const next = window._reviewsIdx >= maxIdx ? 0 : window._reviewsIdx + 1;
+  reviewsGo(next);
+}
+
+function reviewsPrev(){
+  const maxIdx = window._reviewsMaxIdx || 0;
+  if(maxIdx === 0) return;
+
+  const prev = window._reviewsIdx <= 0 ? maxIdx : window._reviewsIdx - 1;
+  reviewsGo(prev);
+}
 </script>
 
 
