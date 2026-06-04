@@ -1097,12 +1097,13 @@ async function submitTrial(){
       msg.innerHTML = '✅ Prova gratuita attivata! Controlla la tua email: ti abbiamo inviato il codice licenza.';
       btn.textContent = 'Prova attivata';
     } else {
-      throw new Error(data.error || 'Errore durante la creazione della prova gratuita.');
-    }
+  throw new Error(JSON.stringify(data));
+}
   } catch(e) {
     msg.style.display = 'block';
     msg.style.color = '#c00';
     msg.textContent = e.message || 'Errore di connessione. Riprova tra poco.';
+console.error('Errore trial:', e);
     btn.disabled = false;
     btn.textContent = 'Attiva prova gratuita';
   }
