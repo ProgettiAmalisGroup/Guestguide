@@ -1093,6 +1093,7 @@ async function activateLicense(){
       return;
     }
     if(data.valid){
+      window.currentLicenseData = data;
       currentLicenseCode = input;
       currentSlotsTotal = data.slots_total || 3;
       localStorage.setItem('gg_license_code', input);
@@ -1139,7 +1140,51 @@ async function activateLicense(){
 async function showSetup(){
   document.getElementById('license-gate').style.display = 'none';
   document.getElementById('setup-mode').style.display = 'block';
-  currentSlot = 0;
+
+// Banner prova gratuita
+if(window.currentLicenseData?.expires_at){
+
+  const oldBanner = document.getElementById('trial-banner');
+  if(oldBanner) oldBanner.remove();
+
+  const expires = new Date(window.currentLicenseData.expires_at);
+  const now = new Date();
+
+  const daysLeft = Math.ceil(
+    (expires.getTime() - now.getTime()) /
+    (1000 * 60 * 60 * 24)
+  );
+
+  const banner = document.createElement('div');
+
+  banner.id = 'trial-banner';
+
+  banner.style.cssText = `
+    max-width:960px;
+    margin:0 auto 20px auto;
+    background:#FFF8E6;
+    border:1px solid #FFD970;
+    color:#996600;
+    padding:14px 18px;
+    border-radius:12px;
+    text-align:center;
+    font-size:13px;
+    line-height:1.5;
+  `;
+
+  banner.innerHTML = `
+    ⏳ <strong>Prova gratuita attiva</strong><br>
+    Scade tra <strong>${daysLeft}</strong> giorni
+  `;
+
+  document.querySelector('.setup-wrap')
+    .insertBefore(
+      banner,
+      document.querySelector('.setup-header')
+    );
+}
+
+currentSlot = 0;
 
   // 1. Prova a caricare da Supabase
   let slotsData = await loadSlotsFromSupabase(currentLicenseCode);

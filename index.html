@@ -442,12 +442,12 @@
   <div class="hero-left">
     <div class="hero-tag rv"><span></span>Guida digitale per strutture ricettive</div>
    <h1 class="rv d1">Smetti di rispondere<br>sempre alle stesse<br><em>domande degli ospiti.</em></h1>
-    <p class="hero-sub rv d2">Crea una guida digitale automatica in (13 limgue) con check-in, WiFi, regole e dintorni. Pronta in 5 minuti. Nessun abbonamento.</p>
+    <p class="hero-sub rv d2">Crea una guida digitale automatica in (13 limgue) con check-in, WiFi, regole e dintorni. Pronta in 5 minuti.</p>
     <div class="hero-actions rv d3">
       <a href="#pricing" class="btn-primary">Inizia ora →</a>
       <div class="price-inline">
-        <div class="amount">Da €25 IVA incl.</div>
-        <div class="note">Pagamento unico · nessun rinnovo</div>
+        <div class="amount">Prova gratis 30 giorni</div>
+<div class="note">Offerta lancio da € 25 invece di € 129</div>
       </div>
     </div>
   </div>
@@ -554,7 +554,7 @@
     <div class="feat rv"><span class="feat-icon">🗝️</span><div class="feat-title">Istruzioni di accesso</div><p class="feat-text">Codice cassetta chiavi, citofono, indicazioni precise. I tuoi ospiti arrivano senza chiamarti.</p></div>
     <div class="feat rv d1"><span class="feat-icon">📶</span><div class="feat-title">WiFi a colpo d'occhio</div><p class="feat-text">Rete e password ben visibili alla prima apertura. Nessun post-it, nessuna email da cercare.</p></div>
     <div class="feat rv d2"><span class="feat-icon">📍</span><div class="feat-title">Dintorni automatici</div><p class="feat-text">Ristoranti, farmacie, supermercati e attrazioni trovati via mappa. Con distanza e link Google Maps.</p></div>
-    <div class="feat rv"><span class="feat-icon">🌐</span><div class="feat-title">Bilingue IT / EN</div><p class="feat-text">Inserisci i testi in entrambe le lingue. Gli ospiti scelgono la loro con un clic.</p></div>
+    <div class="feat rv"><span class="feat-icon">🌐</span><div class="feat-title">Multilingue automatico</div><p class="feat-text">Seleziona le lingue che desideri fino a 13. Gli ospiti scelgono la loro con un clic.</p></div>
    <div class="feat rv d1"><span class="feat-icon">🎨</span><div class="feat-title">Personalizzazione completa</div><p class="feat-text">Scegli colori di sfondo e accento con il color picker. Aggiungi il logo della tua struttura. La guida è davvero tua.</p></div>
     <div class="feat rv d2"><span class="feat-icon">📲</span><div class="feat-title">Link + QR code</div><p class="feat-text">Condividi via WhatsApp, email, SMS. Genera il QR code da stampare e appendere in casa.</p></div>
   </div>
@@ -841,7 +841,7 @@ function reviewsPrev(){
 <section class="pricing" id="pricing">
   <div class="sec-tag rv" style="justify-content:center;">Piani e prezzi</div>
   <h2 class="rv" style="text-align:center;margin-left:auto;margin-right:auto;">Attiva la tua guida<br><em>in 5 minuti.</em></h2>
-  <p class="pricing-sub rv">Prezzo lancio — disponibile per un periodo limitato</p>
+  <p class="pricing-sub rv">Offerta Lancio — Prova gratis 30 giorni e blocca il prezzo a vita</p>
 <p class="pricing-sub rv" style="margin-top:-36px;font-size:13px;">
   Pagamento unico · nessun abbonamento · nessuna scadenza · IVA inclusa
 </p>
@@ -854,7 +854,12 @@ function reviewsPrev(){
     <!-- BASIC -->
     <div class="plan rv">
       <div class="plan-name">Basic</div>
-      <div class="plan-price"><sup>€</sup>25</div>
+      <div class="plan-price">
+  <div style="font-size:22px;color:#999;text-decoration:line-through;margin-bottom:8px;">
+    € 129
+  </div>
+  <sup>€</sup>25
+</div>
       <div class="plan-iva">IVA inclusa</div>
       <div class="plan-strutture">1 struttura</div>
       <ul class="plan-feats">
@@ -867,14 +872,25 @@ function reviewsPrev(){
       </ul>
       <div class="plan-divider"></div>
       <div class="plan-extra">Ideale per chi gestisce un solo appartamento o casa vacanze</div>
-      <button onclick="goToCheckout(1)" class="btn-plan light" style="border:none;cursor:pointer;width:100%;">Inizia subito (pagamento unico) →</button>
+      <button onclick="startTrial(1)" class="btn-plan light" style="border:none;cursor:pointer;width:100%;">
+  Prova gratis
+</button>
+
+<button onclick="goToCheckout(1)" class="btn-plan light" style="margin-top:12px;background:#f7f7f7;border:1px solid #e5e5e5;color:#444;cursor:pointer;width:100%;box-shadow:none;">
+  Attiva subito € 25
+</button>
     </div>
 
     <!-- STANDARD (featured) -->
     <div class="plan featured rv d1">
       <div class="plan-badge">Più scelto</div>
       <div class="plan-name">Standard</div>
-      <div class="plan-price"><sup>€</sup>40</div>
+      <div class="plan-price">
+  <div style="font-size:22px;color:rgba(255,255,255,.6);text-decoration:line-through;margin-bottom:8px;">
+    € 249
+  </div>
+  <sup>€</sup>40
+</div>
       <div class="plan-iva">IVA inclusa</div>
       <div class="plan-strutture">2 strutture</div>
       <ul class="plan-feats">
@@ -886,13 +902,20 @@ function reviewsPrev(){
       </ul>
       <div class="plan-divider"></div>
       <div class="plan-extra">Perfetto per chi ha due proprietà — città e mare, o due camere in affitto breve</div>
-      <button onclick="goToCheckout(2)" class="btn-plan dark" style="border:none;cursor:pointer;width:100%;">Inizia subito (pagamento unico) →</button>
+      <button onclick="goToCheckout(2)" class="btn-plan dark" style="border:none;cursor:pointer;width:100%;">
+  Attiva subito €40
+</button>
     </div>
 
     <!-- PRO -->
     <div class="plan rv d2">
       <div class="plan-name">Pro</div>
-      <div class="plan-price"><sup>€</sup>55</div>
+      <div class="plan-price">
+  <div style="font-size:22px;color:#999;text-decoration:line-through;margin-bottom:8px;">
+    € 349
+  </div>
+  <sup>€</sup>55
+</div>
       <div class="plan-iva">IVA inclusa</div>
       <div class="plan-strutture">3 strutture</div>
       <ul class="plan-feats">
@@ -904,7 +927,9 @@ function reviewsPrev(){
       </ul>
       <div class="plan-divider"></div>
       <div class="plan-extra">La scelta ideale per il property manager o l'host con più proprietà</div>
-      <button onclick="goToCheckout(3)" class="btn-plan light" style="border:none;cursor:pointer;width:100%;">Inizia subito (pagamento unico) →</button>
+      <button onclick="goToCheckout(1)" class="btn-plan light" style="border:none;cursor:pointer;width:100%;">
+  Attiva subito €55
+</button>
     </div>
 
   </div>
@@ -928,7 +953,7 @@ function reviewsPrev(){
 <!-- FINAL CTA -->
 <section class="final-cta">
   <h2 class="rv">I tuoi ospiti meritano<br>una guida <em>all'altezza</em><br>della tua struttura.</h2>
-  <p class="rv">Nessun abbonamento. Nessuna scadenza. Paghi una volta sola.</p>
+  <p class="rv">Prova GuestGuide gratis per 30 giorni. Se ti piace, attivala per sempre. Paghi una volta sola.</p>
   <div class="cta-plans rv">
    <button onclick="goToCheckout(1)" class="btn-cta-plan outline" style="border:1px solid;cursor:pointer;">1 struttura — €25</button>
 <button onclick="goToCheckout(2)" class="btn-cta-plan filled" style="border:none;cursor:pointer;">2 strutture — €40 ✦</button>
@@ -981,6 +1006,105 @@ async function goToCheckout(strutture){
     else { btn.textContent = orig; btn.disabled = false; }
   } catch(e) {
     btn.textContent = orig; btn.disabled = false;
+  }
+}
+</script>
+
+<!-- MODAL PROVA GRATUITA -->
+<div id="trial-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9999;align-items:center;justify-content:center;padding:20px;">
+  <div style="background:#fff;border-radius:18px;max-width:440px;width:100%;padding:32px;box-shadow:0 30px 80px rgba(0,0,0,.25);position:relative;">
+    
+    <button onclick="closeTrialModal()" style="position:absolute;top:16px;right:16px;background:none;border:none;font-size:22px;cursor:pointer;color:#999;">×</button>
+
+   <div style="font-family:'Playfair Display',serif;font-size:34px;font-weight:400;margin-bottom:12px;line-height:1.2;text-align:center;">
+  <span style="color:#173A63;">Prova gratis Guest</span><span style="color:#37C5B6;">Guide</span>
+</div>
+
+    <p style="font-size:14px;color:var(--text-soft);line-height:1.6;margin-bottom:24px;text-align:center;">
+  Inserisci i tuoi dati e riceverai via email il codice licenza gratuito valido 30 giorni per 1 struttura.
+</p>
+
+    <div style="display:flex;flex-direction:column;gap:12px;">
+
+  <input id="trial-name" type="text" placeholder="Nome e cognome"
+    style="width:100%;height:48px;border:1px solid #dbe3ec;border-radius:10px;padding:0 14px;font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;color:#111C28;background:#F8FAFC;outline:none;">
+
+  <input id="trial-email" type="email" placeholder="Email"
+    style="width:100%;height:48px;border:1px solid #dbe3ec;border-radius:10px;padding:0 14px;font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;color:#111C28;background:#F8FAFC;outline:none;">
+
+  <input id="trial-phone" type="tel" placeholder="Telefono / WhatsApp"
+    style="width:100%;height:48px;border:1px solid #dbe3ec;border-radius:10px;padding:0 14px;font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;color:#111C28;background:#F8FAFC;outline:none;">
+
+</div>
+
+    <button id="trial-submit-btn" onclick="submitTrial()"
+  style="margin-top:20px;width:100%;height:52px;border:none;border-radius:10px;background:#1A3A5C;color:white;font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;font-weight:700;cursor:pointer;box-shadow:0 10px 24px rgba(26,58,92,.22);">
+  Attiva prova gratuita
+</button>
+
+    <div id="trial-message" style="display:none;margin-top:16px;font-size:13px;line-height:1.5;"></div>
+
+    <p style="font-size:11px;color:#999;line-height:1.5;margin-top:16px;">
+      Nessuna carta richiesta. La prova gratuita scade automaticamente dopo 30 giorni.
+    </p>
+  </div>
+</div>
+
+<script>
+function startTrial(strutture){
+  if(strutture !== 1){
+    alert('La prova gratuita è disponibile solo per 1 struttura.');
+    return;
+  }
+
+  document.getElementById('trial-modal').style.display = 'flex';
+}
+
+function closeTrialModal(){
+  document.getElementById('trial-modal').style.display = 'none';
+}
+
+async function submitTrial(){
+  const name = document.getElementById('trial-name').value.trim();
+  const email = document.getElementById('trial-email').value.trim();
+  const phone = document.getElementById('trial-phone').value.trim();
+  const btn = document.getElementById('trial-submit-btn');
+  const msg = document.getElementById('trial-message');
+
+  if(!name || !email || !phone){
+    msg.style.display = 'block';
+    msg.style.color = '#c00';
+    msg.textContent = 'Compila tutti i campi per attivare la prova gratuita.';
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = 'Attivazione in corso...';
+  msg.style.display = 'none';
+
+  try {
+    const res = await fetch('https://foavmbrrlrpehshvjxfk.supabase.co/functions/v1/create-trial-license', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, email, phone })
+    });
+
+    const data = await res.json();
+
+    if(data.success){
+      msg.style.display = 'block';
+      msg.style.color = '#16A34A';
+      msg.innerHTML = '✅ Prova gratuita attivata! Controlla la tua email: ti abbiamo inviato il codice licenza.';
+      btn.textContent = 'Prova attivata';
+    } else {
+      throw new Error(data.error || 'Errore durante la creazione della prova gratuita.');
+    }
+  } catch(e) {
+    msg.style.display = 'block';
+    msg.style.color = '#c00';
+    msg.textContent = e.message || 'Errore di connessione. Riprova tra poco.';
+    btn.disabled = false;
+    btn.textContent = 'Attiva prova gratuita';
   }
 }
 </script>
