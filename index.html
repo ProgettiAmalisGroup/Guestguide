@@ -1088,10 +1088,9 @@ async function submitTrial(){
 const res = await fetch('https://foavmbrrlrpehshvjxfk.supabase.co/functions/v1/create-trial-license', {
   method: 'POST',
   headers: {
-    'Content-Type': 'application/json',
-    'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
-    'apikey': SUPABASE_ANON_KEY
-  },
+  'Content-Type': 'application/json',
+  'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+},
   body: JSON.stringify({ name, email, phone })
 });
 
